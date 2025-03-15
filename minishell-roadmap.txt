@@ -1,0 +1,183 @@
+1. Basic Shell Framework
+Set up the main loop (prompt, read input, basic execution)
+Implement a simple command execution function
+Handle exit conditions (Ctrl+D, "exit" command)
+2. Basic Tokenizer
+Split by whitespace (start with simple ft_split)
+Create data structures for tokens
+Free memory properly
+3. Enhanced Tokenizer with Quote Handling
+Implement state tracking for quotes
+Preserve whitespace within quotes
+Handle different quote types (single vs double)
+4. Special Operators Recognition
+Identify and separate operators (|, >, <, etc.)
+Create tokens for operators
+Handle adjacent operators (>>, <<)
+5. Command Structure Building
+Convert tokens into command structures
+Link commands with pipes
+Associate redirections with commands
+6. Environment Variable Expansion
+Detect $VAR patterns
+Look up and replace variables
+Handle $? special variable
+Apply expansion rules based on quote context
+7. Command Execution Logic
+Execute simple commands
+Implement redirections
+Set up pipes between commands
+Handle exit status
+8. Built-in Commands
+cd, echo, pwd, env, export, unset, exit
+Implement each with proper behavior
+9. Signal Handling
+Handle Ctrl+C, Ctrl+D, Ctrl+\
+Different behaviors in parent vs child processes
+10. Command Separators
+Handle ;, &&, ||
+Track exit status for conditional execution
+
+
+# Minishell Implementation Plan
+
+## 1. Complete Command Creation
+
+First, complete the creation of command structures from tokens:
+
+### Steps:
+1. **Implement `create_cmds` function:**
+   - Process tokens sequentially
+   - Group tokens into commands based on pipes
+   - Associate redirections with the appropriate commands
+   - Handle syntax errors properly
+
+2. **Enhance the Command Structure:**
+   - Make sure to properly initialize all fields
+   - Create cleanup functions for command structures
+   - Implement error handling for malloc failures
+
+## 2. Implement Basic Command Execution
+
+Start with executing a single command without pipes or redirections:
+
+### Steps:
+1. **Create a new file `executor.c` with these functions:**
+   - `execute_command_list` - Main entry point for execution
+   - `execute_simple_command` - For single commands
+   - `execute_builtin` - For built-in commands
+   - `setup_redirections` - For handling redirections
+
+2. **Fix the `find_executable` function:**
+   - Fix the condition checking absolute/relative paths
+   - Add proper error handling
+
+3. **Implement the fork/exec pattern:**
+   - Fork before executing external commands
+   - Use execve in the child process
+   - Wait for child in the parent process
+   - Handle and store exit status
+
+## 3. Implement Redirections
+
+Add support for input/output redirections:
+
+### Steps:
+1. **Process redirection tokens:**
+   - Identify redirection type (`>`, `<`, `>>`, `<<`)
+   - Store the redirection file name
+   - Associate with the correct command
+
+2. **Apply redirections before executing:**
+   - Open files with correct flags
+   - Use dup2 to redirect standard input/output
+   - Handle errors (file not found, permission denied)
+
+3. **Special handling for heredoc (`<<`):**
+   - Create a temporary file or pipe
+   - Read input until delimiter is seen
+   - Connect to command's standard input
+
+## 4. Implement Pipes
+
+Connect commands with pipes:
+
+### Steps:
+1. **Create pipeline logic:**
+   - Set up pipe file descriptors between commands
+   - Connect stdout of one command to stdin of the next
+   - Handle multiple pipes in sequence
+
+2. **Process management:**
+   - Fork for each command in the pipeline
+   - Close unused pipe ends in each process
+   - Wait for all processes in the correct order
+
+## 5. Implement Built-in Commands
+
+Add support for shell built-in commands:
+
+### Steps:
+1. **Implement each built-in command:**
+   - `cd` - Change directory
+   - `echo` - Print arguments
+   - `pwd` - Print working directory
+   - `env` - Print environment
+   - `export` - Set environment variable
+   - `unset` - Unset environment variable
+   - `exit` - Exit the shell
+
+2. **Environment variable handling:**
+   - Create functions to manage environment
+   - Implement expansion of variables in commands
+
+## 6. Enhance Signal Handling
+
+Improve handling of signals:
+
+### Steps:
+1. **Different behaviors based on context:**
+   - Interactive mode vs. executing commands
+   - Parent process vs. child processes
+
+2. **Handle various signals:**
+   - SIGINT (Ctrl+C)
+   - SIGQUIT (Ctrl+\)
+   - SIGTSTP (Ctrl+Z)
+
+## 7. Add Error Handling and Edge Cases
+
+Improve robustness:
+
+### Steps:
+1. **Syntax error detection:**
+   - Unclosed quotes
+   - Invalid redirections
+   - Missing command after pipe
+
+2. **Enhanced environment variable expansion:**
+   - Handle $? for last command's exit status
+   - Handle ${VAR} syntax
+   - Handle variable expansion inside double quotes
+
+3. **Memory management:**
+   - Ensure all allocated memory is properly freed
+   - Handle malloc failures gracefully
+
+## 8. Testing and Debugging
+
+Create comprehensive tests:
+
+### Steps:
+1. **Create test cases for each feature:**
+   - Simple commands
+   - Redirections
+   - Pipes
+   - Built-ins
+   - Signal handling
+
+2. **Edge case testing:**
+   - Empty input
+   - Invalid commands
+   - Syntax errors
+   - Large inputs
