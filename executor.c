@@ -155,7 +155,7 @@ int	setup_command_pipe(t_command *current, int *prev_pipe_read, int pipe_fd[2])
 		}
 	}
 	else
-	{
+    {
 		pipe_fd[0] = -1;
 		pipe_fd[1] = -1;
 	}
@@ -186,7 +186,6 @@ int setup_all_heredocs(t_command *cmd_list)
     }
     return 0;
 }
-
 int	execute_command_list(t_command *cmd_list, char **envp)
 {
 	int			pipe_fd[2];
