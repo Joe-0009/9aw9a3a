@@ -6,7 +6,7 @@ int is_builtin_command(char *cmd)
     char *builtins[] = {"cd", "echo", "pwd", "export", "unset", "env", "exit", NULL};
     int i;
 
-    i =-1;
+    i = -1;
     while (builtins[++i])
     {
         if (ft_strcmp(builtins[i], cmd) == 0)
@@ -22,17 +22,17 @@ int execute_builtin(t_command *cmd, char **envp)
     command = cmd->args[0];
     if (ft_strcmp(command, "cd") == 0)
         return (builtin_cd(cmd));
-    else if (strcmp(command, "echo") == 0)
+    else if (ft_strcmp(command, "echo") == 0)
         return builtin_echo(cmd);
-    else if (strcmp(command, "pwd") == 0)
+    else if (ft_strcmp(command, "pwd") == 0)
         return builtin_pwd();
-    else if (strcmp(command, "export") == 0)
+    else if (ft_strcmp(command, "export") == 0)
         return builtin_export(cmd, envp);
-    else if (strcmp(command, "unset") == 0)
+    else if (ft_strcmp(command, "unset") == 0)
         return builtin_unset(cmd);
-    else if (strcmp(command, "env") == 0)
+    else if (ft_strcmp(command, "env") == 0)
         return builtin_env(envp);
-    else if (strcmp(command, "exit") == 0)
+    else if (ft_strcmp(command, "exit") == 0)
         return builtin_exit(cmd);
     
     return 1;
@@ -43,7 +43,7 @@ static int setup_pipe(int pipe_fd[2])
 {
     if (pipe(pipe_fd) == -1)
     {
-        perror("minishell: pipe error");
+        perror("minishell: pipe creation failed");
         return -1;
     }
     return 0;
@@ -52,6 +52,7 @@ static int setup_pipe(int pipe_fd[2])
 
 static void child_process(t_command *current, int prev_pipe_read, int pipe_fd[2], char **envp)
 {
+    // input mn previous pipe
     if (prev_pipe_read != -1)
     {
         if (dup2(prev_pipe_read, STDIN_FILENO) == -1)
@@ -61,6 +62,7 @@ static void child_process(t_command *current, int prev_pipe_read, int pipe_fd[2]
         }
         safe_close(&prev_pipe_read);
     }
+    // to the next pipe
     if (current->next)
     {
         safe_close(&pipe_fd[0]);
@@ -95,9 +97,9 @@ void execute_single_command(t_command *current, char **envp)
             fprintf(stderr, "minishell: %s: command not found\n", current->args[0]);
             exit(127);
         }
+        free(exec_path);
         execve(exec_path, current->args, envp);
         fprintf(stderr, "minishell: %s: %s\n", current->args[0], strerror(errno));
-        free(exec_path);
         exit(127);
     }
     exit(0);
