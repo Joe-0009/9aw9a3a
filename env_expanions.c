@@ -3,7 +3,7 @@
 
 static int	is_var_char(char c)
 {
-	return (ft_isalnum(c) || c == '_');
+	return (ft_isalnum(c) || c == '_' || c == '?');
 }
 
 static char	*extract_var_name(const char *str, int *pos)
