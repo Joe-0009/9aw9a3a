@@ -97,9 +97,9 @@ void execute_single_command(t_command *current, char **envp)
             fprintf(stderr, "minishell: %s: command not found\n", current->args[0]);
             exit(127);
         }
-        free(exec_path);
         execve(exec_path, current->args, envp);
-        fprintf(stderr, "minishell: %s: %s\n", current->args[0], strerror(errno));
+        perror("execve error");
+        free(exec_path);
         exit(127);
     }
     exit(0);
@@ -163,6 +163,7 @@ int	setup_command_pipe(t_command *current, int *prev_pipe_read, int pipe_fd[2])
 	}
 	return (1);
 }
+
 int setup_all_heredocs(t_command *cmd_list)
 {
     t_command *current;
@@ -179,7 +180,10 @@ int setup_all_heredocs(t_command *cmd_list)
             {
                 heredoc_fd = setup_heredoc(redir->file);
                 if (heredoc_fd == -1)
+                {
+                    fprintf(stderr, "minishell: heredoc setup failed for %s\n", redir->file);
                     return -1;
+                }
                 redir->heredoc_fd = heredoc_fd;
             }
             redir = redir->next;
@@ -188,6 +192,7 @@ int setup_all_heredocs(t_command *cmd_list)
     }
     return 0;
 }
+
 int	execute_command_list(t_command *cmd_list, char **envp)
 {
 	int			pipe_fd[2];

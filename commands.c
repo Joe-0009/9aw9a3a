@@ -2,33 +2,37 @@
 
 char *find_executable_path(char *cmd, char **envp)
 {
-	char *path_env;
-	int i;
-	char **paths;
-	char *full_path;
+    char *path_env;
+    int i;
+    char **paths;
+    char *full_path;
 
-	if (!cmd || !*cmd)
-		return (NULL);
-	if ((cmd[0] == '/') || (cmd[0] == '.' && (cmd[1] == '/' || 
-        (cmd[1] == '.' && cmd[2] == '/'))))
-	{
-		if (access(cmd, X_OK) == 0)
-			return (ft_strdup(cmd));
-		return (NULL);
-	}
-	path_env = NULL;
-	i = -1;
-	while (envp[++i])
-	{
-		if (ft_strncmp(envp[i], "PATH=", 5) == 0)
-		{
-			path_env = envp[i] + 5;
-			break ;
-		}
-	}
-	if (!path_env)
+    if (!cmd || !*cmd)
         return (NULL);
-	paths = ft_split(path_env, ':');
+    if ((cmd[0] == '/') || (cmd[0] == '.' && (cmd[1] == '/' || 
+        (cmd[1] == '.' && cmd[2] == '/'))))
+    {
+        if (access(cmd, X_OK) == 0)
+            return (ft_strdup(cmd));
+        return (NULL);
+    }
+    path_env = NULL;
+    i = -1;
+    while (envp[++i])
+    {
+        if (ft_strncmp(envp[i], "PATH=", 5) == 0)
+        {
+            path_env = envp[i] + 5;
+            break ;
+        }
+    }
+    if (!path_env)
+    {
+        printf("PATH environment variable not found\n");
+        return (NULL);
+    }
+    
+    paths = ft_split(path_env, ':');
     if (!paths)
         return (NULL);
     full_path = NULL;
@@ -53,7 +57,6 @@ char *find_executable_path(char *cmd, char **envp)
     while (paths[i])
         free(paths[i++]);
     free(paths);
-
     return (full_path);
 }
 

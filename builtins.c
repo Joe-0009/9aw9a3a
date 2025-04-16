@@ -18,7 +18,6 @@ int	builtin_cd(t_command *cmd)
 	}
 	else
 		dir = cmd->args[1];
-
 	ret = chdir(dir);
 	if (ret != 0)
 	{
@@ -70,20 +69,21 @@ int	builtin_echo(t_command *cmd)
 
 int	builtin_pwd(void)
 {
-	char *cwd = getcwd(NULL, 0);
+	char *cwd;
+    
+    cwd = getcwd(NULL, 0);
 	if (cwd)
 	{
 		printf("%s\n", cwd);
 		free(cwd);
 		return (0);
 	}
-	fprintf(stderr, "minishell: pwd: %s\n", strerror(errno));
 	return (1);
 }
 
 static int	compare_env_vars(const void *a, const void *b)
 {
-    return (ft_strcmp(*(const char **)a, *(const char **)b));
+    return (ft_strcmp(*( char **)a, *( char **)b));
 }
 
 static int	print_env_vars(char **envp)
