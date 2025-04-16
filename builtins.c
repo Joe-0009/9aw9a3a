@@ -86,11 +86,38 @@ static int	compare_env_vars(const void *a, const void *b)
     return (ft_strcmp(*( char **)a, *( char **)b));
 }
 
-static int	print_env_vars(char **envp)
+static void ft_swap_ptr(char **a, char **b)
 {
-    int		i;
-    int		env_count;
-    char	**sorted_env;
+    char *tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+static void ft_bubble_sort(char **arr, int n, int (*compar)(const void *, const void *))
+{
+    int i;
+    int j;
+    
+ 
+    i = 0;
+    while (i < n - 1)
+    {
+        j = 0;
+        while (j < n - i - 1)
+        {
+            if (compar(&arr[j], &arr[j + 1]) > 0)
+                ft_swap_ptr(&arr[j], &arr[j + 1]);
+            j++;
+        }
+        i++;
+    }
+}
+
+static int print_env_vars(char **envp)
+{
+    int     i;
+    int     env_count;
+    char    **sorted_env;
 
     env_count = 0;
     while (envp[env_count])
@@ -98,14 +125,11 @@ static int	print_env_vars(char **envp)
     sorted_env = malloc(sizeof(char *) * (env_count + 1));
     if (!sorted_env)
         return (1);
-    i = 0;
-    while (i < env_count)
-    {
+    i = -1;
+    while (++i < env_count)
         sorted_env[i] = envp[i];
-        i++;
-    }
     sorted_env[i] = NULL;
-    qsort(sorted_env, env_count, sizeof(char *), compare_env_vars);
+    ft_bubble_sort(sorted_env, env_count, compare_env_vars);
     i = 0;
     while (sorted_env[i])
     {
@@ -116,7 +140,7 @@ static int	print_env_vars(char **envp)
     return (0);
 }
 
-static int	set_env_var(char *var_name, char *var_value)
+static int	set_env_var(const char *var_name, const char *var_value)
 {
 	if (setenv(var_name, var_value, 1) != 0)
 	{

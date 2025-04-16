@@ -86,7 +86,7 @@ void safe_close(int *fd);
 int is_number(char *str);
 int ft_isspace(char c);
 char *ft_strndup(const char *s, size_t n);
-int ft_strcmp(char *s1, char *s2);
+int ft_strcmp(const char *s1, const char *s2);
 
 /* Tokenizer functions */
 t_token		*tokenize_input(char *input);

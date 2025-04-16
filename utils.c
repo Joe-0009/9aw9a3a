@@ -1,4 +1,3 @@
-
 #include "minishell.h"
 
 int	is_number(char *str)
@@ -17,7 +16,7 @@ int	is_number(char *str)
 	return (1);
 }
 
-int	ft_strcmp( char *s1,  char *s2)
+int	ft_strcmp(const char *s1, const char *s2)
 {
 	size_t	i;
 
