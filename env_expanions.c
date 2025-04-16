@@ -6,7 +6,6 @@ static int	is_var_char(char c)
 	return (ft_isalnum(c) || c == '_');
 }
 
-
 static char	*extract_var_name(const char *str, int *pos)
 {
 	int	start;
@@ -26,7 +25,7 @@ static char	*get_env_value(char *var_name, char **envp)
 	i = 0;
 	var_len = ft_strlen(var_name);
 	if (ft_strcmp(var_name, "?") == 0)
-		return (ft_strdup("0"));
+		return (ft_itoa(g_last_exit_status));
 	while (envp[i])
 	{
 		if (ft_strncmp(envp[i], var_name, var_len) == 0 && 

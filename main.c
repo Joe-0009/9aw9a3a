@@ -1,5 +1,6 @@
 #include "minishell.h"
 
+int g_last_exit_status = 0;
 
 static void display_welcome(void)
 {
@@ -26,13 +27,9 @@ static int process_command(char *input, char **envp)
 {
     t_token *tokens;
     t_command *cmds;
-    int status;
 
     tokens = NULL;
     cmds = NULL;
-	status = 0;
-    if (ft_strcmp(input, "exit") == 0)
-        return 1;
     tokens = tokenize_input(input);
     if (!tokens)
         return 0;
@@ -40,9 +37,8 @@ static int process_command(char *input, char **envp)
     cmds = create_cmds(&tokens);
     if (cmds)
     {
-
-        status = execute_command_list(cmds, envp);
-        printf("Command exit status: %d\n", status);
+        g_last_exit_status = execute_command_list(cmds, envp);
+        printf("Command exit status: %d\n", g_last_exit_status);
         free_command_list(cmds);
     }
     else if (tokens)

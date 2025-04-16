@@ -19,6 +19,10 @@
 # include "get_next_line/get_next_line.h"
 # include "libft/libft.h"
 
+
+
+extern int g_last_exit_status;
+
 /**
  * Parser state for handling quotes
  */
