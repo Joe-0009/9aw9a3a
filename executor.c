@@ -193,14 +193,29 @@ int setup_all_heredocs(t_command *cmd_list)
     return 0;
 }
 
+int is_parent_builtin(char *cmd)
+{
+    return (ft_strcmp(cmd, "cd") == 0 ||
+            ft_strcmp(cmd, "export") == 0 ||
+            ft_strcmp(cmd, "unset") == 0 ||
+            ft_strcmp(cmd, "exit") == 0);
+}
+
 int	execute_command_list(t_command *cmd_list, char **envp)
 {
 	int			pipe_fd[2];
 	pid_t		pid;
 	int			prev_pipe_read;
+    int status;
 	t_command	*current;
-     t_redirections *redir;
+    t_redirections *redir;
 
+    if (cmd_list && cmd_list->next == NULL && is_parent_builtin(cmd_list->args[0]))
+    {
+        expand_command_args(cmd_list, envp);
+        status = execute_builtin(cmd_list, envp);
+        return status;
+    }
     if (setup_all_heredocs(cmd_list) == -1)
         return 1;
 	pipe_fd[0] = -1;
