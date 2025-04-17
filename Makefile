@@ -10,19 +10,31 @@ LIBS = $(LIBFT) $(GNL)
 INCLUDES = -I/opt/homebrew/opt/readline/include
 LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory
 
-SRCS =	main.c \
-		utils.c \
-		signals.c \
-		tokenizer.c \
-		token_utils.c \
-		token_types.c \
-		lst_functions.c \
-		commands.c \
-		executor.c \
-		builtins.c \
-		memory.c \
-		env_expanions.c \
-		redirections.c
+SRCS =\
+	main.c \
+	utils.c \
+	signals.c \
+	tokenizer.c \
+	token_utils.c \
+	token_types.c \
+	lst_functions.c \
+	command_path.c \
+	command_init.c \
+	command_redirection.c \
+	command_parser.c \
+	heredoc.c \
+	executor_main.c \
+	executor_exec.c \
+	executor_child.c \
+	executor_utils.c \
+	builtins_cd_pwd.c \
+	builtins_echo.c \
+	builtins_env_export.c \
+	builtins_exit.c \
+	memory.c \
+	env_expand_utils1.c \
+	env_expand_utils2.c \
+	env_expand_main.c
 
 OBJS = $(SRCS:.c=.o)
 

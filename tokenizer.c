@@ -62,12 +62,6 @@ int	process_end_of_input(t_token **tokens, char *input, int i, int start,
 	return (1);
 }
 
-t_token	*clean_tokens_return_null(t_token **tokens)
-{
-	ft_token_clear(tokens, free);
-	return (NULL);
-}
-
 t_token	*tokenize_input(char *input)
 {
 	t_token	*tokens;

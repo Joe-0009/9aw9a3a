@@ -52,3 +52,9 @@ void	handle_quotes(char *input, int *i, t_state *state)
 	}
 	(*i)++;
 }
+
+t_token	*clean_tokens_return_null(t_token **tokens)
+{
+	ft_token_clear(tokens, free);
+	return (NULL);
+}

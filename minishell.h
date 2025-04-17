@@ -118,6 +118,11 @@ char *find_executable_path(char *cmd, char **envp);
 int setup_redirections(t_command *cmd);
 int setup_heredoc(char *delimiter);
 void execute_single_command(t_command *current, char **envp);
+t_command	*create_command_type_word(t_token **tokens);
+t_command	*command_init(void);
+int setup_redirect_in(char *file_path);
+int setup_redirect_out(char *file_path, int append_mode);
+int handle_redirect_token(t_token **current, t_command **first_cmd, t_command **current_cmd);
 
 /* Built-in commands */
 int is_builtin_command(char *cmd);
@@ -132,5 +137,27 @@ int builtin_exit(t_command *cmd);
 
 /* Signal handling */
 void setup_signals(void);
+
+/* Environment variable expansion utility functions */
+int is_var_char(char c);
+char *extract_var_name(const char *str, int *pos);
+char *get_env_value(char *var_name, char **envp);
+int add_char_to_result(char **result, char c);
+void update_quote_state(char c, t_state *state);
+char *expand_variables(char *str, char **envp);
+
+/* Executor utility functions */
+int setup_pipe(int pipe_fd[2]);
+int handle_heredoc_redir(t_redirections *redir);
+void handle_fork_error(t_command *current, int prev_pipe_read, int pipe_fd[2]);
+
+/* Executor child functions */
+void child_process(t_command *current, int prev_pipe_read, int pipe_fd[2], char **envp);
+int wait_for_children(void);
+int parent_process(int prev_pipe_read, int pipe_fd[2]);
+
+/* Executor exec functions */
+int setup_command_pipe(t_command *current, int *prev_pipe_read, int pipe_fd[2]);
+int is_parent_builtin(char *cmd);
 
 #endif
