@@ -159,5 +159,7 @@ int parent_process(int prev_pipe_read, int pipe_fd[2]);
 /* Executor exec functions */
 int setup_command_pipe(t_command *current, int *prev_pipe_read, int pipe_fd[2]);
 int is_parent_builtin(char *cmd);
+int print_env_vars(char **envp);
+int is_valid_identifier(char *str);
 
 #endif

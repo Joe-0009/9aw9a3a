@@ -1,0 +1,1714 @@
+#ifndef MINISHELL_H
+# define MINISHELL_H
+
+# include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <sys/wait.h>
+# include <sys/stat.h>
+# include <sys/types.h>
+# include <dirent.h>
+# include <string.h>
+# include <errno.h>
+# include <signal.h>
+# include <readline/readline.h>
+# include <readline/history.h>
+# include <termios.h>
+# include <limits.h>
+# include "get_next_line/get_next_line.h"
+# include "libft/libft.h"
+
+
+
+extern int g_last_exit_status;
+
+/**
+ * Parser state for handling quotes
+ */
+typedef enum e_state {
+    STATE_NORMAL,           // Normal parsing state
+    STATE_IN_SINGLE_QUOTE,  // Inside single quotes
+    STATE_IN_DOUBLE_QUOTE   // Inside double quotes
+} t_state;
+
+/**
+ * Token types for parsing
+ */
+typedef enum e_token_type {
+    TOKEN_WORD,             
+    TOKEN_PIPE,             
+    TOKEN_REDIRECT_OUT,     
+    TOKEN_REDIRECT_IN,      
+    TOKEN_APPEND,           
+    TOKEN_HEREDOC           
+} t_token_type;
+
+/**
+ * Token structure for lexical analysis
+ */
+typedef struct s_token
+{
+    char *content;          // Token content
+    t_token_type type;      // Token type
+    struct s_token *next;   // Next token in list
+} t_token;
+
+/**
+ * Redirection structure for I/O operations
+ */
+typedef struct s_redirections
+{
+    t_token_type type;
+    char *file;
+    int heredoc_fd;
+    struct s_redirections *next; 
+} t_redirections;
+
+/**
+ * Command structure representing a single command or pipeline element
+ */
+typedef struct s_command
+{
+    char **args;
+    int args_count;
+    t_redirections *redirections;
+    struct s_command *next;
+} t_command;
+
+/* Memory management functions */
+void free_command(t_command *cmd);
+void free_command_list(t_command *cmd_list);
+void safe_free(void **ptr);
+void safe_close(int *fd);
+
+/* String utility functions */
+int is_number(char *str);
+int ft_isspace(char c);
+char *ft_strndup(const char *s, size_t n);
+int ft_strcmp(const char *s1, const char *s2);
+
+/* Tokenizer functions */
+t_token		*tokenize_input(char *input);
+void        expand_command_args(t_command *cmd, char **envp);
+void		assign_token_types(t_token *tokens);
+int			is_operator(char c);
+char		*extract_operator_token(char *str, int *pos);
+char		*extract_word_token(char *str, int start, int end);
+int			process_normal_char(t_token **tokens, char *input, int *i, int *start);
+int			process_operator(t_token **tokens, char *input, int *i, int *start);
+int			process_whitespace(t_token **tokens, char *input, int *i, int *start);
+void		skip_whitespace(char *input, int *i, int *start);
+int			process_end_of_input(t_token **tokens, char *input, int i, 
+				int start, t_state state);
+t_token		*clean_tokens_return_null(t_token **tokens);
+void		handle_quotes(char *input, int *i, t_state *state);
+int			add_token(t_token **tokens, char *content);
+
+/* Token list functions */
+void ft_token_add_back(t_token **lst, t_token *new);
+void ft_token_delone(t_token *lst, void (*del)(void *));
+void ft_token_clear(t_token **lst, void (*del)(void *));
+t_token *ft_token_new(char *content);
+
+/* Command creation and execution */
+t_command *create_cmds(t_token **tokens);
+int execute_command_list(t_command *cmd_list, char **envp);
+char *find_executable_path(char *cmd, char **envp);
+int setup_redirections(t_command *cmd);
+int setup_heredoc(char *delimiter);
+void execute_single_command(t_command *current, char **envp);
+t_command	*create_command_type_word(t_token **tokens);
+t_command	*command_init(void);
+int setup_redirect_in(char *file_path);
+int setup_redirect_out(char *file_path, int append_mode);
+int handle_redirect_token(t_token **current, t_command **first_cmd, t_command **current_cmd);
+
+/* Built-in commands */
+int is_builtin_command(char *cmd);
+int execute_builtin(t_command *cmd, char **envp);
+int builtin_cd(t_command *cmd);
+int builtin_echo(t_command *cmd);
+int builtin_pwd(void);
+int builtin_export(t_command *cmd, char **envp);
+int builtin_unset(t_command *cmd);
+int builtin_env(char **envp);
+int builtin_exit(t_command *cmd);
+
+/* Signal handling */
+void setup_signals(void);
+
+/* Environment variable expansion utility functions */
+int is_var_char(char c);
+char *extract_var_name(const char *str, int *pos);
+char *get_env_value(char *var_name, char **envp);
+int add_char_to_result(char **result, char c);
+void update_quote_state(char c, t_state *state);
+char *expand_variables(char *str, char **envp);
+
+/* Executor utility functions */
+int setup_pipe(int pipe_fd[2]);
+int handle_heredoc_redir(t_redirections *redir);
+void handle_fork_error(t_command *current, int prev_pipe_read, int pipe_fd[2]);
+
+/* Executor child functions */
+void child_process(t_command *current, int prev_pipe_read, int pipe_fd[2], char **envp);
+int wait_for_children(void);
+int parent_process(int prev_pipe_read, int pipe_fd[2]);
+
+/* Executor exec functions */
+int setup_command_pipe(t_command *current, int *prev_pipe_read, int pipe_fd[2]);
+int is_parent_builtin(char *cmd);
+
+#endif#include "minishell.h"
+
+int builtin_cd(t_command *cmd)
+{
+    char *dir;
+    char *home;
+    int ret;
+
+    if (cmd->args_count == 1)
+    {
+        home = getenv("HOME");
+        if (!home)
+        {
+            fprintf(stderr, "minishell: cd: HOME not set\n");
+            return (1);
+        }
+        dir = home;
+    }
+    else
+        dir = cmd->args[1];
+    ret = chdir(dir);
+    if (ret != 0)
+    {
+        fprintf(stderr, "minishell: cd: %s: %s\n", dir, strerror(errno));
+        return (1);
+    }
+    return (0);
+}
+
+int builtin_pwd(void)
+{
+    char *cwd;
+
+    cwd = getcwd(NULL, 0);
+    if (cwd)
+    {
+        printf("%s\n", cwd);
+        free(cwd);
+        return (0);
+    }
+    return (1);
+}
+#include "minishell.h"
+
+static int is_valid_n_flag(char *arg)
+{
+    int i;
+    if (arg[0] != '-' || arg[1] != 'n')
+        return (0);
+    i = 2;
+    while (arg[i])
+    {
+        if (arg[i] != 'n')
+            return (0);
+        i++;
+    }
+    return (1);
+}
+
+int builtin_echo(t_command *cmd)
+{
+    int i;
+    int print_newline;
+    i = 1;
+    print_newline = 1;
+    while (i < cmd->args_count && is_valid_n_flag(cmd->args[i]))
+    {
+        print_newline = 0;
+        i++;
+    }
+    while (i < cmd->args_count)
+    {
+        printf("%s", cmd->args[i]);
+        if (i < cmd->args_count - 1)
+            printf(" ");
+        i++;
+    }
+    if (print_newline)
+        printf("\n");
+    return (0);
+}
+#include "minishell.h"
+
+static int compare_env_vars(const void *a, const void *b)
+{
+    return (ft_strcmp(*(char **)a, *(char **)b));
+}
+
+static void ft_swap_ptr(char **a, char **b)
+{
+    char *tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+static void ft_bubble_sort(char **arr, int n, int (*compar)(const void *, const void *))
+{
+    int i, j;
+    i = 0;
+    while (i < n - 1)
+    {
+        j = 0;
+        while (j < n - i - 1)
+        {
+            if (compar(&arr[j], &arr[j + 1]) > 0)
+                ft_swap_ptr(&arr[j], &arr[j + 1]);
+            j++;
+        }
+        i++;
+    }
+}
+
+static int print_env_vars(char **envp)
+{
+    int i, env_count;
+    char **sorted_env;
+    env_count = 0;
+    while (envp[env_count])
+        env_count++;
+    sorted_env = malloc(sizeof(char *) * (env_count + 1));
+    if (!sorted_env)
+        return (1);
+    i = -1;
+    while (++i < env_count)
+        sorted_env[i] = envp[i];
+    sorted_env[i] = NULL;
+    ft_bubble_sort(sorted_env, env_count, compare_env_vars);
+    i = 0;
+    while (sorted_env[i])
+    {
+        printf("declare -x %s\n", sorted_env[i]);
+        i++;
+    }
+    free(sorted_env);
+    return (0);
+}
+
+static int set_env_var(const char *var_name, const char *var_value)
+{
+    if (setenv(var_name, var_value, 1) != 0)
+    {
+        fprintf(stderr, "minishell: export: unable to set environment variable\n");
+        return (1);
+    }
+    return (0);
+}
+
+static int is_valid_identifier(char *str)
+{
+    int i;
+    if (!str || (!ft_isalpha(str[0]) && str[0] != '_'))
+        return (0);
+    i = 1;
+    while (str[i])
+    {
+        if (!ft_isalnum(str[i]) && str[i] != '_')
+            return (0);
+        i++;
+    }
+    return (1);
+}
+
+int builtin_export(t_command *cmd, char **envp)
+{
+    char *equal_sign, *var_name, *var_value;
+    int i, ret;
+    if (cmd->args_count == 1)
+        return (print_env_vars(envp));
+    i = 1;
+    ret = 0;
+    while (i < cmd->args_count)
+    {
+        equal_sign = strchr(cmd->args[i], '=');
+        if (equal_sign)
+        {
+            var_name = ft_substr(cmd->args[i], 0, equal_sign - cmd->args[i]);
+            var_value = ft_strdup(equal_sign + 1);
+            if (!var_name || !var_value)
+            {
+                fprintf(stderr, "minishell: export: memory allocation error\n");
+                return (1);
+            }
+            if (!is_valid_identifier(var_name))
+            {
+                fprintf(stderr, "minishell: export: '%s': not a valid identifier\n", var_name);
+                ret = 1;
+            }
+            else if (set_env_var(var_name, var_value) != 0)
+                ret = 1;
+            free(var_name);
+            free(var_value);
+        }
+        else
+        {
+            if (!is_valid_identifier(cmd->args[i]))
+            {
+                fprintf(stderr, "minishell: export: '%s': not a valid identifier\n", cmd->args[i]);
+                ret = 1;
+            }
+        }
+        i++;
+    }
+    return (ret);
+}
+
+int builtin_unset(t_command *cmd)
+{
+    int i, ret;
+    if (cmd->args_count == 1)
+        return (0);
+    i = 1;
+    ret = 0;
+    while (i < cmd->args_count)
+    {
+        if (!is_valid_identifier(cmd->args[i]))
+        {
+            fprintf(stderr, "minishell: unset: '%s': not a valid identifier\n", cmd->args[i]);
+            ret = 1;
+        }
+        else if (unsetenv(cmd->args[i]) != 0)
+        {
+            fprintf(stderr, "minishell: unset: '%s': unable to unset var\n", cmd->args[i]);
+            ret = 1;
+        }
+        i++;
+    }
+    return (ret);
+}
+
+int builtin_env(char **envp)
+{
+    int i = 0;
+    while (envp[i] != NULL)
+    {
+        printf("%s\n", envp[i]);
+        i++;
+    }
+    return (0);
+}
+#include "minishell.h"
+
+static int process_exit_arg(char *arg)
+{
+    int exit_status;
+    if (!is_number(arg))
+    {
+        fprintf(stderr, "minishell: exit: %s: numeric argument required\n", arg);
+        return (2);
+    }
+    exit_status = ft_atoi(arg);
+    return (exit_status % 256);
+}
+
+int builtin_exit(t_command *cmd)
+{
+    int exit_status;
+    printf("exit\n");
+    if (cmd->args_count > 2)
+    {
+        fprintf(stderr, "minishell: exit: too many arguments\n");
+        return (1);
+    }
+    if (cmd->args_count > 1)
+        exit_status = process_exit_arg(cmd->args[1]);
+    else
+        exit_status = 0;
+    exit(exit_status);
+}
+#include "minishell.h"
+
+t_command *command_init(void)
+{
+    t_command *cmd;
+    
+    cmd = malloc(sizeof(t_command));
+    if (!cmd)
+        return (NULL);
+    cmd->args = NULL;
+    cmd->args_count = 0;
+    cmd->redirections = NULL;
+    cmd->next = NULL;
+    return (cmd);
+}
+
+static int count_word_args(t_token *token)
+{
+    int count;
+
+    count = 0;
+    while (token && token->type == TOKEN_WORD)
+    {
+        count++;
+        token = token->next;
+    }
+    return (count);
+}
+
+static void fill_word_args(char **args, t_token **token, int count)
+{
+    int i;
+
+    i = 0;
+    while (*token && (*token)->type == TOKEN_WORD && i < count)
+    {
+        args[i] = ft_strdup((*token)->content);
+        *token = (*token)->next;
+        i++;
+    }
+    args[i] = NULL;
+}
+
+t_command *create_command_type_word(t_token **tokens)
+{
+    t_command *cmds;
+    int args_count;
+
+    if (!*tokens || (*tokens)->type != TOKEN_WORD)
+        return (NULL);
+    cmds = command_init();
+    if (!cmds)
+        return (NULL);
+    args_count = count_word_args(*tokens);
+    cmds->args = malloc(sizeof(char *) * (args_count + 1));
+    if (!cmds->args)
+        return (free(cmds), NULL);
+    fill_word_args(cmds->args, tokens, args_count);
+    cmds->args_count = args_count;
+    return (cmds);
+}#include "minishell.h"
+
+static t_command *handle_word_token(t_token **current, t_command **first_cmd, t_command **current_cmd)
+{
+    t_command *new_cmd;
+    new_cmd = create_command_type_word(current);
+    if (!new_cmd)
+        return (NULL);
+    if (!*first_cmd)
+        *first_cmd = new_cmd;
+    else if (*current_cmd)
+        (*current_cmd)->next = new_cmd;
+    *current_cmd = new_cmd;
+    return (new_cmd);
+}
+
+static int handle_pipe_token(t_command *current_cmd)
+{
+    if (!current_cmd)
+    {
+        fprintf(stderr, "minishell: syntax error near unexpected token `|\n");
+        return (0);
+    }
+    return (1);
+}
+
+t_command *create_cmds(t_token **tokens)
+{
+    t_command *first_cmd;
+    t_command *current_cmd;
+    t_token *current;
+    first_cmd = NULL;
+    current_cmd = NULL;
+    current = *tokens;
+    while (current)
+    {
+        if (current->type == TOKEN_WORD)
+        {
+            if (!handle_word_token(&current, &first_cmd, &current_cmd))
+                return (NULL);
+        }
+        else if (current->type == TOKEN_PIPE)
+        {
+            if (!handle_pipe_token(current_cmd))
+                return (NULL);
+            current = current->next;
+        }
+        else if (current->type == TOKEN_REDIRECT_IN || current->type == TOKEN_REDIRECT_OUT || current->type == TOKEN_APPEND || current->type == TOKEN_HEREDOC)
+        {
+            if (!handle_redirect_token(&current, &first_cmd, &current_cmd))
+                return (NULL);
+        }
+        else
+            current = current->next;
+    }
+    return (first_cmd);
+}
+#include "minishell.h"
+
+static char *get_path_env(char **envp)
+{
+    int i;
+    i = 0;
+    while (envp[i])
+    {
+        if (ft_strncmp(envp[i], "PATH=", 5) == 0)
+            return (envp[i] + 5);
+        i++;
+    }
+    return (NULL);
+}
+
+static char *find_in_paths(char **paths, char *cmd)
+{
+    int i = 0;
+    char *full_path = NULL;
+    char *temp;
+    while (paths[i])
+    {
+        full_path = ft_strjoin(paths[i], "/");
+        if (!full_path)
+            break ;
+        temp = full_path;
+        full_path = ft_strjoin(full_path, cmd);
+        free(temp);
+        if (!full_path)
+            break ;
+        if (access(full_path, X_OK) == 0)
+            return (full_path);
+        free(full_path);
+        full_path = NULL;
+        i++;
+    }
+    return (NULL);
+}
+
+char *find_executable_path(char *cmd, char **envp)
+{
+    char *path_env;
+    char **paths;
+    char *full_path;
+    int i;
+    if (!cmd || !*cmd)
+        return (NULL);
+    if ((cmd[0] == '/') || (cmd[0] == '.' && (cmd[1] == '/' ||
+        (cmd[1] == '.' && cmd[2] == '/'))))
+    {
+        if (access(cmd, X_OK) == 0)
+            return (ft_strdup(cmd));
+        return (NULL);
+    }
+    path_env = get_path_env(envp);
+    if (!path_env)
+        return (NULL);
+    paths = ft_split(path_env, ':');
+    if (!paths)
+        return (NULL);
+    full_path = find_in_paths(paths, cmd);
+    i = 0;
+    while (paths[i])
+        free(paths[i++]);
+    free(paths);
+    return (full_path);
+}#include "minishell.h"
+
+void add_redirection(t_command *cmd, t_token_type redirect_type, char *file)
+{
+    t_redirections *redirection;
+    t_redirections *current;
+    redirection = malloc(sizeof(t_redirections));
+    if (!redirection)
+        return ;
+    redirection->type = redirect_type;
+    redirection->file = ft_strdup(file);
+    redirection->heredoc_fd = -1;
+    redirection->next = NULL;
+    if (!redirection->file)
+        return (free(redirection));
+    if (!cmd->redirections)
+        cmd->redirections = redirection;
+    else
+    {
+        current = cmd->redirections;
+        while (current->next)
+            current = current->next;
+        current->next = redirection;
+    }
+}
+
+int setup_redirections(t_command *cmd)
+{
+    t_redirections *redir;
+    int result;
+    redir = cmd->redirections;
+    result = 0;
+    while (redir && result == 0)
+    {
+        if (redir->type == TOKEN_REDIRECT_IN)
+            result = setup_redirect_in(redir->file);
+        else if (redir->type == TOKEN_REDIRECT_OUT)
+            result = setup_redirect_out(redir->file, 0);
+        else if (redir->type == TOKEN_APPEND)
+            result = setup_redirect_out(redir->file, 1);
+        else if (redir->type == TOKEN_HEREDOC)
+        {
+            if (dup2(redir->heredoc_fd, STDIN_FILENO) == -1)
+            {
+                fprintf(stderr, "minishell: heredoc redirection failed: %s\n", strerror(errno));
+                result = -1;
+            }
+            safe_close(&redir->heredoc_fd);
+        }
+        else
+        {
+            fprintf(stderr, "minishell: unknown redirection type\n");
+            result = -1;
+        }
+        redir = redir->next;
+    }
+    return result;
+}
+
+int setup_redirect_in(char *file_path)
+{
+    int fd = open(file_path, O_RDONLY);
+    if (fd == -1)
+    {
+        fprintf(stderr, "minishell: %s: %s\n", file_path, strerror(errno));
+        return -1;
+    }
+    if (dup2(fd, STDIN_FILENO) == -1)
+    {
+        fprintf(stderr, "minishell: input redirection failed: %s\n", strerror(errno));
+        close(fd);
+        return -1;
+    }
+    close(fd);
+    return 0;
+}
+
+int setup_redirect_out(char *file_path, int append_mode)
+{
+    int flags = O_WRONLY | O_CREAT;
+    flags |= (append_mode ? O_APPEND : O_TRUNC);
+    int fd = open(file_path, flags, 0644);
+    if (fd == -1)
+    {
+        fprintf(stderr, "minishell: %s: %s\n", file_path, strerror(errno));
+        return -1;
+    }
+    if (dup2(fd, STDOUT_FILENO) == -1)
+    {
+        fprintf(stderr, "minishell: output redirection failed: %s\n", strerror(errno));
+        close(fd);
+        return -1;
+    }
+    close(fd);
+    return 0;
+}
+
+int handle_redirect_token(t_token **current, t_command **first_cmd, t_command **current_cmd)
+{
+    t_command *new_cmd;
+    t_token_type redirect_type;
+    if (!*current_cmd)
+    {
+        new_cmd = command_init();
+        if (!new_cmd)
+            return (0);
+        if (!*first_cmd)
+            *first_cmd = new_cmd;
+        *current_cmd = new_cmd;
+    }
+    redirect_type = (*current)->type;
+    *current = (*current)->next;
+    if (!*current || (*current)->type != TOKEN_WORD)
+    {
+        fprintf(stderr, "minishell: syntax error near unexpected token\n");
+        return (0);
+    }
+    add_redirection(*current_cmd, redirect_type, (*current)->content);
+    *current = (*current)->next;
+    return (1);
+}
+#include "minishell.h"
+
+static void expand_args_loop(t_command *cmd, char **envp)
+{
+	int i;
+	char *expanded;
+	i = 0;
+	while (i < cmd->args_count)
+	{
+		expanded = expand_variables(cmd->args[i], envp);
+		if (expanded)
+		{
+			free(cmd->args[i]);
+			cmd->args[i] = expanded;
+		}
+		i++;
+	}
+}
+
+static void expand_redirections_loop(t_command *cmd, char **envp)
+{
+	t_redirections *redir;
+	char *expanded;
+	redir = cmd->redirections;
+	while (redir)
+	{
+		if (redir->type != TOKEN_HEREDOC)
+		{
+			expanded = expand_variables(redir->file, envp);
+			if (expanded)
+			{
+				free(redir->file);
+				redir->file = expanded;
+			}
+		}
+		redir = redir->next;
+	}
+}
+
+
+void expand_command_args(t_command *cmd, char **envp)
+{
+	expand_args_loop(cmd, envp);
+	expand_redirections_loop(cmd, envp);
+}
+#include "minishell.h"
+
+// 1. is_var_char
+int is_var_char(char c)
+{
+	return (ft_isalnum(c) || c == '_' || c == '?');
+}
+
+// 2. extract_var_name
+char *extract_var_name(const char *str, int *pos)
+{
+	int start;
+	start = *pos;
+	while (str[*pos] && is_var_char(str[*pos]))
+		(*pos)++;
+	return (ft_strndup(str + start, *pos - start));
+}
+
+// 3. get_env_value
+char *get_env_value(char *var_name, char **envp)
+{
+	int i;
+	size_t var_len;
+	i = 0;
+	var_len = ft_strlen(var_name);
+	if (ft_strcmp(var_name, "?") == 0)
+		return (ft_itoa(g_last_exit_status));
+	while (envp[i])
+	{
+		if (ft_strncmp(envp[i], var_name, var_len) == 0 && envp[i][var_len] == '=')
+			return (ft_strdup(envp[i] + var_len + 1));
+		i++;
+	}
+	return (ft_strdup(""));
+}
+
+// 4. add_char_to_result
+int add_char_to_result(char **result, char c)
+{
+	char *temp;
+	char buf[2];
+	buf[0] = c;
+	buf[1] = '\0';
+	temp = *result;
+	*result = ft_strjoin(*result, buf);
+	if (temp)
+		free(temp);
+	return (*result != NULL);
+}
+
+// 5. update_quote_state
+void update_quote_state(char c, t_state *state)
+{
+	if (c == '"' && *state != STATE_IN_SINGLE_QUOTE)
+	{
+		if (*state == STATE_NORMAL)
+			*state = STATE_IN_DOUBLE_QUOTE;
+		else
+			*state = STATE_NORMAL;
+	}
+	else if (c == '\'' && *state != STATE_IN_DOUBLE_QUOTE)
+	{
+		if (*state == STATE_NORMAL)
+			*state = STATE_IN_SINGLE_QUOTE;
+		else
+			*state = STATE_NORMAL;
+	}
+}
+#include "minishell.h"
+
+
+static int process_variable(char **result, char *str, int *i, char **envp)
+{
+	char *var_name;
+	char *var_value;
+	char *temp;
+	(*i)++;
+	if (!str[*i] || ft_isspace(str[*i]))
+		return (add_char_to_result(result, '$'));
+	var_name = extract_var_name(str, i);
+	if (!var_name)
+		return (0);
+	var_value = get_env_value(var_name, envp);
+	free(var_name);
+	if (!var_value)
+		return (0);
+	temp = *result;
+	*result = ft_strjoin(*result, var_value);
+	if (temp)
+		free(temp);
+	free(var_value);
+	return (*result != NULL);
+}
+
+
+static int handle_expand_dollar(char **result, char *str, int *i, char **envp, t_state state)
+{
+	if (str[*i] == '$' && state != STATE_IN_SINGLE_QUOTE && str[*i + 1])
+	{
+		if (!process_variable(result, str, i, envp))
+			return (0);
+		return (1);
+	}
+	return (-1);
+}
+
+
+static int handle_expand_char(char **result, char *str, int *i)
+{
+	if (!add_char_to_result(result, str[(*i)++]))
+	{
+		free(*result);
+		return (0);
+	}
+	return (1);
+}
+
+
+char *expand_variables(char *str, char **envp)
+{
+	int i;
+	t_state state;
+	char *result;
+	int handle_ret;
+	i = 0;
+	state = STATE_NORMAL;
+	result = ft_strdup("");
+	if (!result)
+		return (NULL);
+	while (str[i])
+	{
+		update_quote_state(str[i], &state);
+		handle_ret = handle_expand_dollar(&result, str, &i, envp, state);
+		if (handle_ret == 0)
+			return (NULL);
+		else if (handle_ret == 1)
+			continue;
+		if (!handle_expand_char(&result, str, &i))
+			return (NULL);
+	}
+	return (result);
+}
+
+
+
+#include "minishell.h"
+
+void handle_child_input(int prev_pipe_read)
+{
+    if (prev_pipe_read != -1)
+    {
+        if (dup2(prev_pipe_read, STDIN_FILENO) == -1)
+        {
+            perror("minishell: dup2 error on input");
+            exit(1);
+        }
+        safe_close(&prev_pipe_read);
+    }
+}
+
+void handle_child_output(t_command *current, int pipe_fd[2])
+{
+    if (current->next)
+    {
+        safe_close(&pipe_fd[0]);
+        if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+        {
+            perror("minishell: dup2 error on output");
+            exit(1);
+        }
+        safe_close(&pipe_fd[1]);
+    }
+}
+
+void child_process(t_command *current, int prev_pipe_read, int pipe_fd[2], char **envp)
+{
+    handle_child_input(prev_pipe_read);
+    handle_child_output(current, pipe_fd);
+    if (setup_redirections(current) == -1)
+        exit(1);
+    execute_single_command(current, envp);
+    fprintf(stderr, "minishell: command execution failed\n");
+    exit(127);
+}
+
+int wait_for_children(void)
+{
+    pid_t last_pid;
+    int status = 0;
+    while ((last_pid = waitpid(-1, &status, 0)) > 0)
+        ;
+    if (WIFEXITED(status))
+        return WEXITSTATUS(status);
+    else if (WIFSIGNALED(status))
+        return 128 + WTERMSIG(status);
+    else
+        return 1;
+}
+
+int parent_process(int prev_pipe_read, int pipe_fd[2])
+{
+    if (prev_pipe_read != -1)
+        close(prev_pipe_read);
+    if (pipe_fd[1] != -1)
+    {
+        close(pipe_fd[1]);
+        return pipe_fd[0];
+    }
+    if (pipe_fd[0] != -1)
+        return pipe_fd[0]; 
+    return -1;
+}#include "minishell.h"
+
+static char *get_exec_path(t_command *current, char **envp)
+{
+    char *exec_path = find_executable_path(current->args[0], envp);
+    if (!exec_path)
+        exec_path = ft_strdup(current->args[0]);
+    return exec_path;
+}
+
+void execute_single_command(t_command *current, char **envp)
+{
+    char *exec_path;
+    if (current->args && current->args[0] && is_builtin_command(current->args[0]))
+        exit(execute_builtin(current, envp));
+    else if (current->args && current->args[0])
+    {
+        exec_path = get_exec_path(current, envp);
+        if (!exec_path)
+        {
+            fprintf(stderr, "minishell: %s: command not found\n", current->args[0]);
+            exit(127);
+        }
+        execve(exec_path, current->args, envp);
+        perror("execve error");
+        free(exec_path);
+        exit(127);
+    }
+    exit(0);
+}
+
+int setup_command_pipe(t_command *current, int *prev_pipe_read, int pipe_fd[2])
+{
+    if (current->next)
+    {
+        if (setup_pipe(pipe_fd) == -1)
+        {
+            safe_close(prev_pipe_read);
+            return (0);
+        }
+    }
+    else
+    {
+        pipe_fd[0] = -1;
+        pipe_fd[1] = -1;
+    }
+    return (1);
+}
+
+int is_parent_builtin(char *cmd)
+{
+    return (ft_strcmp(cmd, "cd") == 0 ||
+            ft_strcmp(cmd, "export") == 0 ||
+            ft_strcmp(cmd, "unset") == 0 ||
+            ft_strcmp(cmd, "exit") == 0);
+}
+#include "minishell.h"
+
+int is_builtin_command(char *cmd)
+{
+    char *builtins[] = {"cd", "echo", "pwd", "export", "unset", "env", "exit", NULL};
+    int i;
+    i = -1;
+    while (builtins[++i])
+    {
+        if (ft_strcmp(builtins[i], cmd) == 0)
+            return (1);
+    }
+    return (0);
+}
+
+int execute_builtin(t_command *cmd, char **envp)
+{
+    char *command;
+    command = cmd->args[0];
+    if (ft_strcmp(command, "cd") == 0)
+        return (builtin_cd(cmd));
+    else if (ft_strcmp(command, "echo") == 0)
+        return builtin_echo(cmd);
+    else if (ft_strcmp(command, "pwd") == 0)
+        return builtin_pwd();
+    else if (ft_strcmp(command, "export") == 0)
+        return builtin_export(cmd, envp);
+    else if (ft_strcmp(command, "unset") == 0)
+        return builtin_unset(cmd);
+    else if (ft_strcmp(command, "env") == 0)
+        return builtin_env(envp);
+    else if (ft_strcmp(command, "exit") == 0)
+        return builtin_exit(cmd);
+    return 1;
+}
+
+int setup_all_heredocs(t_command *cmd_list)
+{
+    t_command *current;
+    t_redirections *redir;
+    int result;
+    current = cmd_list;
+    while (current)
+    {
+        redir = current->redirections;
+        while (redir)
+        {
+            if (redir->type == TOKEN_HEREDOC)
+            {
+                result = handle_heredoc_redir(redir);
+                if (result == -1)
+                    return -1;
+            }
+            redir = redir->next;
+        }
+        current = current->next;
+    }
+    return 0;
+}
+
+static void close_heredoc_fds(t_redirections *redir)
+{
+    while (redir)
+    {
+        if (redir->type == TOKEN_HEREDOC && redir->heredoc_fd >= 0)
+            safe_close(&redir->heredoc_fd);
+        redir = redir->next;
+    }
+}
+
+int execute_command_list(t_command *cmd_list, char **envp)
+{
+    int pipe_fd[2];
+    pid_t pid;
+    int prev_pipe_read;
+    int status;
+    t_command *current;
+    if (cmd_list && cmd_list->next == NULL && is_parent_builtin(cmd_list->args[0]))
+    {
+        expand_command_args(cmd_list, envp);
+        status = execute_builtin(cmd_list, envp);
+        return status;
+    }
+    if (setup_all_heredocs(cmd_list) == -1)
+        return 1;
+    pipe_fd[0] = -1;
+    pipe_fd[1] = -1;
+    prev_pipe_read = -1;
+    current = cmd_list;
+    while (current)
+    {
+        if (!setup_command_pipe(current, &prev_pipe_read, pipe_fd))
+            return (1);
+        expand_command_args(current, envp);
+        pid = fork();
+        if (pid == -1)
+        {
+            handle_fork_error(current, prev_pipe_read, pipe_fd);
+            return (1);
+        }
+        if (pid == 0)
+            child_process(current, prev_pipe_read, pipe_fd, envp);
+        close_heredoc_fds(current->redirections);
+        prev_pipe_read = parent_process(prev_pipe_read, pipe_fd);
+        current = current->next;
+    }
+    safe_close(&prev_pipe_read);
+    return (wait_for_children());
+}#include "minishell.h"
+
+int setup_pipe(int pipe_fd[2])
+{
+    if (pipe(pipe_fd) == -1)
+    {
+        perror("minishell: pipe creation failed");
+        return -1;
+    }
+    return 0;
+}
+
+int handle_heredoc_redir(t_redirections *redir)
+{
+    int heredoc_fd;
+    heredoc_fd = setup_heredoc(redir->file);
+    if (heredoc_fd == -1)
+    {
+        fprintf(stderr, "minishell: heredoc setup failed for %s\n", redir->file);
+        return -1;
+    }
+    redir->heredoc_fd = heredoc_fd;
+    return 0;
+}
+
+void handle_fork_error(t_command *current, int prev_pipe_read, int pipe_fd[2])
+{
+    perror("minishell: fork error");
+    safe_close(&prev_pipe_read);
+    if (current->next)
+    {
+        safe_close(&pipe_fd[0]);
+        safe_close(&pipe_fd[1]);
+    }
+}#include "minishell.h"
+
+int setup_heredoc(char *delimiter)
+{
+    int pipe_fd[2];
+    char *line;
+    if (pipe(pipe_fd) == -1)
+    {
+        perror("minishell: heredoc pipe error");
+        return -1;
+    }
+    printf("heredoc ");
+    while (1)
+    {
+        line = readline("> ");
+        if (!line)
+        {
+            fprintf(stderr, "minishell: warning: heredoc delimited by end-of-file\n");
+            safe_close(&pipe_fd[1]);
+            break;
+        }
+        if (ft_strcmp(line, delimiter) == 0)
+        {
+            free(line);
+            safe_close(&pipe_fd[1]);
+            break;
+        }
+        write(pipe_fd[1], line, ft_strlen(line));
+        write(pipe_fd[1], "\n", 1);
+        free(line);
+    }
+    safe_close(&pipe_fd[1]);
+    return pipe_fd[0];
+}
+#include "minishell.h"
+
+t_token *ft_token_new(char *content)
+{
+	t_token	*new_node;
+
+	new_node = (t_token *)malloc(sizeof(t_token));
+	if (!new_node)
+		return (NULL);
+	new_node->content = content;
+	new_node->next = NULL;
+	return (new_node);
+}
+
+void	ft_token_add_back(t_token **lst, t_token *new)
+{
+	t_token	*head;
+
+	if (!lst || !new)
+		return ;
+	if (*lst == NULL)
+	{
+		*lst = new;
+		return ;
+	}
+	head = *lst;
+	while (head->next)
+		head = head->next;
+	head->next = new;
+}
+
+
+void	ft_token_delone(t_token *lst, void (*del)(void *))
+{
+	if (!lst || !del)
+		return ;
+	del(lst->content);
+	free(lst);
+}
+
+void	ft_token_clear(t_token **lst, void (*del)(void *))
+{
+	t_token	*tmp;
+	t_token	*nextnode;
+
+	if (!lst || !del)
+		return ;
+	tmp = *lst;
+	while (tmp)
+	{
+		nextnode = tmp->next;
+		ft_token_delone(tmp, del);
+		tmp = nextnode;
+	}
+	*lst = NULL;
+}
+
+#include "minishell.h"
+
+int g_last_exit_status = 0;
+
+static void display_welcome(void)
+{
+    printf("\n");
+    printf(" ╔════════════════════════════════════╗\n");
+    printf(" ║            MINISHELL               ║\n");
+    printf(" ╚════════════════════════════════════╝\n");
+    printf(" Welcome to Minishell! Type 'exit' to quit.\n\n");
+}
+
+void print_Cmd_list(t_command *cmd)
+{
+    int i = 0;
+    while (cmd)
+    {
+        i = 0;
+        while (i < cmd->args_count)
+            printf("%s ", cmd->args[i++]);
+        printf("\n");
+        cmd = cmd->next;
+    }
+}
+static int process_command(char *input, char **envp)
+{
+    t_token *tokens;
+    t_command *cmds;
+
+    tokens = NULL;
+    cmds = NULL;
+    tokens = tokenize_input(input);
+    if (!tokens)
+        return 0;
+    assign_token_types(tokens);
+    cmds = create_cmds(&tokens);
+    if (cmds)
+    {
+        g_last_exit_status = execute_command_list(cmds, envp);
+        printf("Command exit status: %d\n", g_last_exit_status);
+        free_command_list(cmds);
+    }
+    else if (tokens)
+    {
+        fprintf(stderr, "minishell: syntax error in command\n");
+        ft_token_clear(&tokens, free);
+    }
+    return 0;
+}
+
+
+
+static void shell_loop(char **envp)
+{
+    char *input;
+    int should_exit;
+
+    should_exit = 0;
+    while (!should_exit)
+    {
+        input = readline("minishell> ");
+        if (input == NULL)
+        {
+            printf("exit\n");
+            break;
+        }
+        if (input[0] != '\0')
+        {
+            add_history(input);
+            should_exit = process_command(input, envp);
+        }
+        free(input);
+    }
+}
+
+
+int main(int argc, char **argv, char **envp)
+{
+    (void)argc;
+    (void)argv;
+
+    setup_signals();
+    display_welcome();
+    shell_loop(envp);
+    return 0;
+}#include "minishell.h"
+
+void	safe_free(void **ptr)
+{
+	if (ptr && *ptr)
+	{
+		free(*ptr);
+		*ptr = NULL;
+	}
+}
+
+
+void	safe_close(int *fd)
+{
+	if (fd && *fd >= 0)
+	{
+		close(*fd);
+		*fd = -1;
+	}
+}
+
+void	free_command(t_command *cmd)
+{
+	t_redirections	*redir;
+	t_redirections	*next_redir;
+	int				i;
+
+	if (!cmd)
+		return ;
+	if (cmd->args)
+	{
+		i = 0;
+		while (i < cmd->args_count)
+		{
+			safe_free((void **)&cmd->args[i]);
+			i++;
+		}
+		safe_free((void **)&cmd->args);
+	}
+	redir = cmd->redirections;
+	while (redir)
+	{
+		next_redir = redir->next;
+		if (redir->type == TOKEN_HEREDOC && redir->heredoc_fd >= 0)
+			safe_close(&redir->heredoc_fd);
+		safe_free((void **)&redir->file);
+		safe_free((void **)&redir);
+		redir = next_redir;
+	}
+	safe_free((void **)&cmd);
+}
+
+void	free_command_list(t_command *cmd_list)
+{
+	t_command	*current;
+	t_command	*next;
+
+	current = cmd_list;
+	while (current)
+	{
+		next = current->next;
+		free_command(current);
+		current = next;
+	}
+}
+
+
+
+#include "minishell.h"
+
+static void handle_sigint(int sig)
+{
+    (void)sig;
+    write(1, "\n", 1);
+    rl_on_new_line();
+    rl_replace_line("", 0);
+    rl_redisplay();
+}
+
+void setup_signals(void)
+{
+    signal(SIGINT, handle_sigint);
+    signal(SIGQUIT, SIG_IGN);
+}#include "minishell.h"
+
+
+int	is_operator(char c)
+{
+	return (c == '|' || c == '>' || c == '<');
+}
+
+
+char	*extract_operator_token(char *str, int *pos)
+{
+	int		start;
+	char	*token;
+
+	start = *pos;
+	if ((str[*pos] == '>' || str[*pos] == '<') && (str[*pos] == str[*pos + 1]))
+	{
+		(*pos) += 2;
+		token = ft_strndup(&str[start], 2);
+	}
+	else
+	{
+		(*pos)++;
+		token = ft_strndup(&str[start], 1);
+	}
+	if (!token)
+		fprintf(stderr, "minishell: memory allocation error\n");
+	return (token);
+}
+
+void	assign_token_types(t_token *tokens)
+{
+	t_token	*current;
+
+	current = tokens;
+	while (current)
+	{
+		if (ft_strcmp(current->content, "|") == 0)
+			current->type = TOKEN_PIPE;
+		else if (ft_strcmp(current->content, ">") == 0)
+			current->type = TOKEN_REDIRECT_OUT;
+		else if (ft_strcmp(current->content, "<") == 0)
+			current->type = TOKEN_REDIRECT_IN;
+		else if (ft_strcmp(current->content, ">>") == 0)
+			current->type = TOKEN_APPEND;
+		else if (ft_strcmp(current->content, "<<") == 0)
+			current->type = TOKEN_HEREDOC;
+		else
+			current->type = TOKEN_WORD;
+		current = current->next;
+	}
+}
+#include "minishell.h"
+
+int	add_token(t_token **tokens, char *content)
+{
+	t_token	*new_token;
+
+	new_token = ft_token_new(content);
+	if (!new_token)
+	{
+		free(content);
+		return (0);
+	}
+	ft_token_add_back(tokens, new_token);
+	return (1);
+}
+
+
+char	*extract_word_token(char *str, int start, int end)
+{
+	char	*token;
+
+	token = ft_strndup(&str[start], (end - start));
+	if (!token)
+		fprintf(stderr, "minishell: memory allocation error in tokenization\n");
+	return (token);
+}
+
+
+void	skip_whitespace(char *input, int *i, int *start)
+{
+	while (input[*i] && ft_isspace(input[*i]))
+		(*i)++;
+	*start = *i;
+}
+
+
+void	handle_quotes(char *input, int *i, t_state *state)
+{
+	if (input[*i] == '"' && *state != STATE_IN_SINGLE_QUOTE)
+	{
+		if (*state == STATE_NORMAL)
+			*state = STATE_IN_DOUBLE_QUOTE;
+		else
+			*state = STATE_NORMAL;
+	}
+	else if (input[*i] == '\'' && *state != STATE_IN_DOUBLE_QUOTE)
+	{
+		if (*state == STATE_NORMAL)
+			*state = STATE_IN_SINGLE_QUOTE;
+		else
+			*state = STATE_NORMAL;
+	}
+	(*i)++;
+}
+
+t_token	*clean_tokens_return_null(t_token **tokens)
+{
+	ft_token_clear(tokens, free);
+	return (NULL);
+}
+#include "minishell.h"
+
+
+
+int	process_operator(t_token **tokens, char *input, int *i, int *start)
+{
+	char	*token_content;
+
+	if (*i > *start)
+	{
+		token_content = extract_word_token(input, *start, *i);
+		if (!token_content || !add_token(tokens, token_content))
+			return (0);
+	}
+	token_content = extract_operator_token(input, i);
+	if (!token_content || !add_token(tokens, token_content))
+		return (0);
+	*start = *i;
+	return (1);
+}
+
+int	process_whitespace(t_token **tokens, char *input, int *i, int *start)
+{
+	char	*token_content;
+
+	if (*i > *start)
+	{
+		token_content = extract_word_token(input, *start, *i);
+		if (!token_content || !add_token(tokens, token_content))
+			return (0);
+	}
+	skip_whitespace(input, i, start);
+	return (1);
+}
+
+int	process_normal_char(t_token **tokens, char *input, int *i, int *start)
+{
+	if (is_operator(input[*i]))
+		return (process_operator(tokens, input, i, start));
+	else if (ft_isspace(input[*i]))
+		return (process_whitespace(tokens, input, i, start));
+	(*i)++;
+	return (1);
+}
+
+int	process_end_of_input(t_token **tokens, char *input, int i, int start,
+		t_state state)
+{
+	char	*token_content;
+
+	if (i > start)
+	{
+		token_content = extract_word_token(input, start, i);
+		if (!token_content || !add_token(tokens, token_content))
+			return (0);
+	}
+	if (state != STATE_NORMAL)
+	{
+		fprintf(stderr, "minishell: syntax error: unclosed quote\n");
+		return (0);
+	}
+	return (1);
+}
+
+t_token	*tokenize_input(char *input)
+{
+	t_token	*tokens;
+	t_state	state;
+	int		i;
+	int		start;
+
+	tokens = NULL;
+	state = STATE_NORMAL;
+	i = 0;
+	start = 0;
+	while (input[i])
+	{
+		if ((input[i] == '"' && state != STATE_IN_SINGLE_QUOTE) || 
+			(input[i] == '\'' && state != STATE_IN_DOUBLE_QUOTE))
+		{
+			handle_quotes(input, &i, &state);
+			continue ;
+		}
+		if (state == STATE_NORMAL && !process_normal_char(&tokens, input, 
+				&i, &start))
+			return (clean_tokens_return_null(&tokens));
+		else if (state != STATE_NORMAL)
+			i++;
+	}
+	if (!process_end_of_input(&tokens, input, i, start, state))
+		return (clean_tokens_return_null(&tokens));
+	return (tokens);
+}
+#include "minishell.h"
+
+int	is_number(char *str)
+{
+	int	i;
+
+	i = 0;
+	if (str[i] == '+')
+		i++;
+	while (str[i])
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+int	ft_strcmp(const char *s1, const char *s2)
+{
+	size_t	i;
+
+	i = 0;
+	while (s1[i] && s2[i] && s1[i] == s2[i])
+		i++;
+	return ((unsigned char)s1[i] - (unsigned char)s2[i]);
+}
+
+char *ft_strndup(const char *s, size_t n)
+{
+    size_t len = 0;
+    char *result;
+    
+    while (len < n && s[len])
+        len++;
+    result = calloc(len + 1, 1);
+    if (!result)
+        return (NULL);
+    for (size_t i = 0; i < len; i++)
+        result[i] = s[i];
+    return (result);
+}
+
+
+
+
+int	ft_isspace(char c)
+{
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' ||
+			c == '\f' || c == '\r');
+}
+
+
+
+
+
+
+
+
+
+

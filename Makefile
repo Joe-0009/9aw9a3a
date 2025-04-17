@@ -29,11 +29,12 @@ SRCS =\
 	executor_utils.c \
 	builtins_cd_pwd.c \
 	builtins_echo.c \
-	builtins_env_export.c \
 	builtins_exit.c \
 	memory.c \
 	env_expand_utils1.c \
 	env_expand_utils2.c \
+	builtins_env_unset_export.c \
+	builtins_env_export_utils.c \
 	env_expand_main.c
 
 OBJS = $(SRCS:.c=.o)

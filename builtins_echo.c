@@ -19,6 +19,7 @@ int builtin_echo(t_command *cmd)
 {
     int i;
     int print_newline;
+    
     i = 1;
     print_newline = 1;
     while (i < cmd->args_count && is_valid_n_flag(cmd->args[i]))

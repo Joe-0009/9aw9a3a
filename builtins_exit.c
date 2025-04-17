@@ -9,7 +9,7 @@ static int process_exit_arg(char *arg)
         return (2);
     }
     exit_status = ft_atoi(arg);
-    return (exit_status % 256);
+    return (exit_status);
 }
 
 int builtin_exit(t_command *cmd)

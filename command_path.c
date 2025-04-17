@@ -3,6 +3,7 @@
 static char *get_path_env(char **envp)
 {
     int i;
+
     i = 0;
     while (envp[i])
     {
@@ -18,6 +19,7 @@ static char *find_in_paths(char **paths, char *cmd)
     int i = 0;
     char *full_path = NULL;
     char *temp;
+
     while (paths[i])
     {
         full_path = ft_strjoin(paths[i], "/");
@@ -43,6 +45,7 @@ char *find_executable_path(char *cmd, char **envp)
     char **paths;
     char *full_path;
     int i;
+
     if (!cmd || !*cmd)
         return (NULL);
     if ((cmd[0] == '/') || (cmd[0] == '.' && (cmd[1] == '/' ||
