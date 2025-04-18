@@ -1,49 +1,49 @@
 # Minishell Execution Flow
 
-This diagram illustrates the full execution process of commands in minishell, from parsing to command execution.
+This diagram illustrates the full execution process of commands in minishell, from parsing to command execution, including the specific function names from the codebase.
 
 ```mermaid
 flowchart TD
     %% Main flow
-    Start([User Input]) --> Parse[Parse Input]
-    Parse --> TokenList[Create Token List]
-    TokenList --> CommandList[Build Command List]
-    CommandList --> CheckCmd{Command Type?}
+    Start([User Input]) --> Parse["parse_input()"]
+    Parse --> TokenList["create_token_list()"]
+    TokenList --> CommandList["build_command_list()"]
+    CommandList --> CheckCmd{"execute_command_list()\nCommand Type?"}
     
     %% Command type decision
-    CheckCmd -- "Single Parent Builtin\n(cd, export, unset, exit)" --> ParentBuiltin[Execute in Parent Process]
-    CheckCmd -- "Pipeline or\nOther Commands" --> SetupHeredocs[Setup All Heredocs]
+    CheckCmd -- "Single Parent Builtin\n(cd, export, unset, exit)" --> ParentBuiltin["execute_builtin()"]
+    CheckCmd -- "Pipeline or\nOther Commands" --> SetupHeredocs["setup_all_heredocs()"]
     
     %% Heredoc handling
-    SetupHeredocs -- Success --> CommandLoop[Process Each Command]
-    SetupHeredocs -- Failure --> ReturnError[Return Error]
+    SetupHeredocs -- Success --> CommandLoop["Command Loop"]
+    SetupHeredocs -- Failure --> ReturnError["Return Error (1)"]
     
     %% Command processing loop
-    CommandLoop --> SetupPipe[Setup Pipes]
-    SetupPipe --> ExpandVars[Expand Environment Variables]
-    ExpandVars --> ForkProcess[Fork Process]
-    ForkProcess --> ProcessType{Process Type?}
+    CommandLoop --> SetupPipe["setup_command_pipe()"]
+    SetupPipe --> ExpandVars["expand_command_args()"]
+    ExpandVars --> ForkProcess["fork()"]
+    ForkProcess --> ProcessType{"Process Type?"}
     
     %% Child process flow
-    ProcessType -- Child --> SetupRedirs[Setup Redirections]
-    SetupRedirs --> CommandCheck{Command Type?}
-    CommandCheck -- Builtin --> ExecBuiltin[Execute Builtin]
-    CommandCheck -- External --> FindPath[Find Executable Path]
-    FindPath --> CheckPath{Path Found?}
-    CheckPath -- Yes --> Execve[Execute with execve]
-    CheckPath -- No --> CommandNotFound[Command Not Found]
-    CommandNotFound --> ChildExit[Exit Child with Status 127]
-    Execve -- Failure --> ExecError[Print Error]
+    ProcessType -- Child --> SetupRedirs["child_process()\napply_redirections()"]
+    SetupRedirs --> CommandCheck{"execute_single_command()\nCommand Type?"}
+    CommandCheck -- Builtin --> ExecBuiltin["handle_builtin_command()"]
+    CommandCheck -- External --> FindPath["handle_external_command()\nget_exec_path()"]
+    FindPath --> CheckPath{"Path Found?"}
+    CheckPath -- Yes --> Execve["execve()"]
+    CheckPath -- No --> CommandNotFound["Command Not Found"]
+    CommandNotFound --> ChildExit["exit(127)"]
+    Execve -- Failure --> ExecError["perror()"]
     ExecError --> ChildExit
     ExecBuiltin --> ChildExit
     
     %% Parent process flow
-    ProcessType -- Parent --> CloseHeredocs[Close Heredoc FDs]
-    CloseHeredocs --> ManagePipes[Manage Pipe FDs]
-    ManagePipes --> NextCommand{More Commands?}
+    ProcessType -- Parent --> CloseHeredocs["close_heredoc_fds()"]
+    CloseHeredocs --> ManagePipes["parent_process()"]
+    ManagePipes --> NextCommand{"More Commands?"}
     NextCommand -- Yes --> CommandLoop
-    NextCommand -- No --> WaitChildren[Wait for Children]
-    WaitChildren --> CollectStatus[Collect Exit Status]
+    NextCommand -- No --> WaitChildren["wait_for_children()"]
+    WaitChildren --> CollectStatus["Collect Exit Status"]
     CollectStatus --> End([End Execution])
     
     %% Connect parent builtin to end
@@ -51,59 +51,62 @@ flowchart TD
     
     %% Additional information
     subgraph "Environment Handling"
-        ExpandVars --> ConvertEnv[Convert t_env to char **envp]
-        ConvertEnv --> FreeTempEnv[Free Temporary envp]
+        ExpandVars --> ConvertEnv["env_list_to_envp()"]
+        ConvertEnv --> FreeTempEnv["safe_doube_star_free()"]
     end
     
     subgraph "Redirection Handling"
-        SetupRedirs --> InRedir[Handle Input Redirections]
-        SetupRedirs --> OutRedir[Handle Output Redirections]
-        SetupRedirs --> HereDoc[Setup Heredoc Input]
-        SetupRedirs --> Append[Handle Append Redirections]
+        SetupRedirs --> InRedir["handle_input_redir()"]
+        SetupRedirs --> OutRedir["handle_output_redir()"]
+        SetupRedirs --> HereDoc["handle_heredoc_redir()"]
+        SetupRedirs --> Append["handle_append_redir()"]
     end
     
     subgraph "Path Resolution"
-        FindPath --> CheckSlash{Contains '/'?}
-        CheckSlash -- Yes --> UseAsPath[Use as Direct Path]
-        CheckSlash -- No --> GetPATH[Get PATH Environment]
-        GetPATH --> TryPaths[Try Each Directory in PATH]
-        TryPaths --> CheckFound{Found?}
-        CheckFound -- Yes --> ReturnPath[Return Full Path]
-        CheckFound -- No --> ReturnNull[Return Original Command]
+        FindPath --> CheckSlash["find_executable_path()"]
+        CheckSlash -- Contains '/' --> UseAsPath["Use as Direct Path"]
+        CheckSlash -- No '/' --> GetPATH["get_path_value()"]
+        GetPATH --> TryPaths["try_path_directories()"]
+        TryPaths --> CheckFound{"Found?"}
+        CheckFound -- Yes --> ReturnPath["Return Full Path"]
+        CheckFound -- No --> ReturnNull["Return Original (ft_strdup)"]
     end
     
     %% Memory Management
     subgraph "Memory Management"
-        ConvertEnv --> CallCallocArray[ft_calloc for Arrays]
-        FindPath --> StrdupPaths[strdup for Paths]
-        CommandLoop --> FreeEnvp[safe_doube_star_free for envp]
-        ChildExit --> FreeExecResources[Free Resources]
-        End --> FinalCleanup[Cleanup Resources]
+        ConvertEnv --> CallCallocArray["ft_calloc()"]
+        FindPath --> StrdupPaths["ft_strdup()"]
+        CommandLoop --> FreeEnvp["safe_doube_star_free()"]
+        ChildExit --> FreeExecResources["safe_free()"]
+        End --> FinalCleanup["cleanup_resources()"]
     end
 ```
 
-## Key Components
+## Key Functions in Execution Flow
 
-1. **Command Execution Decision**
-   - Parent builtins (cd, export, unset, exit) run in parent process
-   - Other commands run in child processes
+1. **Command Parsing & Setup**
+   - `execute_command_list()`: Main function coordinating command execution
+   - `setup_all_heredocs()`: Prepares all heredoc redirections before execution
+   - `setup_command_pipe()`: Sets up pipes between commands
 
-2. **Piping and Redirection**
-   - Pipes connect stdout of one command to stdin of next command
-   - Redirections modify stdin/stdout for each command
+2. **Command Execution**
+   - `child_process()`: Handles execution in child processes
+   - `handle_builtin_command()`: Executes shell builtin commands
+   - `handle_external_command()`: Handles execution of external programs
+   - `execute_single_command()`: Routes commands to builtin or external handler
 
 3. **Path Resolution**
-   - Direct paths (containing '/') are used as-is
-   - Other commands are searched in PATH directories
+   - `get_exec_path()`: Gets executable path using temp environment
+   - `find_executable_path()`: Searches for command in PATH directories 
 
-4. **Process Management**
-   - Child processes execute commands and exit
-   - Parent process waits for and collects exit status
+4. **Environment Management**
+   - `env_list_to_envp()`: Converts internal environment to execve format
+   - `expand_command_args()`: Expands environment variables in commands
 
-5. **Environment Management**
-   - Internal t_env list is converted to execve-compatible format
-   - Proper memory management for environment variables
+5. **Process & Pipe Management**
+   - `parent_process()`: Manages pipes in parent shell
+   - `wait_for_children()`: Waits for all child processes and collects status
 
-6. **Heredoc Handling**
-   - All heredocs are set up before execution starts
-   - Heredoc file descriptors are managed during execution
+6. **Memory Management**
+   - `safe_doube_star_free()`: Safely frees string arrays
+   - `safe_free()`: Safely frees individual pointers
