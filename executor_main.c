@@ -33,7 +33,7 @@ int	execute_builtin(t_command *cmd, t_env **env_list)
 	else if (ft_strcmp(command, "env") == 0)
 		return (builtin_env(*env_list));
 	else if (ft_strcmp(command, "exit") == 0)
-		return (builtin_exit(cmd));
+		return (builtin_exit(cmd, env_list));
 	return (1);
 }
 
@@ -79,11 +79,14 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	int			prev_pipe_read;
 	int			status;
 	t_command	*current;
+	char **envp;
 
+	envp = env_list_to_envp(*env_list);
 	if (cmd_list && cmd_list->next == NULL
 		&& is_parent_builtin(cmd_list->args[0]))
 	{
-		expand_command_args(cmd_list, env_list_to_envp(*env_list));
+		expand_command_args(cmd_list, envp);
+		safe_doube_star_free(envp);
 		status = execute_builtin(cmd_list, env_list);
 		return (status);
 	}
@@ -97,7 +100,8 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	{
 		if (!setup_command_pipe(current, &prev_pipe_read, pipe_fd))
 			return (1);
-		expand_command_args(current, env_list_to_envp(*env_list));
+		envp = env_list_to_envp(*env_list); 
+		expand_command_args(current, envp);
 		pid = fork();
 		if (pid == -1)
 		{
@@ -108,8 +112,10 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 			child_process(current, prev_pipe_read, pipe_fd, *env_list);
 		close_heredoc_fds(current->redirections);
 		prev_pipe_read = parent_process(prev_pipe_read, pipe_fd);
+		safe_doube_star_free(envp);
 		current = current->next;
 	}
+	safe_doube_star_free(envp);
 	safe_close(&prev_pipe_read);
 	return (wait_for_children());
 }

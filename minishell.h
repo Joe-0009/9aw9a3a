@@ -91,6 +91,8 @@ void						free_command(t_command *cmd);
 void						free_command_list(t_command *cmd_list);
 void						safe_free(void **ptr);
 void						safe_close(int *fd);
+void						safe_doube_star_free(char **str);
+void free_env_list(t_env *env_list);
 
 /* ===================== STRING UTILS ===================== */
 int							is_number(char *str);
@@ -150,7 +152,7 @@ int							builtin_pwd(void);
 int							builtin_export(t_command *cmd, t_env **env_list);
 int							builtin_unset(t_command *cmd, t_env **env_list);
 int							builtin_env(t_env *env_list);
-int							builtin_exit(t_command *cmd);
+int							builtin_exit(t_command *cmd, t_env **env_list);
 void						export_one_arg(char *arg, t_env **env_list);
 void						unset_one_arg(char *arg, t_env **env_list);
 

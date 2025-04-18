@@ -4,14 +4,10 @@ static char	*get_exec_path(t_command *current, t_env *env_list)
 {
 	char	**envp;
 	char	*exec_path;
-	int		i;
 
 	envp = env_list_to_envp(env_list);
 	exec_path = find_executable_path(current->args[0], envp);
-	i = 0;
-	while (envp && envp[i])
-		free(envp[i++]);
-	free(envp);
+	safe_doube_star_free(envp);
 	if (!exec_path)
 		exec_path = ft_strdup(current->args[0]);
 	return (exec_path);
@@ -26,7 +22,6 @@ void	handle_external_command(t_command *current, t_env *env_list)
 {
 	char	*exec_path;
 	char	**envp;
-	int		i;
 
 	exec_path = get_exec_path(current, env_list);
 	if (!exec_path)
@@ -38,9 +33,7 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	execve(exec_path, current->args, envp);
 	perror("execve error");
 	free(exec_path);
-	i = 0;
-	while (envp && envp[i])
-		free(envp[i++]);
+	safe_doube_star_free(envp);
 	free(envp);
 	exit(127);
 }

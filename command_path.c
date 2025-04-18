@@ -46,7 +46,6 @@ char	*find_executable_path(char *cmd, char **envp)
 	char	*path_env;
 	char	**paths;
 	char	*full_path;
-	int		i;
 
 	if (!cmd || !*cmd)
 		return (NULL);
@@ -64,9 +63,6 @@ char	*find_executable_path(char *cmd, char **envp)
 	if (!paths)
 		return (NULL);
 	full_path = find_in_paths(paths, cmd);
-	i = 0;
-	while (paths[i])
-		free(paths[i++]);
-	free(paths);
+	safe_doube_star_free(paths);
 	return (full_path);
 }

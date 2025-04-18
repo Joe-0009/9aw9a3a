@@ -38,6 +38,7 @@ static int	process_command(char *input, t_env **env_list)
 	cmds = create_cmds(&tokens);
 	if (cmds)
 	{
+		ft_token_clear(&tokens, free);
 		g_last_exit_status = execute_command_list(cmds, env_list);
 		printf("Command exit status: %d\n", g_last_exit_status);
 		free_command_list(cmds);
@@ -71,7 +72,23 @@ static void	shell_loop(t_env *env_list)
 		}
 		free(input);
 	}
+	clear_history();
 }
+
+void free_env_list(t_env *env_list)
+{
+	t_env *next;
+
+	while (env_list)
+	{
+		next = env_list->next;
+		safe_free((void **)&env_list->key);
+		safe_free((void **)&env_list->value);
+		safe_free((void **)&env_list);
+		env_list = next;
+	}
+}
+
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -83,6 +100,6 @@ int	main(int argc, char **argv, char **envp)
 	display_welcome();
 	env_list = envp_to_env_list(envp);
 	shell_loop(env_list);
-	// TODO: free env_list at the end
+	free_env_list(env_list);
 	return (0);
 }

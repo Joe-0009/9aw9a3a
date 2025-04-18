@@ -47,3 +47,20 @@ int	ft_isspace(char c)
 	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f'
 		|| c == '\r');
 }
+
+
+void safe_doube_star_free(char **str)
+{
+	int i;
+
+	if (!str)
+		return;
+	i = 0;
+	while (str[i])
+	{
+		if (str[i])
+			free(str[i]);
+		i++;
+	}
+	free(str);
+}

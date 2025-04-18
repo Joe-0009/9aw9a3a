@@ -6,7 +6,7 @@
 /*   By: yrachidi <yrachidi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 13:47:20 by yrachidi          #+#    #+#             */
-/*   Updated: 2024/11/02 11:02:25 by yrachidi         ###   ########.fr       */
+/*   Updated: 2025/04/18 16:49:15 by yrachidi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@ static unsigned int	ft_number_of_divisions(unsigned int n, int base)
 	if (n == 0)
 		return (1);
 	num = 0;
-	if (n < 0)
-		n *= -1;
 	while (n > 0)
 	{
 		n /= base;
