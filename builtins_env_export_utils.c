@@ -1,64 +1,5 @@
 #include "minishell.h"
 
-static int compare_env_vars(const void *a, const void *b)
-{
-    return (ft_strcmp(*(char **)a, *(char **)b));
-}
-
-static void ft_swap_ptr(char **a, char **b)
-{
-    char *tmp;
-
-    tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
-static void ft_bubble_sort(char **arr, int n, int (*compar)(const void *, const void *))
-{
-    int i, j;
-
-    i = 0;
-    while (i < n - 1)
-    {
-        j = 0;
-        while (j < n - i - 1)
-        {
-            if (compar(&arr[j], &arr[j + 1]) > 0)
-                ft_swap_ptr(&arr[j], &arr[j + 1]);
-            j++;
-        }
-        i++;
-    }
-}
-
-int print_env_vars(char **envp)
-{
-    int i;
-    int env_count;
-    char **sorted_env;
-
-    env_count = 0;
-    while (envp[env_count])
-        env_count++;
-    sorted_env = malloc(sizeof(char *) * (env_count + 1));
-    if (!sorted_env)
-        return (1);
-    i = -1;
-    while (++i < env_count)
-        sorted_env[i] = envp[i];
-    sorted_env[i] = NULL;
-    ft_bubble_sort(sorted_env, env_count, compare_env_vars);
-    i = 0;
-    while (sorted_env[i])
-    {
-        printf("declare -x %s\n", sorted_env[i]);
-        i++;
-    }
-    free(sorted_env);
-    return (0);
-}
-
 int is_valid_identifier(char *str)
 {
     int i;
@@ -73,4 +14,133 @@ int is_valid_identifier(char *str)
         i++;
     }
     return (1);
+}
+
+t_env	*find_env_node(t_env *env_list, const char *key)
+{
+	while (env_list)
+	{
+		if (ft_strcmp(env_list->key, key) == 0)
+			return (env_list);
+		env_list = env_list->next;
+	}
+	return (NULL);
+}
+
+t_env	*add_or_update_env(t_env **env_list, const char *key, const char *value)
+{
+	t_env	*node;
+
+	node = find_env_node(*env_list, key);
+	if (node)
+	{
+		if (node->value)
+			free(node->value);
+		if (value != NULL)
+			node->value = ft_strdup(value);
+		else
+			node->value = NULL;
+		return (node);
+	}
+	node = (t_env *)malloc(sizeof(t_env));
+	if (!node)
+		return (NULL);
+	node->key = ft_strdup(key);
+	if (value != NULL)
+		node->value = ft_strdup(value);
+	else
+		node->value = NULL;
+	node->next = *env_list;
+	*env_list = node;
+	return (node);
+}
+
+t_env	*envp_to_env_list(char **envp)
+{
+	t_env	*env_list;
+	char	*equal_sign;
+	char	*key;
+	char	*value;
+	int		i;
+
+	env_list = NULL;
+	i = 0;
+	while (envp[i])
+	{
+		equal_sign = ft_strchr(envp[i], '=');
+		if (equal_sign)
+		{
+			key = ft_substr(envp[i], 0, equal_sign - envp[i]);
+			value = ft_strdup(equal_sign + 1);
+			add_or_update_env(&env_list, key, value);
+			free(key);
+			free(value);
+		}
+		i++;
+	}
+	return (env_list);
+}
+
+void print_export_list(t_env *env_list)
+{
+	t_env *cur = env_list;
+	while (cur)
+	{
+		if (cur->key)
+			printf("declare -x %s=\"%s\"\n", cur->key, cur->value ? cur->value : "");
+		cur = cur->next;
+	}
+}
+
+char	**env_list_to_envp(t_env *env_list)
+{
+	int		size;
+	int		i;
+	t_env	*cur;
+	char	**envp;
+	char	*tmp;
+
+	size = 0;
+	cur = env_list;
+	while (cur)
+	{
+		if (cur->key)
+			size++;
+		cur = cur->next;
+	}
+	envp = (char **)malloc(sizeof(char *) * (size + 1));
+	if (!envp)
+		return (NULL);
+	cur = env_list;
+	i = 0;
+	while (cur)
+	{
+		if (cur->key)
+		{
+			if (cur->value)
+			{
+				tmp = malloc(ft_strlen(cur->key) + ft_strlen(cur->value) + 2);
+				if (tmp)
+				{
+					ft_strlcpy(tmp, cur->key, ft_strlen(cur->key) + 1);
+					ft_strlcat(tmp, "=", ft_strlen(cur->key) + 2);
+					ft_strlcat(tmp, cur->value, ft_strlen(cur->key) + ft_strlen(cur->value) + 2);
+					envp[i++] = tmp;
+				}
+			}
+			else
+			{
+				tmp = malloc(ft_strlen(cur->key) + 2);
+				if (tmp)
+				{
+					ft_strlcpy(tmp, cur->key, ft_strlen(cur->key) + 1);
+					ft_strlcat(tmp, "=", ft_strlen(cur->key) + 2);
+					envp[i++] = tmp;
+				}
+			}
+		}
+		cur = cur->next;
+	}
+	envp[i] = NULL;
+	return (envp);
 }

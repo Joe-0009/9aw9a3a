@@ -35,6 +35,8 @@ SRCS =\
 	env_expand_utils2.c \
 	builtins_env_unset_export.c \
 	builtins_env_export_utils.c \
+	builtins_export_utils.c \
+	builtins_unset_utils.c \
 	env_expand_main.c
 
 OBJS = $(SRCS:.c=.o)

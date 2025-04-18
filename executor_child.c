@@ -27,13 +27,13 @@ void handle_child_output(t_command *current, int pipe_fd[2])
     }
 }
 
-void child_process(t_command *current, int prev_pipe_read, int pipe_fd[2], char **envp)
+void child_process(t_command *current, int prev_pipe_read, int pipe_fd[2], t_env *env_list)
 {
     handle_child_input(prev_pipe_read);
     handle_child_output(current, pipe_fd);
     if (setup_redirections(current) == -1)
         exit(1);
-    execute_single_command(current, envp);
+    execute_single_command(current, env_list);
     fprintf(stderr, "minishell: command execution failed\n");
     exit(127);
 }

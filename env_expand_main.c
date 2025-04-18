@@ -4,6 +4,8 @@ static void expand_args_loop(t_command *cmd, char **envp)
 {
 	int i;
 	char *expanded;
+	char *stripped;
+
 	i = 0;
 	while (i < cmd->args_count)
 	{
@@ -12,6 +14,12 @@ static void expand_args_loop(t_command *cmd, char **envp)
 		{
 			free(cmd->args[i]);
 			cmd->args[i] = expanded;
+		}
+		stripped = strip_quotes(cmd->args[i]);
+		if (stripped)
+		{
+			free(cmd->args[i]);
+			cmd->args[i] = stripped;
 		}
 		i++;
 	}
