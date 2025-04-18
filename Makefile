@@ -5,10 +5,12 @@ GNL_DIR = get_next_line
 LIBFT = $(LIBFT_DIR)/libft.a
 GNL = $(GNL_DIR)/gnl.a
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -I$(LIBFT_DIR) -I$(GNL_DIR) 
+# Add ASan flags
+CFLAGS = -Wall -Wextra -Werror -I$(LIBFT_DIR) -I$(GNL_DIR) -fsanitize=address -g
 LIBS = $(LIBFT) $(GNL) 
 INCLUDES = -I/opt/homebrew/opt/readline/include
-LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory
+# Add ASan flags
+LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory -fsanitize=address
 
 SRCS =\
 	main.c \
@@ -66,4 +68,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+asan: re
+	./$(NAME)
+
+.PHONY: all clean fclean re asan

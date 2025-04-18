@@ -111,7 +111,7 @@ char	**env_list_to_envp(t_env *env_list)
 			size++;
 		cur = cur->next;
 	}
-	envp = (char **)malloc(sizeof(char *) * (size + 1));
+	envp = (char **)ft_calloc(size + 1, sizeof(char *));
 	if (!envp)
 		return (NULL);
 	cur = env_list;
@@ -145,6 +145,5 @@ char	**env_list_to_envp(t_env *env_list)
 		}
 		cur = cur->next;
 	}
-	envp[i] = NULL;
 	return (envp);
 }

@@ -50,5 +50,5 @@ void	expand_command_args(t_command *cmd, char **envp)
 {
 	expand_args_loop(cmd, envp);
 	expand_redirections_loop(cmd, envp);
-	
+	safe_doube_star_free(envp);
 }

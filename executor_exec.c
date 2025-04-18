@@ -32,9 +32,8 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	envp = env_list_to_envp(env_list);
 	execve(exec_path, current->args, envp);
 	perror("execve error");
-	free(exec_path);
+	safe_free((void **)&exec_path); // Cast to void **
 	safe_doube_star_free(envp);
-	free(envp);
 	exit(127);
 }
 
