@@ -1,7 +1,5 @@
 #include "minishell.h"
 
-
-
 int	process_operator(t_token **tokens, char *input, int *i, int *start)
 {
 	char	*token_content;
@@ -75,14 +73,14 @@ t_token	*tokenize_input(char *input)
 	start = 0;
 	while (input[i])
 	{
-		if ((input[i] == '"' && state != STATE_IN_SINGLE_QUOTE) || 
-			(input[i] == '\'' && state != STATE_IN_DOUBLE_QUOTE))
+		if ((input[i] == '"' && state != STATE_IN_SINGLE_QUOTE)
+			|| (input[i] == '\'' && state != STATE_IN_DOUBLE_QUOTE))
 		{
 			handle_quotes(input, &i, &state);
 			continue ;
 		}
-		if (state == STATE_NORMAL && !process_normal_char(&tokens, input, 
-				&i, &start))
+		if (state == STATE_NORMAL && !process_normal_char(&tokens, input, &i,
+				&start))
 			return (clean_tokens_return_null(&tokens));
 		else if (state != STATE_NORMAL)
 			i++;

@@ -47,4 +47,3 @@ void	export_one_arg(char *arg, t_env **env_list)
 	if (value)
 		free(value);
 }
-

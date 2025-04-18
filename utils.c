@@ -26,36 +26,24 @@ int	ft_strcmp(const char *s1, const char *s2)
 	return ((unsigned char)s1[i] - (unsigned char)s2[i]);
 }
 
-char *ft_strndup(const char *s, size_t n)
+char	*ft_strndup(const char *s, size_t n)
 {
-    size_t len = 0;
-    char *result;
-    
-    while (len < n && s[len])
-        len++;
-    result = calloc(len + 1, 1);
-    if (!result)
-        return (NULL);
-    for (size_t i = 0; i < len; i++)
-        result[i] = s[i];
-    return (result);
+	size_t	len;
+	char	*result;
+
+	len = 0;
+	while (len < n && s[len])
+		len++;
+	result = calloc(len + 1, 1);
+	if (!result)
+		return (NULL);
+	for (size_t i = 0; i < len; i++)
+		result[i] = s[i];
+	return (result);
 }
-
-
-
 
 int	ft_isspace(char c)
 {
-	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' ||
-			c == '\f' || c == '\r');
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f'
+		|| c == '\r');
 }
-
-
-
-
-
-
-
-
-
-

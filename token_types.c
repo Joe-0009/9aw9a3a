@@ -1,11 +1,9 @@
 #include "minishell.h"
 
-
 int	is_operator(char c)
 {
 	return (c == '|' || c == '>' || c == '<');
 }
-
 
 char	*extract_operator_token(char *str, int *pos)
 {

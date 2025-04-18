@@ -9,7 +9,6 @@ void	safe_free(void **ptr)
 	}
 }
 
-
 void	safe_close(int *fd)
 {
 	if (fd && *fd >= 0)
@@ -63,6 +62,3 @@ void	free_command_list(t_command *cmd_list)
 		current = next;
 	}
 }
-
-
-

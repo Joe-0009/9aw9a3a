@@ -1,10 +1,10 @@
 #include "minishell.h"
 
-static void expand_args_loop(t_command *cmd, char **envp)
+static void	expand_args_loop(t_command *cmd, char **envp)
 {
-	int i;
-	char *expanded;
-	char *stripped;
+	int		i;
+	char	*expanded;
+	char	*stripped;
 
 	i = 0;
 	while (i < cmd->args_count)
@@ -25,10 +25,11 @@ static void expand_args_loop(t_command *cmd, char **envp)
 	}
 }
 
-static void expand_redirections_loop(t_command *cmd, char **envp)
+static void	expand_redirections_loop(t_command *cmd, char **envp)
 {
-	t_redirections *redir;
-	char *expanded;
+	t_redirections	*redir;
+	char			*expanded;
+
 	redir = cmd->redirections;
 	while (redir)
 	{
@@ -45,8 +46,7 @@ static void expand_redirections_loop(t_command *cmd, char **envp)
 	}
 }
 
-
-void expand_command_args(t_command *cmd, char **envp)
+void	expand_command_args(t_command *cmd, char **envp)
 {
 	expand_args_loop(cmd, envp);
 	expand_redirections_loop(cmd, envp);

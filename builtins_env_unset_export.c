@@ -2,7 +2,7 @@
 
 int	builtin_export(t_command *cmd, t_env **env_list)
 {
-	int i;
+	int	i;
 
 	if (!cmd->args[1])
 	{
@@ -20,7 +20,7 @@ int	builtin_export(t_command *cmd, t_env **env_list)
 
 int	builtin_unset(t_command *cmd, t_env **env_list)
 {
-	int i;
+	int	i;
 
 	i = 1;
 	while (cmd->args[i])
@@ -33,7 +33,9 @@ int	builtin_unset(t_command *cmd, t_env **env_list)
 
 int	builtin_env(t_env *env_list)
 {
-	t_env *current = env_list;
+	t_env	*current;
+
+	current = env_list;
 	while (current)
 	{
 		if (current->value)

@@ -2,8 +2,8 @@
 
 void	unset_one_arg(char *arg, t_env **env_list)
 {
-	t_env *prev;
-	t_env *cur;
+	t_env	*prev;
+	t_env	*cur;
 
 	if (!is_valid_identifier(arg))
 	{

@@ -1,19 +1,19 @@
 #include "minishell.h"
 
-int is_valid_identifier(char *str)
+int	is_valid_identifier(char *str)
 {
-    int i;
+	int	i;
 
-    if (!str || (!ft_isalpha(str[0]) && str[0] != '_'))
-        return (0);
-    i = 1;
-    while (str[i])
-    {
-        if (!ft_isalnum(str[i]) && str[i] != '_')
-            return (0);
-        i++;
-    }
-    return (1);
+	if (!str || (!ft_isalpha(str[0]) && str[0] != '_'))
+		return (0);
+	i = 1;
+	while (str[i])
+	{
+		if (!ft_isalnum(str[i]) && str[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
 }
 
 t_env	*find_env_node(t_env *env_list, const char *key)
@@ -81,13 +81,16 @@ t_env	*envp_to_env_list(char **envp)
 	return (env_list);
 }
 
-void print_export_list(t_env *env_list)
+void	print_export_list(t_env *env_list)
 {
-	t_env *cur = env_list;
+	t_env	*cur;
+
+	cur = env_list;
 	while (cur)
 	{
 		if (cur->key)
-			printf("declare -x %s=\"%s\"\n", cur->key, cur->value ? cur->value : "");
+			printf("declare -x %s=\"%s\"\n", cur->key,
+				cur->value ? cur->value : "");
 		cur = cur->next;
 	}
 }
@@ -124,7 +127,8 @@ char	**env_list_to_envp(t_env *env_list)
 				{
 					ft_strlcpy(tmp, cur->key, ft_strlen(cur->key) + 1);
 					ft_strlcat(tmp, "=", ft_strlen(cur->key) + 2);
-					ft_strlcat(tmp, cur->value, ft_strlen(cur->key) + ft_strlen(cur->value) + 2);
+					ft_strlcat(tmp, cur->value, ft_strlen(cur->key)
+						+ ft_strlen(cur->value) + 2);
 					envp[i++] = tmp;
 				}
 			}

@@ -47,7 +47,8 @@ void	handle_external_command(t_command *current, t_env *env_list)
 
 void	execute_single_command(t_command *current, t_env *env_list)
 {
-	if (current->args && current->args[0] && is_builtin_command(current->args[0]))
+	if (current->args && current->args[0]
+		&& is_builtin_command(current->args[0]))
 		handle_builtin_command(current, env_list);
 	else if (current->args && current->args[0])
 		handle_external_command(current, env_list);
@@ -74,8 +75,6 @@ int	setup_command_pipe(t_command *current, int *prev_pipe_read, int pipe_fd[2])
 
 int	is_parent_builtin(char *cmd)
 {
-	return (ft_strcmp(cmd, "cd") == 0 ||
-			ft_strcmp(cmd, "export") == 0 ||
-			ft_strcmp(cmd, "unset") == 0 ||
-			ft_strcmp(cmd, "exit") == 0);
+	return (ft_strcmp(cmd, "cd") == 0 || ft_strcmp(cmd, "export") == 0
+		|| ft_strcmp(cmd, "unset") == 0 || ft_strcmp(cmd, "exit") == 0);
 }

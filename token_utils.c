@@ -14,7 +14,6 @@ int	add_token(t_token **tokens, char *content)
 	return (1);
 }
 
-
 char	*extract_word_token(char *str, int start, int end)
 {
 	char	*token;
@@ -25,14 +24,12 @@ char	*extract_word_token(char *str, int start, int end)
 	return (token);
 }
 
-
 void	skip_whitespace(char *input, int *i, int *start)
 {
 	while (input[*i] && ft_isspace(input[*i]))
 		(*i)++;
 	*start = *i;
 }
-
 
 void	handle_quotes(char *input, int *i, t_state *state)
 {

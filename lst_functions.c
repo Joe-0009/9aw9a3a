@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-t_token *ft_token_new(char *content)
+t_token	*ft_token_new(char *content)
 {
 	t_token	*new_node;
 
@@ -29,7 +29,6 @@ void	ft_token_add_back(t_token **lst, t_token *new)
 	head->next = new;
 }
 
-
 void	ft_token_delone(t_token *lst, void (*del)(void *))
 {
 	if (!lst || !del)
@@ -54,4 +53,3 @@ void	ft_token_clear(t_token **lst, void (*del)(void *))
 	}
 	*lst = NULL;
 }
-

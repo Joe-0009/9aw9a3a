@@ -1,11 +1,11 @@
 #include "minishell.h"
 
-
-static int process_variable(char **result, char *str, int *i, char **envp)
+static int	process_variable(char **result, char *str, int *i, char **envp)
 {
-	char *var_name;
-	char *var_value;
-	char *temp;
+	char	*var_name;
+	char	*var_value;
+	char	*temp;
+
 	(*i)++;
 	if (!str[*i] || ft_isspace(str[*i]))
 		return (add_char_to_result(result, '$'));
@@ -24,8 +24,8 @@ static int process_variable(char **result, char *str, int *i, char **envp)
 	return (*result != NULL);
 }
 
-
-static int handle_expand_dollar(char **result, char *str, int *i, char **envp, t_state state)
+static int	handle_expand_dollar(char **result, char *str, int *i, char **envp,
+		t_state state)
 {
 	if (str[*i] == '$' && state != STATE_IN_SINGLE_QUOTE && str[*i + 1])
 	{
@@ -36,8 +36,7 @@ static int handle_expand_dollar(char **result, char *str, int *i, char **envp, t
 	return (-1);
 }
 
-
-static int handle_expand_char(char **result, char *str, int *i)
+static int	handle_expand_char(char **result, char *str, int *i)
 {
 	if (!add_char_to_result(result, str[(*i)++]))
 	{
@@ -47,13 +46,13 @@ static int handle_expand_char(char **result, char *str, int *i)
 	return (1);
 }
 
-
-char *expand_variables(char *str, char **envp)
+char	*expand_variables(char *str, char **envp)
 {
-	int i;
-	t_state state;
-	char *result;
-	int handle_ret;
+	int		i;
+	t_state	state;
+	char	*result;
+	int		handle_ret;
+
 	i = 0;
 	state = STATE_NORMAL;
 	result = ft_strdup("");
@@ -66,12 +65,9 @@ char *expand_variables(char *str, char **envp)
 		if (handle_ret == 0)
 			return (NULL);
 		else if (handle_ret == 1)
-			continue;
+			continue ;
 		if (!handle_expand_char(&result, str, &i))
 			return (NULL);
 	}
 	return (result);
 }
-
-
-
