@@ -23,40 +23,40 @@ TMPDIR=$(mktemp -d)
 declare -a CMDS
 
 # === CD tests ===
-CMDS+=("cd ../../../../../.. && pwd")
-CMDS+=("cd /home/user42/ && pwd")
-CMDS+=("cd \$HOME/Bureau && pwd")
-CMDS+=("unset HOME; cd")
-CMDS+=("export HOME= ; cd")
+# CMDS+=("cd ../../../../../.. && pwd") # Uses &&
+# CMDS+=("cd /home/user42/ && pwd") # Uses &&
+# CMDS+=("cd \$HOME/Bureau && pwd") # Uses &&
+# CMDS+=("unset HOME; cd") # Uses ;
+# CMDS+=("export HOME= ; cd") # Uses ;
 CMDS+=("cd too many arguments")
 CMDS+=("cd ./path_not_found")
-CMDS+=("mkdir -p a/b; cd a/b; rm -r ../../a; cd .. && echo \$PWD \$OLDPWD")
-CMDS+=("CDPATH=/; cd home/.. && pwd")
-CMDS+=("CDPATH=/; cd home/dir && pwd")
-CMDS+=("CDPATH=/; cd . && pwd")
-CMDS+=("CDPATH=/; cd .. && pwd")
+# CMDS+=("mkdir -p a/b; cd a/b; rm -r ../../a; cd .. && echo \$PWD \$OLDPWD") # Uses ; and &&
+# CMDS+=("CDPATH=/; cd home/.. && pwd") # Uses ; and &&
+# CMDS+=("CDPATH=/; cd home/dir && pwd") # Uses ; and &&
+# CMDS+=("CDPATH=/; cd . && pwd") # Uses ; and &&
+# CMDS+=("CDPATH=/; cd .. && pwd") # Uses ; and &&
 
 # === ECHO tests ===
-CMDS+=("echo -n -n -nnnn -nnnnm; echo a")
-CMDS+=("echo -n -nnn hello -n; echo a")
+# CMDS+=("echo -n -n -nnnn -nnnnm; echo a") # Uses ;
+# CMDS+=("echo -n -nnn hello -n; echo a") # Uses ;
 
 # === ENV & EXPORT tests ===
-CMDS+=("env; export FOO=bar; env | grep '^FOO='")
-CMDS+=("unset FOO; env | grep '^FOO='")
-CMDS+=("export VAR=a; export \$VAR=test; echo \$VAR \$a")
+# CMDS+=("env; export FOO=bar; env | grep '^FOO='") # Uses ;
+# CMDS+=("unset FOO; env | grep '^FOO='") # Uses ;
+# CMDS+=("export VAR=a; export \$VAR=test; echo \$VAR \$a") # Uses ;
 
 # === EXIT STATUS tests ===
-CMDS+=("cd random_cmd; echo \$?")
-CMDS+=("./file_that_is_not_an_executable || true; echo \$?")
-CMDS+=("cat bla || true; echo \$?")
-CMDS+=("not_cmd || true; echo \$?")
+# CMDS+=("cd random_cmd; echo \$?") # Uses ;
+# CMDS+=("./file_that_is_not_an_executable || true; echo \$?") # Uses || and ;
+# CMDS+=("cat bla || true; echo \$?") # Uses || and ;
+# CMDS+=("not_cmd || true; echo \$?") # Uses || and ;
 
 # === PARSING & SUBSTITUTION samples ===
-CMDS+=("echo \"\\s\"; echo \"\\\\s\"")
+# CMDS+=("echo \"\\s\"; echo \"\\\\s\"") # Uses ;
 CMDS+=("echo \"12\\\"\"")
 CMDS+=("echo \\>")
 CMDS+=("echo \$USER\$NOTSET\\\\\$USER\$USER\\\\\$USERtest\$USER")
-CMDS+=("echo bonjour \\; ls")
+CMDS+=("echo bonjour \\; ls") # Escaped ;, should be okay
 CMDS+=("echo \"'abc'\"")
 CMDS+=("echo '\"abc\"'")
 
@@ -64,8 +64,8 @@ CMDS+=("echo '\"abc\"'")
 CMDS+=("echo -e \"one\ntwo\" | cat | cat | wc -l")
 
 # === REDIRECTION tests ===
-CMDS+=("printf \"A\nB\nC\n\" > out1; cat < out1")
-CMDS+=("echo hello > out2 >> out2; cat out2")
+# CMDS+=("printf \"A\nB\nC\n\" > out1; cat < out1") # Uses ;
+# CMDS+=("echo hello > out2 >> out2; cat out2") # Uses ;
 
 # === SYNTHAX (syntax error) tests ===
 CMDS+=("|")

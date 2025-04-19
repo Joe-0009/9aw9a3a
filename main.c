@@ -2,14 +2,14 @@
 
 int	g_last_exit_status = 0;
 
-static void	display_welcome(void)
-{
-	printf("\n");
-	printf(" ╔════════════════════════════════════╗\n");
-	printf(" ║            MINISHELL               ║\n");
-	printf(" ╚════════════════════════════════════╝\n");
-	printf(" Welcome to Minishell! Type 'exit' to quit.\n\n");
-}
+// static void	display_welcome(void)
+// {
+// 	printf("\n");
+// 	printf(" ╔════════════════════════════════════╗\n");
+// 	printf(" ║            MINISHELL               ║\n");
+// 	printf(" ╚════════════════════════════════════╝\n");
+// 	printf(" Welcome to Minishell! Type 'exit' to quit.\n\n");
+// }
 
 void	print_Cmd_list(t_command *cmd)
 {
@@ -40,7 +40,7 @@ static int	process_command(char *input, t_env **env_list)
 	{
 		ft_token_clear(&tokens, free);
 		g_last_exit_status = execute_command_list(cmds, env_list);
-		printf("Command exit status: %d\n", g_last_exit_status);
+		//printf("Command exit status: %d\n", g_last_exit_status);
 		free_command_list(cmds);
 	}
 	else if (tokens)
@@ -97,7 +97,7 @@ int	main(int argc, char **argv, char **envp)
 	(void)argc;
 	(void)argv;
 	setup_signals();
-	display_welcome();
+	//display_welcome();
 	env_list = envp_to_env_list(envp);
 	shell_loop(env_list);
 	free_env_list(env_list);
