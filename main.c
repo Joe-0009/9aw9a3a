@@ -45,7 +45,7 @@ static int	process_command(char *input, t_env **env_list)
 	}
 	else if (tokens)
 	{
-		fprintf(stderr, "minishell: syntax error in command\n");
+		//fprintf(stderr, "minishell: syntax error in command\n");
 		ft_token_clear(&tokens, free);
 	}
 	return (0);
