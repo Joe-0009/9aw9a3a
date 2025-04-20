@@ -89,19 +89,21 @@ void	print_export_list(t_env *env_list)
 	while (cur)
 	{
 		if (cur->key)
-			printf("declare -x %s=\"%s\"\n", cur->key,
-				cur->value ? cur->value : "");
+		{
+			if (cur->value)
+				printf("declare -x %s=\"%s\"\n", cur->key, cur->value);
+			else
+				printf("declare -x %s=\"\"\n", cur->key);
+		}
 		cur = cur->next;
 	}
 }
 
 char	**env_list_to_envp(t_env *env_list)
 {
-	int		size;
-	int		i;
+	int		(size) , (i);
 	t_env	*cur;
-	char	**envp;
-	char	*tmp;
+	char	(**envp), (*tmp);
 
 	size = 0;
 	cur = env_list;
@@ -120,28 +122,13 @@ char	**env_list_to_envp(t_env *env_list)
 	{
 		if (cur->key)
 		{
+			tmp = ft_strdup(cur->key);
 			if (cur->value)
 			{
-				tmp = malloc(ft_strlen(cur->key) + ft_strlen(cur->value) + 2);
-				if (tmp)
-				{
-					ft_strlcpy(tmp, cur->key, ft_strlen(cur->key) + 1);
-					ft_strlcat(tmp, "=", ft_strlen(cur->key) + 2);
-					ft_strlcat(tmp, cur->value, ft_strlen(cur->key)
-						+ ft_strlen(cur->value) + 2);
-					envp[i++] = tmp;
-				}
+				tmp = ft_strjoin(tmp, "=");
+				tmp = ft_strjoin(tmp, cur->value);
 			}
-			else
-			{
-				tmp = malloc(ft_strlen(cur->key) + 2);
-				if (tmp)
-				{
-					ft_strlcpy(tmp, cur->key, ft_strlen(cur->key) + 1);
-					ft_strlcat(tmp, "=", ft_strlen(cur->key) + 2);
-					envp[i++] = tmp;
-				}
-			}
+			envp[i++] = tmp;
 		}
 		cur = cur->next;
 	}

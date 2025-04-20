@@ -13,10 +13,7 @@ static char	*get_exec_path(t_command *current, t_env *env_list)
 	return (exec_path);
 }
 
-void	handle_builtin_command(t_command *current, t_env *env_list)
-{
-	exit(execute_builtin(current, &env_list));
-}
+
 
 void	handle_external_command(t_command *current, t_env *env_list)
 {
@@ -32,7 +29,7 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	envp = env_list_to_envp(env_list);
 	execve(exec_path, current->args, envp);
 	perror("execve error");
-	safe_free((void **)&exec_path); // Cast to void **
+	safe_free((void **)&exec_path);
 	safe_doube_star_free(envp);
 	exit(127);
 }
@@ -41,7 +38,7 @@ void	execute_single_command(t_command *current, t_env *env_list)
 {
 	if (current->args && current->args[0]
 		&& is_builtin_command(current->args[0]))
-		handle_builtin_command(current, env_list);
+		exit(execute_builtin(current, &env_list));
 	else if (current->args && current->args[0])
 		handle_external_command(current, env_list);
 	exit(0);

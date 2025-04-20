@@ -21,7 +21,7 @@ int	execute_builtin(t_command *cmd, t_env **env_list)
 
 	command = cmd->args[0];
 	if (ft_strcmp(command, "cd") == 0)
-		return (builtin_cd(cmd));
+		return (builtin_cd(cmd, env_list));
 	else if (ft_strcmp(command, "echo") == 0)
 		return (builtin_echo(cmd));
 	else if (ft_strcmp(command, "pwd") == 0)

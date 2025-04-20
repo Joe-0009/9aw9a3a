@@ -146,7 +146,7 @@ int							handle_redirect_token(t_token **current,
 /* ===================== BUILTINS ===================== */
 int							is_builtin_command(char *cmd);
 int							execute_builtin(t_command *cmd, t_env **env_list);
-int							builtin_cd(t_command *cmd);
+int							builtin_cd(t_command *cmd, t_env **env);
 int							builtin_echo(t_command *cmd);
 int							builtin_pwd(void);
 int							builtin_export(t_command *cmd, t_env **env_list);

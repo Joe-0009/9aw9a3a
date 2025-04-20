@@ -87,7 +87,10 @@ int	setup_redirect_out(char *file_path, int append_mode)
 	int	fd;
 
 	flags = O_WRONLY | O_CREAT;
-	flags |= (append_mode ? O_APPEND : O_TRUNC);
+	if (append_mode)
+		flags |= O_APPEND;
+	else
+		flags |= O_TRUNC;
 	fd = open(file_path, flags, 0644);
 	if (fd == -1)
 	{
