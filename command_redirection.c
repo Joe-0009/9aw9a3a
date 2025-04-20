@@ -124,7 +124,10 @@ int	handle_redirect_token(t_token **current, t_command **first_cmd,
 	*current = (*current)->next;
 	if (!*current || (*current)->type != TOKEN_WORD)
 	{
-		fprintf(stderr, "minishell: syntax error near unexpected token %s\n", (*current)->content);
+		if (!*current)
+			fprintf(stderr, "minishell: syntax error near unexpected token `newline'\n");
+		else
+			fprintf(stderr, "minishell: syntax error near unexpected token %s\n", (*current)->content);
 		return (0);
 	}
 	add_redirection(*current_cmd, redirect_type, (*current)->content);
