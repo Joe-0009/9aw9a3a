@@ -10,11 +10,11 @@ int	setup_pipe(int pipe_fd[2])
 	return (0);
 }
 
-int	handle_heredoc_redir(t_redirections *redir)
+int	handle_heredoc_redir(t_redirections *redir, char **envp)
 {
 	int	heredoc_fd;
 
-	heredoc_fd = setup_heredoc(redir->file);
+	heredoc_fd = setup_heredoc(redir->file, envp);
 	if (heredoc_fd == -1)
 	{
 		fprintf(stderr, "minishell: heredoc setup failed for %s\n",

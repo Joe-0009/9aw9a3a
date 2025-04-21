@@ -131,7 +131,7 @@ int							execute_command_list(t_command *cmd_list,
 								t_env **env_list);
 char						*find_executable_path(char *cmd, char **envp);
 int							setup_redirections(t_command *cmd);
-int							setup_heredoc(char *delimiter);
+int							setup_heredoc(char *delimiter, char **envp);
 char						*process_heredoc_delimiter(const char *delimiter);
 void						execute_single_command(t_command *current,
 								t_env *env_list);
@@ -179,7 +179,7 @@ char						*strip_quotes(const char *value);
 
 /* ===================== EXECUTOR UTILS ===================== */
 int							setup_pipe(int pipe_fd[2]);
-int							handle_heredoc_redir(t_redirections *redir);
+int							handle_heredoc_redir(t_redirections *redir, char **envp);
 void						handle_fork_error(t_command *current,
 								int prev_pipe_read, int pipe_fd[2]);
 

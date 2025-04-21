@@ -1,13 +1,53 @@
 #include "../minishell.h"
 
-int	setup_heredoc(char *delimiter)
+static int is_delimiter_quoted(char *delimiter)
+{
+	size_t i;
+	size_t len;
+	int in_quotes;
+	char quote_type;
+	int quoted;
+
+	i = 0;
+	in_quotes = 0;
+	quoted = 0;
+	len = ft_strlen(delimiter);
+	while (i < len)
+	{
+		if ((delimiter[i] == '"' || delimiter[i] == '\''))
+		{
+			if (!in_quotes)
+			{
+				in_quotes = 1;
+				quote_type = delimiter[i];
+				i++;
+			}
+			else if (in_quotes && delimiter[i] == quote_type)
+			{
+				quoted = 1;
+				in_quotes = 0;
+				i++;
+			}
+			else
+				i++;
+		}
+		else
+			i++;
+	}
+	return (quoted);
+}
+
+int	setup_heredoc(char *delimiter, char **envp)
 {
 	int		pipe_fd[2];
 	char	*line;
 	char	*processed_delimiter;
+	int quoted;
+
 
 	if (pipe(pipe_fd) == -1)
 		return (ft_putstr_fd("minishell: heredoc pipe error\n", 2), -1);
+	quoted = is_delimiter_quoted(delimiter);
 	processed_delimiter = process_heredoc_delimiter(delimiter);
 	if (!processed_delimiter)
 		return (-1);
@@ -28,13 +68,17 @@ int	setup_heredoc(char *delimiter)
 			safe_close(&pipe_fd[1]);
 			break ;
 		}
-		ft_putstr_fd(line, pipe_fd[1]);
+		if (!quoted)
+			ft_putstr_fd(expand_variables(line, envp), pipe_fd[1]);
+		else
+			ft_putstr_fd(line, pipe_fd[1]);
 		ft_putchar_fd('\n', pipe_fd[1]);
 		safe_free((void **)&line);
 	}
 	safe_close(&pipe_fd[1]);
 	return (pipe_fd[0]);
 }
+
 
 char	*process_heredoc_delimiter(const char *delimiter)
 {

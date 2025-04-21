@@ -37,7 +37,7 @@ int	execute_builtin(t_command *cmd, t_env **env_list)
 	return (1);
 }
 
-int	setup_all_heredocs(t_command *cmd_list)
+int	setup_all_heredocs(t_command *cmd_list, char **envp)
 {
 	t_command		*current;
 	t_redirections	*redir;
@@ -51,7 +51,7 @@ int	setup_all_heredocs(t_command *cmd_list)
 		{
 			if (redir->type == TOKEN_HEREDOC)
 			{
-				result = handle_heredoc_redir(redir);
+				result = handle_heredoc_redir(redir, envp);
 				if (result == -1)
 					return (-1);
 			}
@@ -87,7 +87,7 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 		status = execute_builtin(cmd_list, env_list);
 		return (status);
 	}
-	if (setup_all_heredocs(cmd_list) == -1)
+	if (setup_all_heredocs(cmd_list, env_list_to_envp(*env_list)) == -1)
 		return (1);
 	pipe_fd[0] = -1;
 	pipe_fd[1] = -1;
