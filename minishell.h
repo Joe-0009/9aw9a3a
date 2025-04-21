@@ -1,7 +1,6 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-# include "get_next_line/get_next_line.h"
 # include "libft/libft.h"
 # include <dirent.h>
 # include <errno.h>
@@ -133,6 +132,7 @@ int							execute_command_list(t_command *cmd_list,
 char						*find_executable_path(char *cmd, char **envp);
 int							setup_redirections(t_command *cmd);
 int							setup_heredoc(char *delimiter);
+char						*process_heredoc_delimiter(const char *delimiter);
 void						execute_single_command(t_command *current,
 								t_env *env_list);
 t_command					*create_command_type_word(t_token **tokens);
