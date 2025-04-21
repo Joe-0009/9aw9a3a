@@ -75,9 +75,9 @@ static void	shell_loop(t_env *env_list)
 	clear_history();
 }
 
-void free_env_list(t_env *env_list)
+void	free_env_list(t_env *env_list)
 {
-	t_env *next;
+	t_env	*next;
 
 	while (env_list)
 	{
@@ -89,6 +89,32 @@ void free_env_list(t_env *env_list)
 	}
 }
 
+static void	update_shlvl(t_env **env_list)
+{
+	int		shlvl;
+	char	*shlvl_str;
+	t_env	*node;
+
+	shlvl = 1;
+	node = find_env_node(*env_list, "SHLVL");
+	if (node && node->value)
+		shlvl = ft_atoi(node->value) + 1;
+	shlvl_str = ft_itoa(shlvl);
+	add_or_update_env(env_list, "SHLVL", shlvl_str);
+	safe_free((void **)&shlvl_str);
+}
+
+static void	initialize_empty_env(t_env **env_list)
+{
+	char	cwd[PATH_MAX];
+	char	*shell_path;
+
+	add_or_update_env(env_list, "SHLVL", "1");
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+		add_or_update_env(env_list, "PWD", cwd);
+	shell_path = "./minishell";
+	add_or_update_env(env_list, "_", shell_path);
+}
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -97,8 +123,11 @@ int	main(int argc, char **argv, char **envp)
 	(void)argc;
 	(void)argv;
 	setup_signals();
-	//display_welcome();
 	env_list = envp_to_env_list(envp);
+	if (!env_list)
+		initialize_empty_env(&env_list);
+	else
+		update_shlvl(&env_list);
 	shell_loop(env_list);
 	free_env_list(env_list);
 	return (0);
