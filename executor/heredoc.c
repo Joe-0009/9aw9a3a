@@ -48,7 +48,7 @@ int	setup_heredoc(char *delimiter, char **envp)
 	if (pipe(pipe_fd) == -1)
 		return (ft_putstr_fd("minishell: heredoc pipe error\n", 2), -1);
 	quoted = is_delimiter_quoted(delimiter);
-	processed_delimiter = process_heredoc_delimiter(delimiter);
+	processed_delimiter = strip_quotes(delimiter);
 	if (!processed_delimiter)
 		return (-1);
 	while (1)
@@ -79,44 +79,3 @@ int	setup_heredoc(char *delimiter, char **envp)
 	return (pipe_fd[0]);
 }
 
-
-char	*process_heredoc_delimiter(const char *delimiter)
-{
-	size_t	len;
-	char	*result;
-	size_t	i, j;
-	int		in_quotes;
-	char	quote_type;
-
-	if (!delimiter)
-		return (NULL);
-	len = ft_strlen(delimiter);
-	result = (char *)ft_calloc(len + 1, sizeof(char));
-	if (!result)
-		return (NULL);
-	i = 0;
-	j = 0;
-	in_quotes = 0;
-	while (i < len)
-	{
-		if ((delimiter[i] == '"' || delimiter[i] == '\''))
-		{
-			if (!in_quotes)
-			{
-				in_quotes = 1;
-				quote_type = delimiter[i];
-				i++;
-			}
-			else if (delimiter[i] == quote_type)
-			{
-				in_quotes = 0;
-				i++;
-			}
-			else
-				result[j++] = delimiter[i++];
-		}
-		else
-			result[j++] = delimiter[i++];
-	}
-	return (result);
-}

@@ -85,7 +85,16 @@ static void	extract_key_value(char *arg, char **key, char **value, int *append_m
 		}
 		else
 			*key = ft_substr(arg, 0, equal_sign - arg);
+		
+		// Strip quotes from the value portion after the equal sign
 		*value = strip_quotes(equal_sign + 1);
+		
+		// Debug output to help diagnose
+		ft_putstr_fd("export: key='", 2);
+		ft_putstr_fd(*key, 2);
+		ft_putstr_fd("' value='", 2);
+		ft_putstr_fd(*value ? *value : "NULL", 2);
+		ft_putstr_fd("'\n", 2);
 	}
 	else
 	{
