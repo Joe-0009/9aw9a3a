@@ -55,22 +55,19 @@ int	ft_isspace(char c)
 
 char	*strip_quotes(const char *value)
 {
-    size_t	len;
+    size_t	i;
     char	*result;
-    size_t	i, j;
     int		in_quotes;
     char	quote_type;
-
+    
     if (!value)
         return (NULL);
-    len = ft_strlen(value);
-    result = (char *)ft_calloc(len + 1, sizeof(char));
-    if (!result)
-        return (NULL);
+    
+    // Count characters after stripping quotes
+    size_t len = 0;
     i = 0;
-    j = 0;
     in_quotes = 0;
-    while (i < len)
+    while (value[i])
     {
         if ((value[i] == '"' || value[i] == '\''))
         {
@@ -78,18 +75,60 @@ char	*strip_quotes(const char *value)
             {
                 in_quotes = 1;
                 quote_type = value[i];
-                i++;
             }
             else if (value[i] == quote_type)
             {
                 in_quotes = 0;
-                i++;
             }
             else
-                result[j++] = value[i++];
+                len++;
         }
         else
-            result[j++] = value[i++];
+            len++;
+        i++;
     }
+    
+    // Allocate exactly the right amount of memory
+    result = ft_strdup("");
+    if (!result)
+        return (NULL);
+    
+    // If no quotes to strip, return a simple duplicate
+    if (len == ft_strlen(value))
+    {
+        free(result);
+        return (ft_strdup(value));
+    }
+    
+    // Otherwise, allocate appropriate memory and strip quotes
+    free(result);
+    result = ft_calloc(len + 1, sizeof(char));
+    if (!result)
+        return (NULL);
+    
+    i = 0;
+    size_t j = 0;
+    in_quotes = 0;
+    while (value[i])
+    {
+        if ((value[i] == '"' || value[i] == '\''))
+        {
+            if (!in_quotes)
+            {
+                in_quotes = 1;
+                quote_type = value[i];
+            }
+            else if (value[i] == quote_type)
+            {
+                in_quotes = 0;
+            }
+            else
+                result[j++] = value[i];
+        }
+        else
+            result[j++] = value[i];
+        i++;
+    }
+    
     return (result);
 }

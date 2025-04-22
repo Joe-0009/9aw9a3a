@@ -50,33 +50,40 @@ static void	expand_args_loop(t_command *cmd, char **envp)
 	
 	while (i < cmd->args_count)
 	{
+		// Step 1: Expand variables
 		expanded = expand_variables(cmd->args[i], envp);
 		if (expanded)
 		{
 			free(cmd->args[i]);
 			cmd->args[i] = expanded;
 		}
+		
+		// Step 2: Strip quotes from all arguments
 		stripped = strip_quotes(cmd->args[i]);
 		if (stripped)
 		{
 			free(cmd->args[i]);
 			cmd->args[i] = stripped;
 		}
-		// Only split by whitespace if not export command
+		
+		// Step 3: Split by whitespace (but not for export command's arguments)
 		if (i > 0 && !is_export)
 		{
+			// This ft_split correctly splits strings by whitespace
 			split_words = ft_split(cmd->args[i], ' ');
 			if (split_words && split_words[0])
 			{
-				added = add_split_args_to_command(cmd , i, split_words);
+				added = add_split_args_to_command(cmd, i, split_words);
 				if (added > 0)
 				{
 					i += added;
-					continue ;
+					continue;
 				}
 			}
 		}
-		if (cmd->args[i][0] != '\0')
+		
+		// Step 4: Handle empty arguments
+		if (cmd->args[i] && cmd->args[i][0] != '\0')
 		{
 			if (i != j)
 			{
@@ -85,7 +92,7 @@ static void	expand_args_loop(t_command *cmd, char **envp)
 			}
 			j++;
 		}
-		else
+		else if (cmd->args[i])
 		{
 			free(cmd->args[i]);
 			cmd->args[i] = NULL;

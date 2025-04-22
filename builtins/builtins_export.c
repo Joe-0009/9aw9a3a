@@ -55,7 +55,6 @@ static void	handle_append_mode(char **value, char *key, t_env **env_list)
 	if (existing && existing->value && *value)
 	{
 		new_value = ft_strjoin(existing->value, *value);
-		safe_free((void **)value);
 		*value = new_value;
 	}
 }
@@ -85,16 +84,7 @@ static void	extract_key_value(char *arg, char **key, char **value, int *append_m
 		}
 		else
 			*key = ft_substr(arg, 0, equal_sign - arg);
-		
-		// Strip quotes from the value portion after the equal sign
 		*value = strip_quotes(equal_sign + 1);
-		
-		// Debug output to help diagnose
-		ft_putstr_fd("export: key='", 2);
-		ft_putstr_fd(*key, 2);
-		ft_putstr_fd("' value='", 2);
-		ft_putstr_fd(*value ? *value : "NULL", 2);
-		ft_putstr_fd("'\n", 2);
 	}
 	else
 	{
@@ -118,6 +108,7 @@ void	export_one_arg(char *arg, t_env **env_list)
 	if (append_mode)
 		handle_append_mode(&value, key, env_list);
 	add_or_update_env(env_list, key, value);
+	printf("[DEBUG] freeing key: %p, value: %p\n", (void*)key, (void*)value);
 	safe_free((void **)&key);
 	if (value)
 		safe_free((void **)&value);
