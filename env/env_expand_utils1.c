@@ -34,7 +34,7 @@ char	*get_env_value(char *var_name, char **envp)
 			return (ft_strdup(envp[i] + var_len + 1));
 		i++;
 	}
-	return (ft_strdup(""));
+	return (NULL);
 }
 
 

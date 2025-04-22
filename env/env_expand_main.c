@@ -3,10 +3,12 @@
 static void	expand_args_loop(t_command *cmd, char **envp)
 {
 	int		i;
+	int j;
 	char	*expanded;
 	char	*stripped;
 
 	i = 0;
+	j= 0;
 	while (i < cmd->args_count)
 	{
 		expanded = expand_variables(cmd->args[i], envp);
@@ -21,6 +23,19 @@ static void	expand_args_loop(t_command *cmd, char **envp)
 			free(cmd->args[i]);
 			cmd->args[i] = stripped;
 		}
+		if (cmd->args[i][0] != '\0')
+		{
+            if (i != j) {
+                cmd->args[j] = cmd->args[i];
+                cmd->args[i] = NULL;
+            }
+            j++;
+        } else
+		{
+            // Free empty arguments
+            free(cmd->args[i]);
+            cmd->args[i] = NULL;
+        }
 		i++;
 	}
 }
