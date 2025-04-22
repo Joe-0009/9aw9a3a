@@ -108,7 +108,6 @@ void	export_one_arg(char *arg, t_env **env_list)
 	if (append_mode)
 		handle_append_mode(&value, key, env_list);
 	add_or_update_env(env_list, key, value);
-	printf("[DEBUG] freeing key: %p, value: %p\n", (void*)key, (void*)value);
 	safe_free((void **)&key);
 	if (value)
 		safe_free((void **)&value);
