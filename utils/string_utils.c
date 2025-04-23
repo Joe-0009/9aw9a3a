@@ -1,10 +1,5 @@
 #include "../minishell.h"
 
-/*
- * String manipulation utility functions
- * Handles string comparison, duplication, and manipulation
- */
-
 int	is_number(char *str)
 {
 	int	i;

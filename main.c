@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-int	g_last_exit_status = 0;
+int			g_last_exit_status = 0;
 
 // static void	display_welcome(void)
 // {
@@ -13,7 +13,9 @@ int	g_last_exit_status = 0;
 
 void	print_Cmd_list(t_command *cmd)
 {
-	int	i = 0;
+	int	i;
+
+	i = 0;
 	while (cmd)
 	{
 		i = 0;
@@ -40,12 +42,12 @@ static int	process_command(char *input, t_env **env_list)
 	{
 		ft_token_clear(&tokens, free);
 		g_last_exit_status = execute_command_list(cmds, env_list);
-		//printf("Command exit status: %d\n", g_last_exit_status);
+		// printf("Command exit status: %d\n", g_last_exit_status);
 		free_command_list(cmds);
 	}
 	else if (tokens)
 	{
-		//fprintf(stderr, "minishell: syntax error in command\n");
+		// fprintf(stderr, "minishell: syntax error in command\n");
 		ft_token_clear(&tokens, free);
 	}
 	return (0);
@@ -55,6 +57,7 @@ static void	shell_loop(t_env *env_list)
 {
 	char	*input;
 	int		should_exit;
+	int		ret;
 
 	should_exit = 0;
 	while (!should_exit)
@@ -68,7 +71,10 @@ static void	shell_loop(t_env *env_list)
 		if (input[0] != '\0')
 		{
 			add_history(input);
-			should_exit = process_command(input, &env_list);
+			ret = process_command(input, &env_list);
+			if (ret == 1)
+				printf("\n");
+			should_exit = ret;
 		}
 		free(input);
 	}
@@ -118,7 +124,7 @@ static void	initialize_empty_env(t_env **env_list)
 
 int	main(int argc, char **argv, char **envp)
 {
-	t_env	*env_list;
+	t_env *env_list;
 
 	(void)argc;
 	(void)argv;

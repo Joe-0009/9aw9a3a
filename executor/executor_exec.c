@@ -13,19 +13,34 @@ static char	*get_exec_path(t_command *current, t_env *env_list)
 	return (exec_path);
 }
 
-
-
 void	handle_external_command(t_command *current, t_env *env_list)
 {
 	char	*exec_path;
 	char	**envp;
-
+	char	cwd[PATH_MAX];
+	
 	exec_path = get_exec_path(current, env_list);
 	if (!exec_path)
 	{
 		fprintf(stderr, "minishell: %s: command not found\n", current->args[0]);
 		exit(127);
 	}
+	
+	// Check if we need to resolve a relative path (handle ./minishell case)
+	if (exec_path[0] != '/' && (exec_path[0] == '.' && exec_path[1] == '/'))
+	{
+		if (getcwd(cwd, sizeof(cwd)) != NULL)
+		{
+			char *temp = exec_path;
+			// Skip the "./" prefix
+			exec_path = ft_strjoin(cwd, "/");
+			char *temp2 = exec_path;
+			exec_path = ft_strjoin(exec_path, temp + 2); // +2 to skip "./"
+			free(temp);
+			free(temp2);
+		}
+	}
+	
 	envp = env_list_to_envp(env_list);
 	execve(exec_path, current->args, envp);
 	perror("execve error");

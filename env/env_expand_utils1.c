@@ -38,7 +38,7 @@ char	*get_env_value(char *var_name, char **envp)
 }
 
 
-int	add_char_to_result(char **result, char c)
+ int	add_char_to_result(char **result, char c)
 {
 	char	*temp;
 	char	buf[2];

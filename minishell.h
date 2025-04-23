@@ -167,6 +167,11 @@ int							is_valid_identifier(char *str);
 
 /* ===================== SIGNALS ===================== */
 void						setup_signals(void);
+void                        setup_heredoc_signals(void);
+void                        setup_exec_signals(void);
+void						set_sigint_default(void);
+void						restore_signals(void);
+int                         *get_exit_status(void);
 
 /* ===================== ENV EXPANSION UTILS ===================== */
 int							is_var_char(char c);

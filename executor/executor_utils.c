@@ -15,12 +15,9 @@ int	handle_heredoc_redir(t_redirections *redir, char **envp)
 	int	heredoc_fd;
 
 	heredoc_fd = setup_heredoc(redir->file, envp);
-	if (heredoc_fd == -1)
-	{
-		fprintf(stderr, "minishell: heredoc setup failed for %s\n",
-			redir->file);
+	if (heredoc_fd == 130) 
+		return (130);     
 		return (-1);
-	}
 	redir->heredoc_fd = heredoc_fd;
 	return (0);
 }

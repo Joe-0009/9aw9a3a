@@ -1,6 +1,6 @@
 #include "../minishell.h"
 
-int	process_operator(t_token **tokens, char *input, int *i, int *start)
+ int process_operator(t_token **tokens, char *input, int *i, int *start)
 {
 	char	*token_content;
 
@@ -17,7 +17,7 @@ int	process_operator(t_token **tokens, char *input, int *i, int *start)
 	return (1);
 }
 
-int	process_whitespace(t_token **tokens, char *input, int *i, int *start)
+ int process_whitespace(t_token **tokens, char *input, int *i, int *start)
 {
 	char	*token_content;
 
@@ -31,7 +31,7 @@ int	process_whitespace(t_token **tokens, char *input, int *i, int *start)
 	return (1);
 }
 
-int	process_normal_char(t_token **tokens, char *input, int *i, int *start)
+ int process_normal_char(t_token **tokens, char *input, int *i, int *start)
 {
 	if (is_operator(input[*i]))
 		return (process_operator(tokens, input, i, start));
@@ -41,7 +41,7 @@ int	process_normal_char(t_token **tokens, char *input, int *i, int *start)
 	return (1);
 }
 
-int	process_end_of_input(t_token **tokens, char *input, int i, int start,
+ int process_end_of_input(t_token **tokens, char *input, int i, int start,
 		t_state state)
 {
 	char	*token_content;
@@ -57,6 +57,46 @@ int	process_end_of_input(t_token **tokens, char *input, int i, int start,
 		fprintf(stderr, "minishell: syntax error: unclosed quote\n");
 		return (0);
 	}
+	return (1);
+}
+
+ void handle_quotes(char *input, int *i, t_state *state)
+{
+	char quote_char;
+
+	quote_char = input[*i];
+	if (*state == STATE_NORMAL)
+		*state = (quote_char == '\'') ? STATE_IN_SINGLE_QUOTE : STATE_IN_DOUBLE_QUOTE;
+	else if ((*state == STATE_IN_SINGLE_QUOTE && quote_char == '\'')
+		|| (*state == STATE_IN_DOUBLE_QUOTE && quote_char == '"'))
+		*state = STATE_NORMAL;
+	(*i)++;
+}
+
+ void skip_whitespace(char *input, int *i, int *start)
+{
+	while (input[*i] && ft_isspace(input[*i]))
+		(*i)++;
+	*start = *i;
+}
+
+ t_token *clean_tokens_return_null(t_token **tokens)
+{
+	ft_token_clear(tokens, free);
+	return (NULL);
+}
+
+ int add_token(t_token **tokens, char *content)
+{
+	t_token *new_token;
+
+	new_token = ft_token_new(content);
+	if (!new_token)
+	{
+		free(content);
+		return (0);
+	}
+	ft_token_add_back(tokens, new_token);
 	return (1);
 }
 
