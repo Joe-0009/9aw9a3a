@@ -1,70 +1,71 @@
 #include "../minishell.h"
 
-int	builtin_cd(t_command *cmd, t_env **env)
+int builtin_cd(t_command *cmd, t_env **env)
 {
-	char	*dir;
-	char	*home;
-	char	*oldpwd;
-	char	*newpwd;
-	int		ret;
-	t_env	*home_node;
+    int ret;
+    char (*old_pwd), (*new_pwd), (*home), (*dir);
 
+    old_pwd = getcwd(NULL, 0);
 	if (cmd->args_count > 2)
-	{
-		ft_fprintf_fd(2, "minishell: cd: too many arguments\n");
-		return (1);
-	}
-	oldpwd = getcwd(NULL, 0);
+    {
+        if (old_pwd)
+            free(old_pwd);
+		return (fprintf(stderr, "minishell: cd: too many arguments\n"), 1);
+    }
 	if (cmd->args_count == 1)
 	{
-		home_node = find_env_node(*env, "HOME");
-		if (home_node)
-			home = home_node->value;
-		else
-			home = NULL;
+		home = find_env_node(*env, "HOME")->value;
 		if (!home)
-		{
-			free(oldpwd);
-			ft_fprintf_fd(2, "minishell: cd: HOME not set\n");
-			return (1);
-		}
+        {
+            if (old_pwd)
+                free(old_pwd);
+			return (fprintf(stderr, "minishell: cd: HOME not set\n"), 1);
+        }
 		dir = home;
 	}
 	else
 		dir = cmd->args[1];
 	ret = chdir(dir);
 	if (ret != 0)
-	{
-		free(oldpwd);
-		ft_fprintf_fd(2, "minishell: cd: %s: %s\n", dir, strerror(errno));
-		return (1);
-	}
-	if (oldpwd)
-		add_or_update_env(env, "OLDPWD", oldpwd);
-	newpwd = getcwd(NULL, 0);
-	if (newpwd)
-	{
-		add_or_update_env(env, "PWD", newpwd);
-		free(newpwd);
-	}
-	free(oldpwd);
+    {
+        if (old_pwd)
+            free(old_pwd);
+        return (fprintf(stderr, "minishell: cd: %s: %s\n", dir, strerror(errno)), 1);
+    }
+    new_pwd = getcwd(NULL, 0);
+    if (new_pwd)
+    {
+        add_or_update_env(env, "PWD", new_pwd);
+        if (old_pwd)
+			add_or_update_env(env, "OLDPWD", old_pwd);
+        free(new_pwd);
+    }
+	if (old_pwd)
+		free(old_pwd);
 	return (0);
 }
 
-int	builtin_pwd(void)
+int builtin_pwd(t_env **env)
 {
-	char	*cwd;
+    char *cwd;
 
 	cwd = getcwd(NULL, 0);
 	if (cwd)
 	{
-		ft_fprintf_fd(1, "%s\n", cwd);
+		printf("%s\n", cwd);
 		free(cwd);
 		return (0);
 	}
-	else
-	{
-		ft_fprintf_fd(2, "minishell: pwd: error retrieving current directory: %s\n", strerror(errno));
-		return (1);
-	}
+    else
+    {
+        // when getcwd fails, i use the PWD environment variable
+        t_env *pwd_node = find_env_node(*env, "PWD");
+        if (pwd_node && pwd_node->value)
+        {
+            printf("%s\n", pwd_node->value);
+            return (0);
+        }
+    }
+
+    return (fprintf(stderr, "minishell: pwd: error retrieving current directory\n"), 1);
 }
