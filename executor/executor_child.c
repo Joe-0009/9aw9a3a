@@ -30,10 +30,8 @@ void	handle_child_output(t_command *current, int pipe_fd[2])
 void	child_process(t_command *current, int prev_pipe_read, int pipe_fd[2],
 		t_env *env_list)
 {
-	// In child processes, reset signals to default behavior
 	set_sigint_default();
-	signal(SIGQUIT, SIG_DFL);  // Also reset SIGQUIT to default behavior
-	
+	signal(SIGQUIT, SIG_DFL);
 	handle_child_input(prev_pipe_read);
 	handle_child_output(current, pipe_fd);
 	if (setup_redirections(current) == -1)
@@ -55,24 +53,17 @@ int	wait_for_children(void)
 	{
 		if (WIFSIGNALED(status))
 		{
-			// For signal termination, store the signal code + 128
 			last_status = 128 + WTERMSIG(status);
-			
-			// For SIGQUIT specifically, show the "Quit" message if it hasn't been shown already
 			if (WTERMSIG(status) == SIGQUIT && g_last_exit_status != 131)
 				write(STDERR_FILENO, "Quit (core dumped)\n", 19);
-				
-			// For SIGINT, we should display a newline
 			if (WTERMSIG(status) == SIGINT)
 				write(STDOUT_FILENO, "\n", 1);
 		}
 		else if (WIFEXITED(status))
 		{
-			// Store the exit status of the last command
 			last_status = WEXITSTATUS(status);
 		}
 	}
-	
 	return (last_status);
 }
 

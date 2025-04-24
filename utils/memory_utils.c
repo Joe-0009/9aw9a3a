@@ -34,7 +34,6 @@ void	safe_doube_star_free(char **str)
 	free(str);
 }
 
-// Free command-related structures with proper memory management
 void	free_command(t_command *cmd)
 {
 	t_redirections	*redir;

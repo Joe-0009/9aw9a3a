@@ -17,6 +17,7 @@
 # include <sys/wait.h>
 # include <termios.h>
 # include <unistd.h>
+#include <stdarg.h>
 
 extern int					g_last_exit_status;
 
@@ -98,6 +99,7 @@ int							is_number(char *str);
 int							ft_isspace(char c);
 char						*ft_strndup(const char *s, size_t n);
 int							ft_strcmp(const char *s1, const char *s2);
+int							ft_fprintf_fd(int fd, const char *format, ...);
 
 /* ===================== TOKENIZER ===================== */
 t_token						*tokenize_input(char *input);

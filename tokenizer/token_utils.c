@@ -1,6 +1,6 @@
 #include "../minishell.h"
 
- int	token_utils_add_token(t_token **tokens, char *content)
+int	token_utils_add_token(t_token **tokens, char *content)
 {
 	t_token	*new_token;
 
@@ -24,14 +24,14 @@ char	*extract_word_token(char *str, int start, int end)
 	return (token);
 }
 
- void	token_utils_skip_whitespace(char *input, int *i, int *start)
+void	token_utils_skip_whitespace(char *input, int *i, int *start)
 {
 	while (input[*i] && ft_isspace(input[*i]))
 		(*i)++;
 	*start = *i;
 }
 
- void	token_utils_handle_quotes(char *input, int *i, t_state *state)
+void	token_utils_handle_quotes(char *input, int *i, t_state *state)
 {
 	if (input[*i] == '"' && *state != STATE_IN_SINGLE_QUOTE)
 	{
@@ -50,7 +50,7 @@ char	*extract_word_token(char *str, int start, int end)
 	(*i)++;
 }
 
- t_token	*token_utils_clean_tokens_return_null(t_token **tokens)
+t_token	*token_utils_clean_tokens_return_null(t_token **tokens)
 {
 	ft_token_clear(tokens, free);
 	return (NULL);

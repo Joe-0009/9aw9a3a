@@ -1,11 +1,9 @@
 #include "../minishell.h"
 
-
 int	is_var_char(char c)
 {
 	return (ft_isalnum(c) || c == '_' || c == '?');
 }
-
 
 char	*extract_var_name(const char *str, int *pos)
 {
@@ -16,7 +14,6 @@ char	*extract_var_name(const char *str, int *pos)
 		(*pos)++;
 	return (ft_strndup(str + start, *pos - start));
 }
-
 
 char	*get_env_value(char *var_name, char **envp)
 {
@@ -37,8 +34,7 @@ char	*get_env_value(char *var_name, char **envp)
 	return (NULL);
 }
 
-
- int	add_char_to_result(char **result, char c)
+int	add_char_to_result(char **result, char c)
 {
 	char	*temp;
 	char	buf[2];
@@ -51,7 +47,6 @@ char	*get_env_value(char *var_name, char **envp)
 		free(temp);
 	return (*result != NULL);
 }
-
 
 void	update_quote_state(char c, t_state *state)
 {

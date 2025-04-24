@@ -52,9 +52,9 @@ static int	setup_all_heredocs(t_command *cmd_list, char **envp)
 			if (redir->type == TOKEN_HEREDOC)
 			{
 				result = handle_heredoc_redir(redir, envp);
-				if (result == 130) 
+				if (result == 130)
 					return (130);
-				if (result == -1) 
+				if (result == -1)
 					return (-1);
 			}
 			redir = redir->next;
@@ -63,16 +63,6 @@ static int	setup_all_heredocs(t_command *cmd_list, char **envp)
 	}
 	return (0);
 }
-
-// static void	close_heredoc_fds(t_redirections *redir)
-// {
-// 	while (redir)
-// 	{
-// 		if (redir->type == TOKEN_HEREDOC && redir->heredoc_fd >= 0)
-// 			safe_close(&redir->heredoc_fd);
-// 		redir = redir->next;
-// 	}
-// }
 
 int	execute_command_list(t_command *cmd_list, t_env **env_list)
 {
@@ -83,22 +73,19 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	t_command	*current;
 	int			setup_result;
 
-	// Set up appropriate signal handling for command execution
 	setup_exec_signals();
-
-	if (cmd_list && cmd_list->next == NULL
-		&& is_parent_builtin(cmd_list->args[0]))
+	if (cmd_list && cmd_list->next == NULL && cmd_list->args
+		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
 	{
 		expand_command_args(cmd_list, env_list_to_envp(*env_list));
 		status = execute_builtin(cmd_list, env_list);
-		// Restore signals to interactive mode after execution
 		setup_signals();
 		return (status);
 	}
 	setup_result = setup_all_heredocs(cmd_list, env_list_to_envp(*env_list));
-	if (setup_result == 130) // Check for 130
-		return (130);       // Return 130
-	if (setup_result == -1) // Handle other errors
+	if (setup_result == 130)
+		return (130);
+	if (setup_result == -1)
 		return (1);
 	pipe_fd[0] = -1;
 	pipe_fd[1] = -1;
@@ -121,7 +108,6 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 		current = current->next;
 	}
 	status = wait_for_children();
-	// Restore signals to interactive mode after all command execution
 	setup_signals();
 	return (status);
 }

@@ -58,7 +58,6 @@ char	*strip_quotes(const char *value)
     if (!value)
         return (NULL);
     
-    // Count characters after stripping quotes
     size_t len = 0;
     i = 0;
     in_quotes = 0;
@@ -83,19 +82,16 @@ char	*strip_quotes(const char *value)
         i++;
     }
     
-    // Allocate exactly the right amount of memory
     result = ft_strdup("");
     if (!result)
         return (NULL);
     
-    // If no quotes to strip, return a simple duplicate
     if (len == ft_strlen(value))
     {
         free(result);
         return (ft_strdup(value));
     }
     
-    // Otherwise, allocate appropriate memory and strip quotes
     free(result);
     result = ft_calloc(len + 1, sizeof(char));
     if (!result)
@@ -126,4 +122,77 @@ char	*strip_quotes(const char *value)
     }
     
     return (result);
+}
+
+int	ft_fprintf_fd(int fd, const char *format, ...)
+{
+	va_list	args;
+	int		i;
+	int		count;
+	char	*str;
+	char	c;
+	char	*temp;
+	char	*result;
+
+	va_start(args, format);
+	i = 0;
+	count = 0;
+	result = ft_strdup("");
+	if (!result)
+		return (-1);
+	
+	while (format[i])
+	{
+		if (format[i] == '%' && format[i + 1])
+		{
+			i++;
+			if (format[i] == 's')
+			{
+				str = va_arg(args, char *);
+				if (!str)
+					str = "(null)";
+				temp = result;
+				result = ft_strjoin(result, str);
+				free(temp);
+				count += ft_strlen(str);
+			}
+			else if (format[i] == 'c')
+			{
+				c = (char)va_arg(args, int);
+				temp = result;
+				result = ft_calloc(ft_strlen(result) + 2, sizeof(char));
+				if (!result)
+				{
+					free(temp);
+					va_end(args);
+					return (-1);
+				}
+				ft_strlcpy(result, temp, ft_strlen(temp) + 1);
+				result[ft_strlen(temp)] = c;
+				free(temp);
+				count++;
+			}
+		}
+		else
+		{
+			temp = result;
+			result = ft_calloc(ft_strlen(result) + 2, sizeof(char));
+			if (!result)
+			{
+				free(temp);
+				va_end(args);
+				return (-1);
+			}
+			ft_strlcpy(result, temp, ft_strlen(temp) + 1);
+			result[ft_strlen(temp)] = format[i];
+			free(temp);
+			count++;
+		}
+		i++;
+	}
+	
+	ft_putstr_fd(result, fd);
+	free(result);
+	va_end(args);
+	return (count);
 }

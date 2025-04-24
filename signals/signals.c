@@ -1,6 +1,5 @@
 #include "../minishell.h"
 
-
 int	*get_exit_status(void)
 {
 	return (&g_last_exit_status);
@@ -81,4 +80,3 @@ void	set_sigint_default(void)
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 		perror("sigaction SIGQUIT default error");
 }
-

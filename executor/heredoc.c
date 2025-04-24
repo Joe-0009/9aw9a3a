@@ -42,6 +42,9 @@ int	setup_heredoc(char *delimiter, char **envp)
 	int		pipe_fd[2];
 	pid_t	pid;
 	int		status;
+		int quoted;
+		char *line;
+		char *processed_delimiter;
 
 	if (pipe(pipe_fd) == -1)
 		return (ft_putstr_fd("minishell: heredoc pipe error\n", 2), -1);
@@ -54,11 +57,7 @@ int	setup_heredoc(char *delimiter, char **envp)
 	}
 	if (pid == 0)
 	{
-		int	quoted;
-		char	*line;
-		char	*processed_delimiter;
-
-		setup_heredoc_signals(); // Use heredoc-specific signal handler
+		setup_heredoc_signals();
 		safe_close(&pipe_fd[0]);
 		quoted = is_delimiter_quoted(delimiter);
 		processed_delimiter = strip_quotes(delimiter);
@@ -69,10 +68,10 @@ int	setup_heredoc(char *delimiter, char **envp)
 			line = readline("> ");
 			if (!line)
 			{
-				// Check if this was due to SIGINT or actual EOF
-				if (g_last_exit_status == 130)  // SIGINT was received
-					break;
-				ft_putstr_fd("minishell: warning: heredoc delimited by end-of-file\n", 2);
+				if (g_last_exit_status == 130)
+					break ;
+				ft_putstr_fd("minishell: warning: heredoc delimited by end-of-file\n",
+					2);
 				break ;
 			}
 			if (ft_strcmp(line, processed_delimiter) == 0)

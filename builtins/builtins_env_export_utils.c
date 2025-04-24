@@ -81,14 +81,12 @@ t_env	*envp_to_env_list(char **envp)
 	return (env_list);
 }
 
-// print_export_list has been moved to builtins_export.c
-
 char	**env_list_to_envp(t_env *env_list)
 {
-	int		(size) , (i);
 	t_env	*cur;
-	char	(**envp), (*tmp);
 
+	int(size), (i);
+	char(**envp), (*tmp);
 	size = 0;
 	cur = env_list;
 	while (cur)

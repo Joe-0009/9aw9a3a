@@ -95,17 +95,22 @@ static void	expand_args_loop(t_command *cmd, char **envp)
 	int	added;
 	int	is_export;
 
+	if (!cmd || !cmd->args || cmd->args_count <= 0)
+		return;
+		
 	i = 0;
 	j = 0;
 	added = 0;
 	is_export = (cmd->args[0] && ft_strcmp(cmd->args[0], "export") == 0);
 	while (i < cmd->args_count)
 	{
-		expand_and_strip_arg(cmd, envp, i);
-		added = split_and_insert_args(cmd, i, is_export);
-		if (added > 0)
-			continue ;
-		compact_args(cmd, &i, &j);
+		if (cmd->args[i]) {
+			expand_and_strip_arg(cmd, envp, i);
+			added = split_and_insert_args(cmd, i, is_export);
+			if (added > 0)
+				continue;
+			compact_args(cmd, &i, &j);
+		}
 		i++;
 	}
 	cmd->args_count = j;
@@ -134,7 +139,9 @@ static void	expand_redirections_loop(t_command *cmd, char **envp)
 
 void	expand_command_args(t_command *cmd, char **envp)
 {
-	expand_args_loop(cmd, envp);
-	expand_redirections_loop(cmd, envp);
+	if (cmd && cmd->args)
+		expand_args_loop(cmd, envp);
+	if (cmd)
+		expand_redirections_loop(cmd, envp);
 	safe_doube_star_free(envp);
 }

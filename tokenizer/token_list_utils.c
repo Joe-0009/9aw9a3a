@@ -1,6 +1,5 @@
 #include "../minishell.h"
 
-
 t_token	*ft_token_new(char *content)
 {
 	t_token	*new_node;
