@@ -22,7 +22,7 @@ char	*extract_operator_token(char *str, int *pos)
 		token = ft_strndup(&str[start], 1);
 	}
 	if (!token)
-		fprintf(stderr, "minishell: memory allocation error\n");
+		ft_putstr_fd("minishell: memory allocation error\n", 2);
 	return (token);
 }
 

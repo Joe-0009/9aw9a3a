@@ -20,7 +20,7 @@ char	*extract_word_token(char *str, int start, int end)
 
 	token = ft_strndup(&str[start], (end - start));
 	if (!token)
-		fprintf(stderr, "minishell: memory allocation error in tokenization\n");
+		ft_putstr_fd("minishell: memory allocation error in tokenization\n", 2);
 	return (token);
 }
 

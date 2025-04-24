@@ -1,5 +1,13 @@
 #include "../minishell.h"
 
+static void	free_env_node(t_env *node)
+{
+	free(node->key);
+	if (node->value)
+		free(node->value);
+	free(node);
+}
+
 void	unset_one_arg(char *arg, t_env **env_list)
 {
 	t_env	*prev;
@@ -20,10 +28,7 @@ void	unset_one_arg(char *arg, t_env **env_list)
 				prev->next = cur->next;
 			else
 				*env_list = cur->next;
-			free(cur->key);
-			if (cur->value)
-				free(cur->value);
-			free(cur);
+			free_env_node(cur);
 			break ;
 		}
 		prev = cur;

@@ -100,6 +100,7 @@ int							ft_isspace(char c);
 char						*ft_strndup(const char *s, size_t n);
 int							ft_strcmp(const char *s1, const char *s2);
 int							ft_fprintf_fd(int fd, const char *format, ...);
+char						*strip_quotes(const char *value);
 
 /* ===================== TOKENIZER ===================== */
 t_token						*tokenize_input(char *input);
@@ -174,6 +175,7 @@ void                        setup_exec_signals(void);
 void						set_sigint_default(void);
 void						restore_signals(void);
 int                         *get_exit_status(void);
+void                        handle_sigint_heredoc(int sig);
 
 /* ===================== ENV EXPANSION UTILS ===================== */
 int							is_var_char(char c);
@@ -182,7 +184,19 @@ char						*get_env_value(char *var_name, char **envp);
 int							add_char_to_result(char **result, char c);
 void						update_quote_state(char c, t_state *state);
 char						*expand_variables(char *str, char **envp);
-char						*strip_quotes(const char *value);
+void						expand_command_args(t_command *cmd, char **envp);
+
+/* ===================== ENV EXPANSION ARGS UTILS ===================== */
+int							count_split_words(char **split_words);
+void						copy_and_replace_args(t_command *cmd, char **new_args,
+								int pos, char **split_words);
+int							add_split_args_to_command(t_command *cmd, int pos,
+								char **split_words);
+void						expand_and_strip_arg(t_command *cmd, char **envp, int i);
+int							split_and_insert_args(t_command *cmd, int i, int is_export);
+void						compact_args(t_command *cmd, int *i, int *j);
+void						expand_args_loop(t_command *cmd, char **envp);
+void						expand_redirections_loop(t_command *cmd, char **envp);
 
 /* ===================== EXECUTOR UTILS ===================== */
 int							setup_pipe(int pipe_fd[2]);
@@ -201,6 +215,7 @@ int							parent_process(int prev_pipe_read, int pipe_fd[2]);
 int							setup_command_pipe(t_command *current,
 								int *prev_pipe_read, int pipe_fd[2]);
 int							is_parent_builtin(char *cmd);
+int							execute_single_parent_builtin(t_command *cmd_list, t_env **env_list);
 int							print_env_vars(char **envp);
 void						handle_builtin_command(t_command *current,
 								t_env *env_list);

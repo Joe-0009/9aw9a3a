@@ -41,6 +41,22 @@ static char	*find_in_paths(char **paths, char *cmd)
 	return (NULL);
 }
 
+static int	is_path_with_slash(char *cmd)
+{
+	return (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/' 
+		|| (cmd[1] == '.' && cmd[2] == '/'))));
+}
+
+static char	*check_direct_path(char *cmd)
+{
+	if (is_path_with_slash(cmd))
+	{
+		if (access(cmd, X_OK) == 0)
+			return (ft_strdup(cmd));
+	}
+	return (NULL);
+}
+
 char	*find_executable_path(char *cmd, char **envp)
 {
 	char	*path_env;
@@ -49,19 +65,19 @@ char	*find_executable_path(char *cmd, char **envp)
 
 	if (!cmd || !*cmd)
 		return (NULL);
-	if ((cmd[0] == '/') || (cmd[0] == '.' && (cmd[1] == '/' || (cmd[1] == '.'
-					&& cmd[2] == '/'))))
-	{
-		if (access(cmd, X_OK) == 0)
-			return (ft_strdup(cmd));
-		return (NULL);
-	}
+	
+	full_path = check_direct_path(cmd);
+	if (full_path)
+		return (full_path);
+		
 	path_env = get_path_env(envp);
 	if (!path_env)
 		return (NULL);
+	
 	paths = ft_split(path_env, ':');
 	if (!paths)
 		return (NULL);
+	
 	full_path = find_in_paths(paths, cmd);
 	safe_doube_star_free(paths);
 	return (full_path);

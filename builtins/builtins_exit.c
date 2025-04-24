@@ -6,8 +6,7 @@ static int	process_exit_arg(char *arg)
 
 	if (!is_number(arg))
 	{
-		fprintf(stderr, "minishell: exit: %s: numeric argument required\n",
-			arg);
+		ft_fprintf_fd(2, "minishell: exit: %s: numeric argument required\n", arg);
 		return (2);
 	}
 	exit_status = ft_atoi(arg);
@@ -21,7 +20,7 @@ int	builtin_exit(t_command *cmd, t_env **env_list)
 	printf("exit\n");
 	if (cmd->args_count > 2)
 	{
-		fprintf(stderr, "minishell: exit: too many arguments\n");
+		ft_putstr_fd("minishell: exit: too many arguments\n", 2);
 		return (1);
 	}
 	if (cmd->args_count > 1)

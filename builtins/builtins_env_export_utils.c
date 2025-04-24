@@ -81,12 +81,11 @@ t_env	*envp_to_env_list(char **envp)
 	return (env_list);
 }
 
-char	**env_list_to_envp(t_env *env_list)
+static int	count_env_entries(t_env *env_list)
 {
 	t_env	*cur;
+	int		size;
 
-	int(size), (i);
-	char(**envp), (*tmp);
 	size = 0;
 	cur = env_list;
 	while (cur)
@@ -95,6 +94,39 @@ char	**env_list_to_envp(t_env *env_list)
 			size++;
 		cur = cur->next;
 	}
+	return (size);
+}
+
+static char	*create_env_string(char *key, char *value)
+{
+	char	*result;
+	char	*temp;
+
+	result = ft_strdup(key);
+	if (!result)
+		return (NULL);
+	if (value)
+	{
+		temp = result;
+		result = ft_strjoin(result, "=");
+		free(temp);
+		if (!result)
+			return (NULL);
+		temp = result;
+		result = ft_strjoin(result, value);
+		free(temp);
+	}
+	return (result);
+}
+
+char	**env_list_to_envp(t_env *env_list)
+{
+	t_env	*cur;
+	char	**envp;
+	int		size;
+	int		i;
+
+	size = count_env_entries(env_list);
 	envp = (char **)ft_calloc(size + 1, sizeof(char *));
 	if (!envp)
 		return (NULL);
@@ -104,13 +136,10 @@ char	**env_list_to_envp(t_env *env_list)
 	{
 		if (cur->key)
 		{
-			tmp = ft_strdup(cur->key);
-			if (cur->value)
-			{
-				tmp = ft_strjoin(tmp, "=");
-				tmp = ft_strjoin(tmp, cur->value);
-			}
-			envp[i++] = tmp;
+			envp[i] = create_env_string(cur->key, cur->value);
+			if (!envp[i])
+				return (safe_doube_star_free(envp), NULL);
+			i++;
 		}
 		cur = cur->next;
 	}

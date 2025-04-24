@@ -2,7 +2,7 @@
 
 int	builtin_unset(t_command *cmd, t_env **env_list)
 {
-	int	i;
+	int i;
 
 	i = 1;
 	while (cmd->args[i])

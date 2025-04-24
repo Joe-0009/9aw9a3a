@@ -50,78 +50,70 @@ int	ft_isspace(char c)
 
 char	*strip_quotes(const char *value)
 {
-    size_t	i;
-    char	*result;
-    int		in_quotes;
-    char	quote_type;
-    
-    if (!value)
-        return (NULL);
-    
-    size_t len = 0;
-    i = 0;
-    in_quotes = 0;
-    while (value[i])
-    {
-        if ((value[i] == '"' || value[i] == '\''))
-        {
-            if (!in_quotes)
-            {
-                in_quotes = 1;
-                quote_type = value[i];
-            }
-            else if (value[i] == quote_type)
-            {
-                in_quotes = 0;
-            }
-            else
-                len++;
-        }
-        else
-            len++;
-        i++;
-    }
-    
-    result = ft_strdup("");
-    if (!result)
-        return (NULL);
-    
-    if (len == ft_strlen(value))
-    {
-        free(result);
-        return (ft_strdup(value));
-    }
-    
-    free(result);
-    result = ft_calloc(len + 1, sizeof(char));
-    if (!result)
-        return (NULL);
-    
-    i = 0;
-    size_t j = 0;
-    in_quotes = 0;
-    while (value[i])
-    {
-        if ((value[i] == '"' || value[i] == '\''))
-        {
-            if (!in_quotes)
-            {
-                in_quotes = 1;
-                quote_type = value[i];
-            }
-            else if (value[i] == quote_type)
-            {
-                in_quotes = 0;
-            }
-            else
-                result[j++] = value[i];
-        }
-        else
-            result[j++] = value[i];
-        i++;
-    }
-    
-    return (result);
+	size_t	i;
+	size_t	len;
+	size_t	j;
+	char	*result;
+	int		in_quotes;
+	char	quote_type;
+
+	if (!value)
+		return (NULL);
+	len = 0;
+	i = 0;
+	in_quotes = 0;
+	while (value[i])
+	{
+		if ((value[i] == '"' || value[i] == '\''))
+		{
+			if (!in_quotes)
+			{
+				in_quotes = 1;
+				quote_type = value[i];
+			}
+			else if (value[i] == quote_type)
+				in_quotes = 0;
+			else
+				len++;
+		}
+		else
+			len++;
+		i++;
+	}
+	result = ft_strdup("");
+	if (!result)
+		return (NULL);
+	if (len == ft_strlen(value))
+	{
+		free(result);
+		return (ft_strdup(value));
+	}
+	free(result);
+	result = ft_calloc(len + 1, sizeof(char));
+	if (!result)
+		return (NULL);
+	i = 0;
+	j = 0;
+	in_quotes = 0;
+	while (value[i])
+	{
+		if ((value[i] == '"' || value[i] == '\''))
+		{
+			if (!in_quotes)
+			{
+				in_quotes = 1;
+				quote_type = value[i];
+			}
+			else if (value[i] == quote_type)
+				in_quotes = 0;
+			else
+				result[j++] = value[i];
+		}
+		else
+			result[j++] = value[i];
+		i++;
+	}
+	return (result);
 }
 
 int	ft_fprintf_fd(int fd, const char *format, ...)

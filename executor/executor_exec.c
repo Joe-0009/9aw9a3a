@@ -13,38 +13,57 @@ static char	*get_exec_path(t_command *current, t_env *env_list)
 	return (exec_path);
 }
 
-void	handle_external_command(t_command *current, t_env *env_list)
+static char	*resolve_relative_path(char *exec_path)
 {
-	char	*exec_path;
-	char	**envp;
 	char	cwd[PATH_MAX];
 	char	*temp;
 	char	*temp2;
+	char	*resolved_path;
 
-	exec_path = get_exec_path(current, env_list);
-	if (!exec_path)
-	{
-		fprintf(stderr, "minishell: %s: command not found\n", current->args[0]);
-		exit(127);
-	}
+	resolved_path = exec_path;
 	if (exec_path[0] != '/' && (exec_path[0] == '.' && exec_path[1] == '/'))
 	{
 		if (getcwd(cwd, sizeof(cwd)) != NULL)
 		{
 			temp = exec_path;
-			exec_path = ft_strjoin(cwd, "/");
-			temp2 = exec_path;
-			exec_path = ft_strjoin(exec_path, temp + 2);
+			resolved_path = ft_strjoin(cwd, "/");
+			temp2 = resolved_path;
+			resolved_path = ft_strjoin(resolved_path, temp + 2);
 			free(temp);
 			free(temp2);
 		}
 	}
-	envp = env_list_to_envp(env_list);
-	execve(exec_path, current->args, envp);
-	perror("execve error");
-	safe_free((void **)&exec_path);
-	safe_doube_star_free(envp);
-	exit(127);
+	return (resolved_path);
+}
+
+void	handle_builtin_command(t_command *current, t_env *env_list)
+{
+	execute_builtin(current, &env_list);
+	exit(g_last_exit_status);
+}
+
+void	handle_external_command(t_command *current, t_env *env_list)
+{
+	char	*path;
+	char	**envp;
+
+	path = find_executable_path(current->args[0], env_list_to_envp(env_list));
+	if (path)
+	{
+		envp = env_list_to_envp(env_list);
+		if (execve(path, current->args, envp) == -1)
+		{
+			perror("minishell: execve");
+			free(path);
+			safe_doube_star_free(envp);
+			exit(126);
+		}
+	}
+	else
+	{
+		ft_fprintf_fd(2, "minishell: %s: command not found\n", current->args[0]);
+		exit(127);
+	}
 }
 
 void	execute_single_command(t_command *current, t_env *env_list)
@@ -73,10 +92,4 @@ int	setup_command_pipe(t_command *current, int *prev_pipe_read, int pipe_fd[2])
 		pipe_fd[1] = -1;
 	}
 	return (1);
-}
-
-int	is_parent_builtin(char *cmd)
-{
-	return (ft_strcmp(cmd, "cd") == 0 || ft_strcmp(cmd, "export") == 0
-		|| ft_strcmp(cmd, "unset") == 0 || ft_strcmp(cmd, "exit") == 0);
 }

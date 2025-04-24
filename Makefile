@@ -27,12 +27,12 @@ LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory -fsanitize=addre
 # Source files by module
 MAIN_SRCS = main.c
 UTILS_SRCS = $(addprefix $(UTILS_DIR)/, string_utils.c memory_utils.c)
-TOKENIZER_SRCS = $(addprefix $(TOKENIZER_DIR)/, tokenizer.c token_utils.c token_types.c token_list_utils.c)
-PARSER_SRCS = $(addprefix $(PARSER_DIR)/, command_path.c command_init.c command_redirection.c command_parser.c)
-EXECUTOR_SRCS = $(addprefix $(EXECUTOR_DIR)/, heredoc.c executor_main.c executor_exec.c executor_child.c executor_utils.c)
+TOKENIZER_SRCS = $(addprefix $(TOKENIZER_DIR)/, tokenizer.c token_utils.c token_types.c token_list_utils.c tokenizer_process.c)
+PARSER_SRCS = $(addprefix $(PARSER_DIR)/, command_path.c command_init.c command_redirection.c command_parser.c command_redirect_setup.c)
+EXECUTOR_SRCS = $(addprefix $(EXECUTOR_DIR)/, heredoc.c executor_main.c executor_exec.c executor_child.c executor_utils.c executor_builtin.c)
 BUILTINS_SRCS = $(addprefix $(BUILTINS_DIR)/, builtins_cd_pwd.c builtins_echo.c builtins_exit.c builtins_env.c builtins_env_export_utils.c builtins_export.c builtins_unset_utils.c builtins_unset.c)
-ENV_SRCS = $(addprefix $(ENV_DIR)/, env_expand_utils1.c env_expand_utils2.c env_expand_main.c)
-SIGNALS_SRCS = $(addprefix $(SIGNALS_DIR)/, signals.c)
+ENV_SRCS = $(addprefix $(ENV_DIR)/, env_expand_utils1.c env_expand_utils2.c env_expand_main.c env_expand_utils3.c env_expand_utils4.c)
+SIGNALS_SRCS = $(addprefix $(SIGNALS_DIR)/, signals.c signals_setup.c)
 
 # All source files
 SRCS = $(MAIN_SRCS) $(UTILS_SRCS) $(TOKENIZER_SRCS) $(PARSER_SRCS) $(EXECUTOR_SRCS) $(BUILTINS_SRCS) $(ENV_SRCS) $(SIGNALS_SRCS)

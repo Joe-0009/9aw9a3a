@@ -25,94 +25,9 @@ void	add_redirection(t_command *cmd, t_token_type redirect_type, char *file)
 	}
 }
 
-int	setup_redirections(t_command *cmd)
+static int	create_cmd_if_needed(t_command **first_cmd, t_command **current_cmd)
 {
-	t_redirections	*redir;
-	int				result;
-
-	redir = cmd->redirections;
-	result = 0;
-	while (redir && result == 0)
-	{
-		if (redir->type == TOKEN_REDIRECT_IN)
-			result = setup_redirect_in(redir->file);
-		else if (redir->type == TOKEN_REDIRECT_OUT)
-			result = setup_redirect_out(redir->file, 0);
-		else if (redir->type == TOKEN_APPEND)
-			result = setup_redirect_out(redir->file, 1);
-		else if (redir->type == TOKEN_HEREDOC)
-		{
-			if (dup2(redir->heredoc_fd, STDIN_FILENO) == -1)
-			{
-				fprintf(stderr, "minishell: heredoc redirection failed: %s\n",
-					strerror(errno));
-				result = -1;
-			}
-			safe_close(&redir->heredoc_fd);
-		}
-		else
-		{
-			fprintf(stderr, "minishell: unknown redirection type\n");
-			result = -1;
-		}
-		redir = redir->next;
-	}
-	return (result);
-}
-
-int	setup_redirect_in(char *file_path)
-{
-	int	fd;
-
-	fd = open(file_path, O_RDONLY);
-	if (fd == -1)
-	{
-		fprintf(stderr, "minishell: %s: %s\n", file_path, strerror(errno));
-		return (-1);
-	}
-	if (dup2(fd, STDIN_FILENO) == -1)
-	{
-		fprintf(stderr, "minishell: input redirection failed: %s\n",
-			strerror(errno));
-		close(fd);
-		return (-1);
-	}
-	close(fd);
-	return (0);
-}
-
-int	setup_redirect_out(char *file_path, int append_mode)
-{
-	int	flags;
-	int	fd;
-
-	flags = O_WRONLY | O_CREAT;
-	if (append_mode)
-		flags |= O_APPEND;
-	else
-		flags |= O_TRUNC;
-	fd = open(file_path, flags, 0644);
-	if (fd == -1)
-	{
-		fprintf(stderr, "minishell: %s: %s\n", file_path, strerror(errno));
-		return (-1);
-	}
-	if (dup2(fd, STDOUT_FILENO) == -1)
-	{
-		fprintf(stderr, "minishell: output redirection failed: %s\n",
-			strerror(errno));
-		close(fd);
-		return (-1);
-	}
-	close(fd);
-	return (0);
-}
-
-int	handle_redirect_token(t_token **current, t_command **first_cmd,
-		t_command **current_cmd)
-{
-	t_command		*new_cmd;
-	t_token_type	redirect_type;
+	t_command	*new_cmd;
 
 	if (!*current_cmd)
 	{
@@ -123,16 +38,37 @@ int	handle_redirect_token(t_token **current, t_command **first_cmd,
 			*first_cmd = new_cmd;
 		*current_cmd = new_cmd;
 	}
-	redirect_type = (*current)->type;
-	*current = (*current)->next;
+	return (1);
+}
+
+static int	check_redirect_syntax(t_token **current)
+{
 	if (!*current || (*current)->type != TOKEN_WORD)
 	{
 		if (!*current)
-			fprintf(stderr, "minishell: syntax error near unexpected token `newline'\n");
+			ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n", 2);
 		else
-			fprintf(stderr, "minishell: syntax error near unexpected token %s\n", (*current)->content);
+			ft_fprintf_fd(2, "minishell: syntax error near unexpected token %s\n", 
+				(*current)->content);
 		return (0);
 	}
+	return (1);
+}
+
+int	handle_redirect_token(t_token **current, t_command **first_cmd,
+		t_command **current_cmd)
+{
+	t_token_type	redirect_type;
+
+	if (!create_cmd_if_needed(first_cmd, current_cmd))
+		return (0);
+		
+	redirect_type = (*current)->type;
+	*current = (*current)->next;
+	
+	if (!check_redirect_syntax(current))
+		return (0);
+		
 	add_redirection(*current_cmd, redirect_type, (*current)->content);
 	*current = (*current)->next;
 	return (1);

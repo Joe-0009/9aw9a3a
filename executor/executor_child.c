@@ -37,7 +37,7 @@ void	child_process(t_command *current, int prev_pipe_read, int pipe_fd[2],
 	if (setup_redirections(current) == -1)
 		exit(1);
 	execute_single_command(current, env_list);
-	fprintf(stderr, "minishell: command execution failed\n");
+	ft_putstr_fd("minishell: command execution failed\n", 2);
 	exit(127);
 }
 

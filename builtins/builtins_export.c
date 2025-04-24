@@ -69,7 +69,8 @@ static void	handle_error(char *key, char **value)
 		safe_free((void **)value);
 }
 
-static void	extract_key_value(char *arg, char **key, char **value, int *append_mode)
+static void	extract_key_value(char *arg, char **key, char **value,
+		int *append_mode)
 {
 	char	*equal_sign;
 
