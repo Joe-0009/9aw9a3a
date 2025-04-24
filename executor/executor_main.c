@@ -1,5 +1,42 @@
 #include "../minishell.h"
 
+int	is_builtin_command(char *cmd)
+{
+	char	*builtins[] = {"cd", "echo", "pwd", "export", "unset", "env",
+			"exit", NULL};
+	int		i;
+
+	i = -1;
+	while (builtins[++i])
+	{
+		if (ft_strcmp(builtins[i], cmd) == 0)
+			return (1);
+	}
+	return (0);
+}
+
+int	execute_builtin(t_command *cmd, t_env **env_list)
+{
+	char	*command;
+
+	command = cmd->args[0];
+	if (ft_strcmp(command, "cd") == 0)
+		return (builtin_cd(cmd, env_list));
+	else if (ft_strcmp(command, "echo") == 0)
+		return (builtin_echo(cmd));
+	else if (ft_strcmp(command, "pwd") == 0)
+		return (builtin_pwd());
+	else if (ft_strcmp(command, "export") == 0)
+		return (builtin_export(cmd, env_list));
+	else if (ft_strcmp(command, "unset") == 0)
+		return (builtin_unset(cmd, env_list));
+	else if (ft_strcmp(command, "env") == 0)
+		return (builtin_env(*env_list));
+	else if (ft_strcmp(command, "exit") == 0)
+		return (builtin_exit(cmd, env_list));
+	return (1);
+}
+
 static int	setup_all_heredocs(t_command *cmd_list, char **envp)
 {
 	t_command		*current;
