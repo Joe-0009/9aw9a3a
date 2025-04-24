@@ -1,41 +1,5 @@
 #include "../minishell.h"
 
-static char	*get_exec_path(t_command *current, t_env *env_list)
-{
-	char	**envp;
-	char	*exec_path;
-
-	envp = env_list_to_envp(env_list);
-	exec_path = find_executable_path(current->args[0], envp);
-	safe_doube_star_free(envp);
-	if (!exec_path)
-		exec_path = ft_strdup(current->args[0]);
-	return (exec_path);
-}
-
-static char	*resolve_relative_path(char *exec_path)
-{
-	char	cwd[PATH_MAX];
-	char	*temp;
-	char	*temp2;
-	char	*resolved_path;
-
-	resolved_path = exec_path;
-	if (exec_path[0] != '/' && (exec_path[0] == '.' && exec_path[1] == '/'))
-	{
-		if (getcwd(cwd, sizeof(cwd)) != NULL)
-		{
-			temp = exec_path;
-			resolved_path = ft_strjoin(cwd, "/");
-			temp2 = resolved_path;
-			resolved_path = ft_strjoin(resolved_path, temp + 2);
-			free(temp);
-			free(temp2);
-		}
-	}
-	return (resolved_path);
-}
-
 void	handle_builtin_command(t_command *current, t_env *env_list)
 {
 	execute_builtin(current, &env_list);
