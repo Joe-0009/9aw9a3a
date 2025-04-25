@@ -20,9 +20,9 @@ LIBS = $(LIBFT)
 
 # Compiler and flags
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -MMD -MP -fsanitize=address -g
+CFLAGS = -Wall -Wextra -Werror -MMD -MP
 INCLUDES = -I$(LIBFT_DIR) -I/opt/homebrew/opt/readline/include
-LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory -fsanitize=address
+LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory 
 
 # Source files by module
 MAIN_SRCS = main.c

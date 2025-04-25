@@ -31,15 +31,18 @@ static int	init_and_setup_heredocs(t_command *cmd_list, t_env **env_list,
 		int pipe_fd[2], int *prev_pipe_read)
 {
 	int	setup_result;
+	char **envp;
 
-	setup_result = setup_all_heredocs(cmd_list, env_list_to_envp(*env_list));
+	envp = env_list_to_envp(*env_list);
+	setup_result = setup_all_heredocs(cmd_list, envp);
 	if (setup_result == 130)
-		return (130);
+		return (safe_doube_star_free(envp), 130);
 	if (setup_result == -1)
-		return (1);
+		return (safe_doube_star_free(envp), 1);
 	pipe_fd[0] = -1;
 	pipe_fd[1] = -1;
 	*prev_pipe_read = -1;
+	safe_doube_star_free(envp);
 	return (0);
 }
 

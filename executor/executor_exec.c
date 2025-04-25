@@ -10,11 +10,11 @@ void	handle_external_command(t_command *current, t_env *env_list)
 {
 	char	*path;
 	char	**envp;
+	envp = env_list_to_envp(env_list);
 
-	path = find_executable_path(current->args[0], env_list_to_envp(env_list));
+	path = find_executable_path(current->args[0], envp);
 	if (path)
 	{
-		envp = env_list_to_envp(env_list);
 		if (execve(path, current->args, envp) == -1)
 		{
 			perror("minishell: execve");
@@ -25,6 +25,7 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	}
 	else
 	{
+		safe_doube_star_free(envp);
 		ft_fprintf_fd(2, "minishell: %s: command not found\n", current->args[0]);
 		exit(127);
 	}
