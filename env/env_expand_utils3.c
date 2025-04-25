@@ -40,7 +40,7 @@ int	add_split_args_to_command(t_command *cmd, int pos,
 	word_count = count_split_words(split_words);
 	if (word_count <= 1)
 		return (ft_free_strs(split_words), 0);
-	new_args = ft_calloc(cmd->args_count + word_count - 1, sizeof(char *));
+	new_args = ft_calloc(cmd->args_count + word_count, sizeof(char *));
 	if (!new_args)
 		return (ft_free_strs(split_words), -1);
 	copy_and_replace_args(cmd, new_args, pos, split_words);
