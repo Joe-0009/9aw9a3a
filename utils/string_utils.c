@@ -116,6 +116,43 @@ char	*strip_quotes(const char *value)
 	return (result);
 }
 
+int	is_content_quoted(char *content)
+{
+	size_t	i;
+	size_t	len;
+	int		in_quotes;
+	char	quote_type;
+	int		quoted;
+
+	i = 0;
+	in_quotes = 0;
+	quoted = 0;
+	len = ft_strlen(content);
+	while (i < len)
+	{
+		if ((content[i] == '"' || content[i] == '\''))
+		{
+			if (!in_quotes)
+			{
+				in_quotes = 1;
+				quote_type = content[i];
+				i++;
+			}
+			else if (in_quotes && content[i] == quote_type)
+			{
+				quoted = 1;
+				in_quotes = 0;
+				i++;
+			}
+			else
+				i++;
+		}
+		else
+			i++;
+	}
+	return (quoted);
+}
+
 int	ft_fprintf_fd(int fd, const char *format, ...)
 {
 	va_list	args;

@@ -65,3 +65,33 @@ void	update_quote_state(char c, t_state *state)
 			*state = STATE_NORMAL;
 	}
 }
+
+// Returns 1 if a $ is found inside single quotes, 0 otherwise
+int is_var_in_squotes(const char *str)
+{
+    int i = 0;
+    t_state state = STATE_NORMAL;
+    while (str[i]) {
+        update_quote_state(str[i], &state);
+        if (str[i] == '$' && state == STATE_IN_SINGLE_QUOTE)
+            return 1;
+        i++;
+    }
+    return 0;
+}
+
+int was_quoted(const char *str)
+{
+    int i = 0;
+    t_state state = STATE_NORMAL;
+    int was_in_quotes = 0;
+
+    while (str[i])
+    {
+        if ((str[i] == '"' || str[i] == '\'') && state == STATE_NORMAL)
+            was_in_quotes = 1;
+        update_quote_state(str[i], &state);
+        i++;
+    }
+    return (was_in_quotes);
+}

@@ -52,12 +52,26 @@ void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
 {
 	char	*expanded;
 	char	*stripped;
+	int		in_single_quotes = 0;
+	t_state	state = STATE_NORMAL;
+	int		j = 0;
 
-	expanded = expand_variables(cmd->args[i], envp);
-	if (expanded)
-	{
-		free(cmd->args[i]);
-		cmd->args[i] = expanded;
+	// Check if any $ is inside single quotes
+	while (cmd->args[i][j]) {
+		update_quote_state(cmd->args[i][j], &state);
+		if (cmd->args[i][j] == '$' && state == STATE_IN_SINGLE_QUOTE) {
+			in_single_quotes = 1;
+			break;
+		}
+		j++;
+	}
+	if (!in_single_quotes) {
+		expanded = expand_variables(cmd->args[i], envp);
+		if (expanded)
+		{
+			free(cmd->args[i]);
+			cmd->args[i] = expanded;
+		}
 	}
 	stripped = strip_quotes(cmd->args[i]);
 	if (stripped)
@@ -65,6 +79,23 @@ void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
 		free(cmd->args[i]);
 		cmd->args[i] = stripped;
 	}
+}
+
+int	has_var_in_dquotes(const char *str)
+{
+	int		i;
+	t_state	state;
+
+	i = 0;
+	state = STATE_NORMAL;
+	while (str[i])
+	{
+		update_quote_state(str[i], &state);
+		if (str[i] == '$' && state == STATE_IN_DOUBLE_QUOTE)
+			return (1);
+		i++;
+	}
+	return (0);
 }
 
 int	split_and_insert_args(t_command *cmd, int i, int is_export)
@@ -79,9 +110,7 @@ int	split_and_insert_args(t_command *cmd, int i, int is_export)
 		{
 			added = add_split_args_to_command(cmd, i, split_words);
 			if (added > 0)
-			{
 				return (added);
-			}
 		}
 	}
 	return (0);

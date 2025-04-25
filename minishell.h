@@ -101,6 +101,7 @@ char						*ft_strndup(const char *s, size_t n);
 int							ft_strcmp(const char *s1, const char *s2);
 int							ft_fprintf_fd(int fd, const char *format, ...);
 char						*strip_quotes(const char *value);
+int                         is_content_quoted(char *content);
 
 /* ===================== TOKENIZER ===================== */
 t_token						*tokenize_input(char *input);
@@ -197,6 +198,9 @@ int							split_and_insert_args(t_command *cmd, int i, int is_export);
 void						compact_args(t_command *cmd, int *i, int *j);
 void						expand_args_loop(t_command *cmd, char **envp);
 void						expand_redirections_loop(t_command *cmd, char **envp);
+int							has_var_in_dquotes(const char *str);
+int                         is_var_in_squotes(const char *str);
+int                         was_quoted(const char *str);
 
 /* ===================== EXECUTOR UTILS ===================== */
 int							setup_pipe(int pipe_fd[2]);

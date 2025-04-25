@@ -1,52 +1,16 @@
 #include "../minishell.h"
 
-static int	is_delimiter_quoted(char *delimiter)
-{
-	size_t	i;
-	size_t	len;
-	int		in_quotes;
-	char	quote_type;
-	int		quoted;
-
-	i = 0;
-	in_quotes = 0;
-	quoted = 0;
-	len = ft_strlen(delimiter);
-	while (i < len)
-	{
-		if ((delimiter[i] == '"' || delimiter[i] == '\''))
-		{
-			if (!in_quotes)
-			{
-				in_quotes = 1;
-				quote_type = delimiter[i];
-				i++;
-			}
-			else if (in_quotes && delimiter[i] == quote_type)
-			{
-				quoted = 1;
-				in_quotes = 0;
-				i++;
-			}
-			else
-				i++;
-		}
-		else
-			i++;
-	}
-	return (quoted);
-}
-
 static void	handle_heredoc_child_process(int pipe_fd[2], char *delimiter,
 		char **envp)
 {
 	int		quoted;
 	char	*line;
 	char	*processed_delimiter;
+	char	*expanded;
 
 	setup_heredoc_signals();
 	safe_close(&pipe_fd[0]);
-	quoted = is_delimiter_quoted(delimiter);
+	quoted = is_content_quoted(delimiter);
 	processed_delimiter = strip_quotes(delimiter);
 	if (!processed_delimiter)
 		exit(1);
@@ -66,7 +30,16 @@ static void	handle_heredoc_child_process(int pipe_fd[2], char *delimiter,
 			break ;
 		}
 		if (!quoted)
-			ft_putstr_fd(expand_variables(line, envp), pipe_fd[1]);
+		{
+			expanded = expand_variables(line, envp);
+			if (expanded)
+			{
+				ft_putstr_fd(expanded, pipe_fd[1]);
+				free(expanded);
+			}
+			else
+				ft_putstr_fd(line, pipe_fd[1]);
+		}
 		else
 			ft_putstr_fd(line, pipe_fd[1]);
 		ft_putchar_fd('\n', pipe_fd[1]);
