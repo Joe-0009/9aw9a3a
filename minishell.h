@@ -26,9 +26,9 @@ extern int					g_last_exit_status;
  */
 typedef enum e_state
 {
-	STATE_NORMAL,          // Normal parsing state
-	STATE_IN_SINGLE_QUOTE, // Inside single quotes
-	STATE_IN_DOUBLE_QUOTE  // Inside double quotes
+	STATE_NORMAL,          
+	STATE_IN_SINGLE_QUOTE, 
+	STATE_IN_DOUBLE_QUOTE  
 }							t_state;
 
 /**
