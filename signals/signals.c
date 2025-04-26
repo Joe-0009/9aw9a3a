@@ -20,7 +20,15 @@ void	handle_sigint_heredoc(int sig)
 	(void)sig;
 	*get_exit_status() = 130;
 	write(1, "\n", 1);
+	
+	// Instead of just closing stdin, we need to actually
+	// exit the process with a signal that the parent can detect
+	signal(SIGINT, SIG_DFL);  // Reset to default handler
+	kill(getpid(), SIGINT);   // Send SIGINT to self - will be detected by parent
+	
+	// These lines will only execute if the kill doesn't work
 	close(STDIN_FILENO);
+	exit(130);                // Ensure we exit with the right code
 }
 
 void	setup_signals(void)

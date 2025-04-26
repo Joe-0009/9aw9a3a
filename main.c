@@ -42,12 +42,10 @@ static int	process_command(char *input, t_env **env_list)
 	{
 		ft_token_clear(&tokens, free);
 		g_last_exit_status = execute_command_list(cmds, env_list);
-		// printf("Command exit status: %d\n", g_last_exit_status);
 		free_command_list(cmds);
 	}
 	else if (tokens)
 	{
-		// fprintf(stderr, "minishell: syntax error in command\n");
 		ft_token_clear(&tokens, free);
 	}
 	return (0);

@@ -70,7 +70,8 @@ int	setup_heredoc(char *delimiter, char **envp)
 	safe_close(&pipe_fd[1]);
 	waitpid(pid, &status, 0);
 	setup_signals();
-	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+	if ((WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) || 
+		status == 33280 || g_last_exit_status == 130)
 	{
 		safe_close(&pipe_fd[0]);
 		g_last_exit_status = 130;

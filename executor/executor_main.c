@@ -16,7 +16,10 @@ static int	setup_all_heredocs(t_command *cmd_list, char **envp)
 			{
 				result = handle_heredoc_redir(redir, envp);
 				if (result == 130)
+				{
+					g_last_exit_status = 130;
 					return (130);
+				}
 				if (result == -1)
 					return (-1);
 			}
@@ -30,19 +33,23 @@ static int	setup_all_heredocs(t_command *cmd_list, char **envp)
 static int	init_and_setup_heredocs(t_command *cmd_list, t_env **env_list,
 		int pipe_fd[2], int *prev_pipe_read)
 {
-	int	setup_result;
-	char **envp;
+	int		setup_result;
+	char	**envp;
 
 	envp = env_list_to_envp(*env_list);
 	setup_result = setup_all_heredocs(cmd_list, envp);
+	safe_doube_star_free(envp);
 	if (setup_result == 130)
-		return (safe_doube_star_free(envp), 130);
+	{
+		g_last_exit_status = 130;
+		setup_signals();
+		return (130);
+	}
 	if (setup_result == -1)
-		return (safe_doube_star_free(envp), 1);
+		return (1);
 	pipe_fd[0] = -1;
 	pipe_fd[1] = -1;
 	*prev_pipe_read = -1;
-	safe_doube_star_free(envp);
 	return (0);
 }
 
@@ -72,19 +79,29 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	int			status;
 	t_command	*current;
 	int			init_result;
+	int			heredoc_interrupted;
 
 	setup_exec_signals();
 	if (cmd_list && cmd_list->next == NULL && cmd_list->args
 		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
 		return (execute_single_parent_builtin(cmd_list, env_list));
-	
-	init_result = init_and_setup_heredocs(cmd_list, env_list, pipe_fd,
-			&prev_pipe_read);
-	if (init_result != 0)
-		return (init_result);
-	
+	pipe_fd[0] = -1;
+	pipe_fd[1] = -1;
+	prev_pipe_read = -1;
+	init_result = init_and_setup_heredocs(cmd_list, env_list, pipe_fd, &prev_pipe_read);
+	heredoc_interrupted = (init_result == 130);
+	if (heredoc_interrupted)
+	{
+		setup_signals();
+		return (130);
+	}
+	else if (init_result != 0)
+	{
+		setup_signals();
+		return (1); 
+	}
 	current = cmd_list;
-	while (current)
+	while (current && !heredoc_interrupted)
 	{
 		execute_command_process(current, &prev_pipe_read, pipe_fd, env_list);
 		current = current->next;

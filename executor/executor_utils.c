@@ -15,8 +15,13 @@ int	handle_heredoc_redir(t_redirections *redir, char **envp)
 	int	heredoc_fd;
 
 	heredoc_fd = setup_heredoc(redir->file, envp);
-	if (heredoc_fd == 130)
+	if (heredoc_fd == 130 || g_last_exit_status == 130)
+	{
+		if (heredoc_fd > 0)
+			safe_close(&heredoc_fd);
+		g_last_exit_status = 130;
 		return (130);
+	}
 	if (heredoc_fd == -1)
 		return (-1);
 	redir->heredoc_fd = heredoc_fd;

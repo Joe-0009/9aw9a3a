@@ -8,22 +8,25 @@ void	handle_builtin_command(t_command *current, t_env *env_list)
 
 void	handle_external_command(t_command *current, t_env *env_list)
 {
-	char	*path;
-	char	**envp;
+	char		*path;
+	char		**envp;
 	struct stat	file_stat;
 
 	envp = env_list_to_envp(env_list);
 	if (current->args[0] && ft_strchr(current->args[0], '/'))
 	{
-		if (stat(current->args[0], &file_stat) == 0 && S_ISDIR(file_stat.st_mode))
+		if (stat(current->args[0], &file_stat) == 0
+			&& S_ISDIR(file_stat.st_mode))
 		{
-			ft_fprintf_fd(2, "minishell: %s: Is a directory\n", current->args[0]);
+			ft_fprintf_fd(2, "minishell: %s: Is a directory\n",
+				current->args[0]);
 			safe_doube_star_free(envp);
 			exit(126);
 		}
 		else if (stat(current->args[0], &file_stat) == -1)
 		{
-			ft_fprintf_fd(2, "minishell: %s: Not a directory\n", current->args[0]);
+			ft_fprintf_fd(2, "minishell: %s: Not a directory\n",
+				current->args[0]);
 			safe_doube_star_free(envp);
 			exit(127);
 		}
