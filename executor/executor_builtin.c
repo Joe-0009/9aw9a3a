@@ -31,7 +31,7 @@ int	execute_builtin(t_command *cmd, t_env **env_list)
 	else if (ft_strcmp(command, "unset") == 0)
 		return (builtin_unset(cmd, env_list));
 	else if (ft_strcmp(command, "env") == 0)
-		return (builtin_env(*env_list));
+		return (builtin_env(cmd, *env_list));
 	else if (ft_strcmp(command, "exit") == 0)
 		return (builtin_exit(cmd, env_list));
 	return (1);
