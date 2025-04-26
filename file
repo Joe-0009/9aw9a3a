@@ -1,0 +1,23 @@
+total 1484
+drwxr-xr-x 13 isallali candidates     334 Apr 26 08:02 .
+drwx------ 28 isallali candidates    4096 Apr 26 07:52 ..
+drwxr-xr-x  2 isallali candidates     213 Apr 25 19:03 builtins
+drwxr-xr-x  3 isallali candidates    4096 Apr 22 17:29 docs
+-rw-r--r--  1 isallali candidates    8196 Apr 25 06:16 .DS_Store
+-rw-r--r--  1 isallali candidates 1307414 Apr 18 16:36 en.subject.pdf
+drwxr-xr-x  2 isallali candidates     139 Apr 25 19:03 env
+drwxr-xr-x  2 isallali candidates     143 Apr 25 19:03 executor
+-rw-r--r--  1 isallali candidates       0 Apr 26 08:03 file
+drwxr-xr-x  8 isallali candidates     220 Apr 26 06:08 .git
+-rw-r--r--  1 isallali candidates   23540 Apr 25 19:03 help
+drwxr-xr-x  2 isallali candidates    4096 Apr 26 08:01 libft
+-rw-r--r--  1 isallali candidates    2850 Apr 23 17:11 main.c
+-rw-r--r--  1 isallali candidates    2791 Apr 25 19:03 Makefile
+-rw-r--r--  1 isallali candidates   73926 Apr 22 17:29 mermaid-diagram-2025-04-18-220539.svg
+-rwxr-xr-x  1 isallali candidates   62744 Apr 26 08:01 minishell
+-rw-r--r--  1 isallali candidates    8117 Apr 25 19:49 minishell.h
+drwxr-xr-x  2 isallali candidates     135 Apr 25 06:16 parser
+drwxr-xr-x  2 isallali candidates      46 Apr 25 06:16 signals
+drwxr-xr-x  2 isallali candidates     120 Apr 25 06:16 tokenizer
+drwxr-xr-x  2 isallali candidates      50 Apr 25 19:03 utils
+drwxr-xr-x  2 isallali candidates      75 Apr 18 16:36 .vscode

@@ -1,19 +1,52 @@
 #include "../minishell.h"
 
-static t_command	*handle_word_token(t_token **current, t_command **first_cmd,
-		t_command **current_cmd)
+int add_arg(t_command *cmd, char *arg_content)
 {
-	t_command	*new_cmd;
+    char **new_args;
+    int i;
 
-	new_cmd = create_command_type_word(current);
-	if (!new_cmd)
-		return (NULL);
-	if (!*first_cmd)
-		*first_cmd = new_cmd;
-	else if (*current_cmd)
-		(*current_cmd)->next = new_cmd;
-	*current_cmd = new_cmd;
-	return (new_cmd);
+    new_args = malloc(sizeof(char *) * (cmd->args_count + 2));
+    if (!new_args)
+        return (0);
+        
+    for (i = 0; i < cmd->args_count; i++)
+        new_args[i] = cmd->args[i];
+        
+    new_args[i] = ft_strdup(arg_content);
+    if (!new_args[i])
+    {
+        free(new_args);
+        return (0);
+    }
+    
+    new_args[i + 1] = NULL;
+    if (cmd->args)
+        free(cmd->args);
+        
+    cmd->args = new_args;
+    cmd->args_count++;
+    return (1);
+}
+
+static int handle_word_token(t_token **current, t_command **first_cmd, t_command **current_cmd)
+{
+    //  we don't have a current command create a new one with create_command_type_word
+    if (!*current_cmd)
+    {
+        *current_cmd = create_command_type_word(current);
+        if (!*current_cmd)
+            return (0);
+        if (!*first_cmd)
+            *first_cmd = *current_cmd;
+        return (1);
+    }
+    
+    //  we already have a command add this word as an argument instead of creating a new command
+    if (!add_arg(*current_cmd, (*current)->content))
+        return (0);
+    
+    *current = (*current)->next;
+    return (1);
 }
 
 static int	handle_pipe_token(t_command *current_cmd)
@@ -47,6 +80,8 @@ t_command	*create_cmds(t_token **tokens)
 			if (!handle_pipe_token(current_cmd))
 				return (NULL);
 			current = current->next;
+			// reset current_cmd to NULL to create a new command after the "|"
+            current_cmd = NULL;
 		}
 		else if (current->type == TOKEN_REDIRECT_IN
 			|| current->type == TOKEN_REDIRECT_OUT
