@@ -55,6 +55,45 @@ static int	check_redirect_syntax(t_token **current)
 	return (1);
 }
 
+static void	add_words_as_args(t_command *cmd, t_token **current)
+{
+	int			new_count;
+	char		**new_args;
+	int			i;
+	int			j;
+	t_token		*temp;
+
+	new_count = 0;
+	temp = *current;
+	while (temp && temp->type == TOKEN_WORD)
+	{
+		new_count++;
+		temp = temp->next;
+	}
+	if (new_count == 0)
+		return ;
+	new_args = malloc(sizeof(char *) * (cmd->args_count + new_count + 1));
+	if (!new_args)
+		return ;
+	i = 0;
+	while (i < cmd->args_count)
+	{
+		new_args[i] = cmd->args[i];
+		i++;
+	}
+	j = 0;
+	while (*current && (*current)->type == TOKEN_WORD && j < new_count)
+	{
+		new_args[i + j] = ft_strdup((*current)->content);
+		*current = (*current)->next;
+		j++;
+	}
+	new_args[i + j] = NULL;
+	free(cmd->args);
+	cmd->args = new_args;
+	cmd->args_count += new_count;
+}
+
 int	handle_redirect_token(t_token **current, t_command **first_cmd,
 		t_command **current_cmd)
 {
@@ -62,14 +101,13 @@ int	handle_redirect_token(t_token **current, t_command **first_cmd,
 
 	if (!create_cmd_if_needed(first_cmd, current_cmd))
 		return (0);
-		
 	redirect_type = (*current)->type;
 	*current = (*current)->next;
-	
 	if (!check_redirect_syntax(current))
 		return (0);
-		
 	add_redirection(*current_cmd, redirect_type, (*current)->content);
 	*current = (*current)->next;
+	if (*current && (*current)->type == TOKEN_WORD)
+		add_words_as_args(*current_cmd, current);
 	return (1);
 }
