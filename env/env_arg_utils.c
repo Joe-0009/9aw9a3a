@@ -36,66 +36,22 @@ int	add_split_args_to_command(t_command *cmd, int pos,
 {
 	char	**new_args;
 	int		word_count;
-	
+
 	word_count = count_split_words(split_words);
 	if (word_count <= 1)
-		return (ft_free_strs(split_words), 0);
+	{
+		ft_free_strs(split_words);
+		return (0);
+	}
 	new_args = ft_calloc(cmd->args_count + word_count, sizeof(char *));
 	if (!new_args)
-		return (ft_free_strs(split_words), -1);
+	{
+		ft_free_strs(split_words);
+		return (-1);
+	}
 	copy_and_replace_args(cmd, new_args, pos, split_words);
 	ft_free_strs(split_words);
 	return (word_count - 1);
-}
-
-void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
-{
-	char	*expanded;
-	char	*stripped;
-	int		in_single_quotes = 0;
-	t_state	state = STATE_NORMAL;
-	int		j = 0;
-
-	// Check if any $ is inside single quotes
-	while (cmd->args[i][j]) {
-		update_quote_state(cmd->args[i][j], &state);
-		if (cmd->args[i][j] == '$' && state == STATE_IN_SINGLE_QUOTE) {
-			in_single_quotes = 1;
-			break;
-		}
-		j++;
-	}
-	if (!in_single_quotes) {
-		expanded = expand_variables(cmd->args[i], envp);
-		if (expanded)
-		{
-			free(cmd->args[i]);
-			cmd->args[i] = expanded;
-		}
-	}
-	stripped = strip_quotes(cmd->args[i]);
-	if (stripped)
-	{
-		free(cmd->args[i]);
-		cmd->args[i] = stripped;
-	}
-}
-
-int	has_var_in_dquotes(const char *str)
-{
-	int		i;
-	t_state	state;
-
-	i = 0;
-	state = STATE_NORMAL;
-	while (str[i])
-	{
-		update_quote_state(str[i], &state);
-		if (str[i] == '$' && state == STATE_IN_DOUBLE_QUOTE)
-			return (1);
-		i++;
-	}
-	return (0);
 }
 
 int	split_and_insert_args(t_command *cmd, int i, int is_export)
@@ -114,4 +70,22 @@ int	split_and_insert_args(t_command *cmd, int i, int is_export)
 		}
 	}
 	return (0);
+}
+
+void	compact_args(t_command *cmd, int *i, int *j)
+{
+	if (cmd->args[*i] && cmd->args[*i][0] != '\0')
+	{
+		if (*i != *j)
+		{
+			cmd->args[*j] = cmd->args[*i];
+			cmd->args[*i] = NULL;
+		}
+		(*j)++;
+	}
+	else if (cmd->args[*i])
+	{
+		free(cmd->args[*i]);
+		cmd->args[*i] = NULL;
+	}
 }

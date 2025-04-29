@@ -1,30 +1,5 @@
 #include "../minishell.h"
 
-void	add_redirection(t_command *cmd, t_token_type redirect_type, char *file)
-{
-	t_redirections	*redirection;
-	t_redirections	*current;
-
-	redirection = malloc(sizeof(t_redirections));
-	if (!redirection)
-		return ;
-	redirection->type = redirect_type;
-	redirection->file = ft_strdup(file);
-	redirection->heredoc_fd = -1;
-	redirection->next = NULL;
-	if (!redirection->file)
-		return (free(redirection));
-	if (!cmd->redirections)
-		cmd->redirections = redirection;
-	else
-	{
-		current = cmd->redirections;
-		while (current->next)
-			current = current->next;
-		current->next = redirection;
-	}
-}
-
 static int	create_cmd_if_needed(t_command **first_cmd, t_command **current_cmd)
 {
 	t_command	*new_cmd;
@@ -55,6 +30,23 @@ static int	check_redirect_syntax(t_token **current)
 	return (1);
 }
 
+static char	**allocate_args_array(t_command *cmd, int new_count)
+{
+	char	**new_args;
+	int		i;
+
+	new_args = malloc(sizeof(char *) * (cmd->args_count + new_count + 1));
+	if (!new_args)
+		return (NULL);
+	i = 0;
+	while (i < cmd->args_count)
+	{
+		new_args[i] = cmd->args[i];
+		i++;
+	}
+	return (new_args);
+}
+
 static void	add_words_as_args(t_command *cmd, t_token **current)
 {
 	int			new_count;
@@ -72,15 +64,10 @@ static void	add_words_as_args(t_command *cmd, t_token **current)
 	}
 	if (new_count == 0)
 		return ;
-	new_args = malloc(sizeof(char *) * (cmd->args_count + new_count + 1));
+	new_args = allocate_args_array(cmd, new_count);
 	if (!new_args)
 		return ;
-	i = 0;
-	while (i < cmd->args_count)
-	{
-		new_args[i] = cmd->args[i];
-		i++;
-	}
+	i = cmd->args_count;
 	j = 0;
 	while (*current && (*current)->type == TOKEN_WORD && j < new_count)
 	{

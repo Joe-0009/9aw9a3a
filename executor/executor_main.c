@@ -72,25 +72,20 @@ static void	execute_command_process(t_command *current, int *prev_pipe_read,
 	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
 }
 
-int	execute_command_list(t_command *cmd_list, t_env **env_list)
+static int	handle_executor_init(t_command *cmd_list, t_env **env_list,
+		int pipe_fd[2], int *prev_pipe_read)
 {
-	int			pipe_fd[2];
-	int			prev_pipe_read;
-	int			status;
-	t_command	*current;
-	int			init_result;
-	int			heredoc_interrupted;
+	int	init_result;
 
-	setup_exec_signals();
 	if (cmd_list && cmd_list->next == NULL && cmd_list->args
 		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
 		return (execute_single_parent_builtin(cmd_list, env_list));
 	pipe_fd[0] = -1;
 	pipe_fd[1] = -1;
-	prev_pipe_read = -1;
-	init_result = init_and_setup_heredocs(cmd_list, env_list, pipe_fd, &prev_pipe_read);
-	heredoc_interrupted = (init_result == 130);
-	if (heredoc_interrupted)
+	*prev_pipe_read = -1;
+	init_result = init_and_setup_heredocs(cmd_list, env_list, pipe_fd,
+			prev_pipe_read);
+	if (init_result == 130)
 	{
 		setup_signals();
 		return (130);
@@ -98,10 +93,26 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	else if (init_result != 0)
 	{
 		setup_signals();
-		return (1); 
+		return (1);
 	}
+	return (0);
+}
+
+int	execute_command_list(t_command *cmd_list, t_env **env_list)
+{
+	int			pipe_fd[2];
+	int			prev_pipe_read;
+	int			status;
+	t_command	*current;
+	int			init_result;
+
+	setup_exec_signals();
+	init_result = handle_executor_init(cmd_list, env_list, pipe_fd,
+			&prev_pipe_read);
+	if (init_result != 0)
+		return (init_result);
 	current = cmd_list;
-	while (current && !heredoc_interrupted)
+	while (current)
 	{
 		execute_command_process(current, &prev_pipe_read, pipe_fd, env_list);
 		current = current->next;

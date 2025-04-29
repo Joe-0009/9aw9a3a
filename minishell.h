@@ -159,6 +159,7 @@ int							builtin_env(t_command *cmd, t_env *env_list);
 int							builtin_exit(t_command *cmd, t_env **env_list);
 void						export_one_arg(char *arg, t_env **env_list);
 void						unset_one_arg(char *arg, t_env **env_list);
+void						print_environment(t_env *env_list, t_command *cmd);
 
 /* ===================== ENV LINKED LIST HELPERS ===================== */
 t_env						*find_env_node(t_env *env_list, const char *key);
@@ -225,5 +226,11 @@ void						handle_builtin_command(t_command *current,
 								t_env *env_list);
 void						handle_external_command(t_command *current,
 								t_env *env_list);
+
+/* ===================== UTILITY FUNCTIONS ===================== */
+int							process_command(char *input, t_env **env_list);
+void						print_Cmd_list(t_command *cmd);
+void						initialize_empty_env(t_env **env_list);
+void						update_shlvl(t_env **env_list);
 
 #endif
