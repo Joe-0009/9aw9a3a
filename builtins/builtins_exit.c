@@ -17,7 +17,7 @@ int	builtin_exit(t_command *cmd, t_env **env_list)
 {
 	int	exit_status;
 
-	printf("exit\n");
+	ft_putstr_fd("exit\n", 1);
 	if (cmd->args_count > 1)
 	{
 		exit_status = process_exit_arg(cmd->args[1]);

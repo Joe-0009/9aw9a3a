@@ -21,17 +21,17 @@ static int	update_pwd_vars(t_env **env, char *old_pwd)
 		ft_fprintf_fd(2, "minishell: cd: error retrieving current directory: "
 			"getcwd: cannot access parent directories: "
 			"No such file or directory\n");
+		if (old_pwd)
+			free(old_pwd);
 		return (1);
 	}
-	if (new_pwd)
-	{
-		add_or_update_env(env, "PWD", new_pwd);
-		if (old_pwd)
-			add_or_update_env(env, "OLDPWD", old_pwd);
-		free(new_pwd);
-	}
+	
+	add_or_update_env(env, "PWD", new_pwd);
 	if (old_pwd)
-		free(old_pwd);
+		add_or_update_env(env, "OLDPWD", old_pwd);
+	
+	free(new_pwd);
+	free(old_pwd);
 	return (0);
 }
 
@@ -40,25 +40,33 @@ int	builtin_cd(t_command *cmd, t_env **env)
 	char	*old_pwd;
 	char	*dir;
 	int		ret;
+	t_env	*home_node;
 
 	old_pwd = getcwd(NULL, 0);
 	if (cmd->args_count > 2)
 	{
-		if (old_pwd)
-			free(old_pwd);
+		free(old_pwd);
 		return (ft_putstr_fd("minishell: cd: too many arguments\n", 2), 1);
 	}
+	
 	if (cmd->args_count == 1)
-		dir = find_env_node(*env, "HOME")->value;
+	{
+		home_node = find_env_node(*env, "HOME");
+		if (home_node)
+			dir = home_node->value;
+		else
+			dir = NULL;
+		if (!dir)
+			return (handle_cd_errors(NULL, old_pwd));
+	}
 	else
 		dir = cmd->args[1];
-	if (cmd->args_count == 1 && !dir)
-		return (handle_cd_errors(NULL, old_pwd));
+	
 	ret = chdir(dir);
 	if (ret != 0)
 		return (handle_cd_errors(dir, old_pwd));
-	update_pwd_vars(env, old_pwd);
-	return (0);
+	
+	return (update_pwd_vars(env, old_pwd));
 }
 
 static int	print_pwd_from_env(t_env **env)

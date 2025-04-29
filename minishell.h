@@ -146,6 +146,7 @@ int							setup_redirect_out(char *file_path,
 								int append_mode);
 int							handle_redirect_token(t_token **current,
 								t_command **first_cmd, t_command **current_cmd);
+void						add_redirection(t_command *cmd, t_token_type redirect_type, char *file);
 
 /* ===================== BUILTINS ===================== */
 int							is_builtin_command(char *cmd);

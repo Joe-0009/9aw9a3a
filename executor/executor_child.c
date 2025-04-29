@@ -70,10 +70,10 @@ int	wait_for_children(void)
 int	parent_process(int prev_pipe_read, int pipe_fd[2])
 {
 	if (prev_pipe_read != -1)
-		close(prev_pipe_read);
+		safe_close(&prev_pipe_read);
 	if (pipe_fd[1] != -1)
 	{
-		close(pipe_fd[1]);
+		safe_close(&pipe_fd[1]);
 		return (pipe_fd[0]);
 	}
 	if (pipe_fd[0] != -1)

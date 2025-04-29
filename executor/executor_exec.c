@@ -1,6 +1,6 @@
 #include "../minishell.h"
 
-static void	handle_directory_errors(char *path, char **envp)
+static int	check_directory_error(char *path, char **envp)
 {
 	struct stat	file_stat;
 
@@ -12,7 +12,15 @@ static void	handle_directory_errors(char *path, char **envp)
 		safe_doube_star_free(envp);
 		exit(126);
 	}
-	else if (stat(path, &file_stat) == -1 && ft_strchr(path, '/'))
+	return (0);
+}
+
+static void	handle_directory_errors(char *path, char **envp)
+{
+	struct stat	file_stat;
+
+	check_directory_error(path, envp);
+	if (stat(path, &file_stat) == -1 && ft_strchr(path, '/'))
 	{
 		ft_fprintf_fd(2, "minishell: %s: Not a directory\n", path);
 		safe_doube_star_free(envp);
@@ -22,17 +30,9 @@ static void	handle_directory_errors(char *path, char **envp)
 
 static void	exec_command(char *path, t_command *current, char **envp)
 {
-	struct stat	file_stat;
-
 	if (path)
 	{
-		if (stat(path, &file_stat) == 0 && S_ISDIR(file_stat.st_mode))
-		{
-			ft_fprintf_fd(2, "minishell: %s: Is a directory\n", path);
-			free(path);
-			safe_doube_star_free(envp);
-			exit(126);
-		}
+		check_directory_error(path, envp);
 		if (execve(path, current->args, envp) == -1)
 		{
 			perror("minishell: execve");

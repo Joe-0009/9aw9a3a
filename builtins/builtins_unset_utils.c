@@ -15,7 +15,7 @@ void	unset_one_arg(char *arg, t_env **env_list)
 
 	if (!is_valid_identifier(arg))
 	{
-		printf("minishell: unset: `%s': not a valid identifier\n", arg);
+		ft_fprintf_fd(2, "minishell: unset: `%s': not a valid identifier\n", arg);
 		return ;
 	}
 	prev = NULL;

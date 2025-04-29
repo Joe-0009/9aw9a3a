@@ -65,19 +65,15 @@ char	*find_executable_path(char *cmd, char **envp)
 
 	if (!cmd || !*cmd)
 		return (NULL);
-	
 	full_path = check_direct_path(cmd);
 	if (full_path)
 		return (full_path);
-		
 	path_env = get_path_env(envp);
 	if (!path_env)
 		return (NULL);
-	
 	paths = ft_split(path_env, ':');
 	if (!paths)
 		return (NULL);
-	
 	full_path = find_in_paths(paths, cmd);
 	safe_doube_star_free(paths);
 	return (full_path);

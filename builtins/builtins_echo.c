@@ -30,12 +30,12 @@ int	builtin_echo(t_command *cmd)
 	}
 	while (i < cmd->args_count)
 	{
-		printf("%s", cmd->args[i]);
+		ft_putstr_fd(cmd->args[i], 1);
 		if (i < cmd->args_count - 1)
-			printf(" ");
+			ft_putchar_fd(' ', 1);
 		i++;
 	}
 	if (print_newline)
-		printf("\n");
+		ft_putchar_fd('\n', 1);
 	return (0);
 }

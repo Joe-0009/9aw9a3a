@@ -18,6 +18,20 @@ int	builtin_export(t_command *cmd, t_env **env_list)
 	return (0);
 }
 
+static void	print_single_export(char *key, char *value)
+{
+	ft_putstr_fd("declare -x ", 1);
+	ft_putstr_fd(key, 1);
+	
+	if (value)
+	{
+		ft_putstr_fd("=\"", 1);
+		ft_putstr_fd(value, 1);
+		ft_putstr_fd("\"", 1);
+	}
+	ft_putchar_fd('\n', 1);
+}
+
 void	print_export_list(t_env *env_list)
 {
 	t_env	*cur;
@@ -26,22 +40,7 @@ void	print_export_list(t_env *env_list)
 	while (cur)
 	{
 		if (cur->key)
-		{
-			if (cur->value)
-			{
-				ft_putstr_fd("declare -x ", 1);
-				ft_putstr_fd(cur->key, 1);
-				ft_putstr_fd("=\"", 1);
-				ft_putstr_fd(cur->value, 1);
-				ft_putstr_fd("\"\n", 1);
-			}
-			else
-			{
-				ft_putstr_fd("declare -x ", 1);
-				ft_putstr_fd(cur->key, 1);
-				ft_putchar_fd('\n', 1);
-			}
-		}
+			print_single_export(cur->key, cur->value);
 		cur = cur->next;
 	}
 }

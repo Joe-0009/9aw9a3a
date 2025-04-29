@@ -46,11 +46,11 @@ void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
 }
 
 static void	process_arg_expansion(t_command *cmd, char **envp, int i,
-		int *was_quoted, int *had_quoted)
+		int *is_quoted, int *had_quoted)
 {
 	char	*stripped;
 
-	*was_quoted = was_quoted(cmd->args[i]);
+	*is_quoted = was_quoted(cmd->args[i]);
 	*had_quoted = has_var_in_dquotes(cmd->args[i]);
 	if (!is_var_in_squotes(cmd->args[i]))
 		expand_and_strip_arg(cmd, envp, i);
@@ -102,8 +102,8 @@ void	expand_args_loop(t_command *cmd, char **envp)
 
 void	expand_redirections_loop(t_command *cmd, char **envp)
 {
-	t_redirections *redir;
-	char *expanded;
+	t_redirections	*redir;
+	char			*expanded;
 
 	redir = cmd->redirections;
 	while (redir)

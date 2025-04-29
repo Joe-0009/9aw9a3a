@@ -57,8 +57,11 @@ static void	execute_command_process(t_command *current, int *prev_pipe_read,
 		int pipe_fd[2], t_env **env_list)
 {
 	pid_t	pid;
+	char	**envp;
 
-	expand_command_args(current, env_list_to_envp(*env_list));
+	envp = env_list_to_envp(*env_list);
+	expand_command_args(current, envp);
+	safe_doube_star_free(envp);
 	if (!setup_command_pipe(current, prev_pipe_read, pipe_fd))
 		return ;
 	pid = fork();
