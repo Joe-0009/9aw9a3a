@@ -6,7 +6,7 @@
 /*   By: yrachidi <yrachidi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 13:41:50 by yrachidi          #+#    #+#             */
-/*   Updated: 2024/11/03 18:00:28 by yrachidi         ###   ########.fr       */
+/*   Updated: 2025/04/29 18:22:07 by yrachidi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ char	*ft_strdup(const char *s1)
 	char	*copy;
 
 	len = ft_strlen(s1);
-	copy = malloc(len + 1);
+	copy = ft_calloc(len + 1, 1);
 	if (!copy)
 		return (NULL);
 	i = 0;
@@ -28,6 +28,5 @@ char	*ft_strdup(const char *s1)
 		copy[i] = s1[i];
 		i++;
 	}
-	copy[i] = '\0';
 	return (copy);
 }

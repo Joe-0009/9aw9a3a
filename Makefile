@@ -20,7 +20,7 @@ LIBS = $(LIBFT)
 
 # Compiler and flags
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -MMD -MP
+CFLAGS = -Wall -Wextra -Werror -MMD -MP -g
 INCLUDES = -I$(LIBFT_DIR) -I/opt/homebrew/opt/readline/include
 LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory 
 

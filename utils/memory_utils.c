@@ -23,7 +23,7 @@ void	safe_doube_star_free(char **str)
 	int	i;
 
 	if (!str)
-		return;
+		return ;
 	i = 0;
 	while (str[i])
 	{

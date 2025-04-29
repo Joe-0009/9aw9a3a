@@ -30,14 +30,16 @@ char	*ft_strndup(const char *s, size_t n)
 {
 	size_t	len;
 	char	*result;
+	size_t	i;
 
 	len = 0;
 	while (len < n && s[len])
 		len++;
-	result = calloc(len + 1, 1);
+	result = ft_calloc(len + 1, 1);
 	if (!result)
 		return (NULL);
-	for (size_t i = 0; i < len; i++)
+	i = -1;
+	while (++i < len)
 		result[i] = s[i];
 	return (result);
 }
@@ -50,9 +52,7 @@ int	ft_isspace(char c)
 
 char	*strip_quotes(const char *value)
 {
-	size_t	i;
-	size_t	len;
-	size_t	j;
+	size_t	(i), (len), (j);
 	char	*result;
 	int		in_quotes;
 	char	quote_type;

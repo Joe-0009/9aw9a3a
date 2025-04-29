@@ -62,6 +62,7 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	safe_doube_star_free(envp);
 	ft_fprintf_fd(2, "minishell: %s: command not found\n",
 		current->args[0]);
+		
 	exit(127);
 }
 

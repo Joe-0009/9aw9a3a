@@ -32,7 +32,7 @@ int	builtin_exit(t_command *cmd, t_env **env_list)
 		return (1);
 	}
 	free_command_list(cmd);
-	free_env_list(*env_list);
+	free_env_list(env_list);
 	clear_history();
 	exit(exit_status);
 }

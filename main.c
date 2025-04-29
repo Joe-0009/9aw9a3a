@@ -2,12 +2,7 @@
 
 int			g_last_exit_status = 0;
 
-// Function prototypes for functions moved to utility files
-int process_command(char *input, t_env **env_list);
-void initialize_empty_env(t_env **env_list);
-void update_shlvl(t_env **env_list);
-
-static void	shell_loop(t_env *env_list)
+static void	shell_loop(t_env **env_list)
 {
 	char	*input;
 	int		should_exit;
@@ -25,7 +20,7 @@ static void	shell_loop(t_env *env_list)
 		if (input[0] != '\0')
 		{
 			add_history(input);
-			ret = process_command(input, &env_list);
+			ret = process_command(input, env_list);
 			if (ret == 1)
 				printf("\n");
 			should_exit = ret;
@@ -34,6 +29,7 @@ static void	shell_loop(t_env *env_list)
 	}
 	clear_history();
 }
+
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -47,7 +43,7 @@ int	main(int argc, char **argv, char **envp)
 		initialize_empty_env(&env_list);
 	else
 		update_shlvl(&env_list);
-	shell_loop(env_list);
-	free_env_list(env_list);
+	shell_loop(&env_list);
+	free_env_list(&env_list);
 	return (0);
 }

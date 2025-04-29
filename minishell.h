@@ -92,7 +92,7 @@ void						free_command_list(t_command *cmd_list);
 void						safe_free(void **ptr);
 void						safe_close(int *fd);
 void						safe_doube_star_free(char **str);
-void free_env_list(t_env *env_list);
+void free_env_list(t_env **env_list);
 
 /* ===================== STRING UTILS ===================== */
 int							is_number(char *str);
@@ -164,7 +164,7 @@ void						print_environment(t_env *env_list, t_command *cmd);
 
 /* ===================== ENV LINKED LIST HELPERS ===================== */
 t_env						*find_env_node(t_env *env_list, const char *key);
-t_env						*add_or_update_env(t_env **env_list,
+void						add_or_update_env(t_env **env_list,
 								const char *key, const char *value);
 void						print_export_list(t_env *env_list);
 t_env						*envp_to_env_list(char **envp);
