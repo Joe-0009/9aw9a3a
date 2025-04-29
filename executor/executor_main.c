@@ -53,6 +53,29 @@ static int	init_and_setup_heredocs(t_command *cmd_list, t_env **env_list,
 	return (0);
 }
 
+static int	setup_pipes_and_heredocs(t_command *cmd_list, t_env **env_list,
+		int pipe_fd[2], int *prev_pipe_read)
+{
+	int	init_result;
+
+	pipe_fd[0] = -1;
+	pipe_fd[1] = -1;
+	*prev_pipe_read = -1;
+	init_result = init_and_setup_heredocs(cmd_list, env_list, pipe_fd,
+			prev_pipe_read);
+	if (init_result == 130)
+	{
+		setup_signals();
+		return (130);
+	}
+	else if (init_result != 0)
+	{
+		setup_signals();
+		return (1);
+	}
+	return (0);
+}
+
 static void	execute_command_process(t_command *current, int *prev_pipe_read,
 		int pipe_fd[2], t_env **env_list)
 {
@@ -74,32 +97,6 @@ static void	execute_command_process(t_command *current, int *prev_pipe_read,
 	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
 }
 
-static int	handle_executor_init(t_command *cmd_list, t_env **env_list,
-		int pipe_fd[2], int *prev_pipe_read)
-{
-	int	init_result;
-
-	if (cmd_list && cmd_list->next == NULL && cmd_list->args
-		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
-		return (execute_single_parent_builtin(cmd_list, env_list));
-	pipe_fd[0] = -1;
-	pipe_fd[1] = -1;
-	*prev_pipe_read = -1;
-	init_result = init_and_setup_heredocs(cmd_list, env_list, pipe_fd,
-			prev_pipe_read);
-	if (init_result == 130)
-	{
-		setup_signals();
-		return (130);
-	}
-	else if (init_result != 0)
-	{
-		setup_signals();
-		return (1);
-	}
-	return (0);
-}
-
 int	execute_command_list(t_command *cmd_list, t_env **env_list)
 {
 	int			pipe_fd[2];
@@ -109,7 +106,10 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	int			init_result;
 
 	setup_exec_signals();
-	init_result = handle_executor_init(cmd_list, env_list, pipe_fd,
+	if (cmd_list && cmd_list->next == NULL && cmd_list->args
+		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
+		return (execute_single_parent_builtin(cmd_list, env_list));
+	init_result = setup_pipes_and_heredocs(cmd_list, env_list, pipe_fd,
 			&prev_pipe_read);
 	if (init_result != 0)
 		return (init_result);
