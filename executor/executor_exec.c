@@ -55,6 +55,8 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	char	**envp;
 
 	envp = env_list_to_envp(env_list);
+	if (!envp)
+		exit(1);
 	if (current->args[0] && ft_strchr(current->args[0], '/'))
 		handle_directory_errors(current->args[0], envp);
 	path = find_executable_path(current->args[0], envp);
@@ -62,7 +64,8 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	safe_doube_star_free(envp);
 	ft_fprintf_fd(2, "minishell: %s: command not found\n",
 		current->args[0]);
-	free_command_list(current);
+	if (path)
+		free(path);
 	exit(127);
 }
 

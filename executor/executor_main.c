@@ -83,17 +83,24 @@ static void	execute_command_process(t_command *current, int *prev_pipe_read,
 	char	**envp;
 
 	envp = env_list_to_envp(*env_list);
+	if (!envp)
+		return;
 	expand_command_args(current, envp);
 	if (!setup_command_pipe(current, prev_pipe_read, pipe_fd))
-		return ;
+	{
+		safe_doube_star_free(envp);
+		return;
+	}
 	pid = fork();
 	if (pid == -1)
 	{
 		handle_fork_error(current, *prev_pipe_read, pipe_fd);
-		return ;
+		safe_doube_star_free(envp);
+		return;
 	}
 	if (pid == 0)
 		child_process(current, *prev_pipe_read, pipe_fd, *env_list);
+	safe_doube_star_free(envp); // Free envp after fork in parent process
 	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
 }
 
