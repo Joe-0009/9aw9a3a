@@ -46,8 +46,21 @@ void add_or_update_env(t_env **env_list, const char *key, const char *value)
 	if (!node)
 		return ;
 	node->key = ft_strdup(key);
+	if (!node->key)
+	{
+		free(node);
+		return ;
+	}
 	if (value != NULL)
+	{
 		node->value = ft_strdup(value);
+		if (!node->value)
+		{
+			free(node->key);
+			free(node);
+			return ;
+		}
+	}
 	else
 		node->value = NULL;
 	node->next = *env_list;

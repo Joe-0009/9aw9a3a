@@ -43,8 +43,8 @@ static void	fill_word_args(char **args, t_token **token, int count)
 
 t_command	*create_command_type_word(t_token **tokens)
 {
-	t_command *cmds;
-	int args_count;
+	t_command	*cmds;
+	int			args_count;
 
 	if (!*tokens || (*tokens)->type != TOKEN_WORD)
 		return (NULL);
@@ -54,7 +54,10 @@ t_command	*create_command_type_word(t_token **tokens)
 	args_count = count_word_args(*tokens);
 	cmds->args = malloc(sizeof(char *) * (args_count + 1));
 	if (!cmds->args)
-		return (free(cmds), NULL);
+	{
+		free_command(cmds);
+		return (NULL);
+	}
 	fill_word_args(cmds->args, tokens, args_count);
 	cmds->args_count = args_count;
 	return (cmds);

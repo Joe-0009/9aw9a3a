@@ -52,7 +52,9 @@ int	ft_isspace(char c)
 
 char	*strip_quotes(const char *value)
 {
-	size_t	(i), (len), (j);
+	size_t	i;
+	size_t	len;
+	size_t	j;
 	char	*result;
 	int		in_quotes;
 	char	quote_type;
@@ -80,15 +82,8 @@ char	*strip_quotes(const char *value)
 			len++;
 		i++;
 	}
-	result = ft_strdup("");
-	if (!result)
-		return (NULL);
 	if (len == ft_strlen(value))
-	{
-		free(result);
 		return (ft_strdup(value));
-	}
-	free(result);
 	result = ft_calloc(len + 1, sizeof(char));
 	if (!result)
 		return (NULL);
