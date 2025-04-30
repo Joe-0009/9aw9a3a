@@ -41,10 +41,24 @@ void	update_shlvl(t_env **env_list)
 	shlvl = 1;
 	node = find_env_node(*env_list, "SHLVL");
 	if (node && node->value)
+	{
 		shlvl = ft_atoi(node->value) + 1;
+		if (shlvl < 0)
+			shlvl = 0;
+		else if (shlvl > 999)
+		{
+			ft_putstr_fd("minishell: warning: shell level (", 2);
+			ft_putnbr_fd(shlvl, 2);
+			ft_putstr_fd(") too high, resetting to 1\n", 2);
+			shlvl = 1;
+		}
+	}
 	shlvl_str = ft_itoa(shlvl);
-	add_or_update_env(env_list, "SHLVL", shlvl_str);
-	safe_free((void **)&shlvl_str);
+	if (shlvl_str)
+	{
+		add_or_update_env(env_list, "SHLVL", shlvl_str);
+		safe_free((void **)&shlvl_str);
+	}
 }
 
 void	initialize_empty_env(t_env **env_list)

@@ -83,8 +83,15 @@ char	*strip_quotes(const char *value)
 		i++;
 	}
 	if (len == ft_strlen(value))
-		return (ft_strdup(value));
-	result = malloc(sizeof(char) * (len + 1));
+	{
+		result = malloc(len + 1);
+		if (!result)
+			return (NULL);
+		memcpy(result, value, len);
+		result[len] = '\0';
+		return (result);
+	}
+	result = malloc(len + 1);
 	if (!result)
 		return (NULL);
 	i = 0;

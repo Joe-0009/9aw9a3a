@@ -45,6 +45,7 @@ t_command	*create_command_type_word(t_token **tokens)
 {
 	t_command	*cmds;
 	int			args_count;
+	int			i;
 
 	if (!*tokens || (*tokens)->type != TOKEN_WORD)
 		return (NULL);
@@ -60,5 +61,15 @@ t_command	*create_command_type_word(t_token **tokens)
 	}
 	fill_word_args(cmds->args, tokens, args_count);
 	cmds->args_count = args_count;
+	i = 0;
+	while (i < args_count)
+	{
+		if (cmds->args[i] == NULL)
+		{
+			free_command(cmds);
+			return (NULL);
+		}
+		i++;
+	}
 	return (cmds);
 }
