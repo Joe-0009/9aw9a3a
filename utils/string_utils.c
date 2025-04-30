@@ -84,7 +84,7 @@ char	*strip_quotes(const char *value)
 	}
 	if (len == ft_strlen(value))
 		return (ft_strdup(value));
-	result = ft_calloc(len + 1, sizeof(char));
+	result = malloc(sizeof(char) * (len + 1));
 	if (!result)
 		return (NULL);
 	i = 0;
@@ -108,6 +108,7 @@ char	*strip_quotes(const char *value)
 			result[j++] = value[i];
 		i++;
 	}
+	result[j] = '\0';
 	return (result);
 }
 

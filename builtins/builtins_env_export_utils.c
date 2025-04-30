@@ -30,7 +30,10 @@ t_env	*find_env_node(t_env *env_list, const char *key)
 void add_or_update_env(t_env **env_list, const char *key, const char *value)
 {
 	t_env	*node;
+	t_env	*last;
 
+	if (!key)
+		return ;
 	node = find_env_node(*env_list, key);
 	if (node)
 	{
@@ -52,17 +55,23 @@ void add_or_update_env(t_env **env_list, const char *key, const char *value)
 		return ;
 	}
 	if (value != NULL)
-	{
 		node->value = ft_strdup(value);
-		if (!node->value)
-		{
-			free(node->key);
-			free(node);
-			return ;
-		}
-	}
 	else
 		node->value = NULL;
-	node->next = *env_list;
-	*env_list = node;
+	if (value != NULL && !node->value)
+	{
+		free(node->key);
+		free(node);
+		return ;
+	}
+	node->next = NULL;
+	if (*env_list == NULL)
+	{
+		*env_list = node;
+		return ;
+	}
+	last = *env_list;
+	while (last->next)
+		last = last->next;
+	last->next = node;
 }

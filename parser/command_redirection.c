@@ -72,6 +72,13 @@ static void	add_words_as_args(t_command *cmd, t_token **current)
 	while (*current && (*current)->type == TOKEN_WORD && j < new_count)
 	{
 		new_args[i + j] = ft_strdup((*current)->content);
+		if (!new_args[i + j])
+		{
+			while (--j >= 0)
+				free(new_args[i + j]);
+			free(new_args);
+			return ;
+		}
 		*current = (*current)->next;
 		j++;
 	}

@@ -40,12 +40,20 @@ t_command	*create_cmds(t_token **tokens)
 		if (current->type == TOKEN_WORD)
 		{
 			if (!handle_word_token(&current, &first_cmd, &current_cmd))
+			{
+				if (first_cmd)
+					free_command_list(first_cmd);
 				return (NULL);
+			}
 		}
 		else if (current->type == TOKEN_PIPE)
 		{
 			if (!handle_pipe_token(current_cmd))
+			{
+				if (first_cmd)
+					free_command_list(first_cmd);
 				return (NULL);
+			}
 			current = current->next;
 		}
 		else if (current->type == TOKEN_REDIRECT_IN
@@ -53,7 +61,11 @@ t_command	*create_cmds(t_token **tokens)
 			|| current->type == TOKEN_APPEND || current->type == TOKEN_HEREDOC)
 		{
 			if (!handle_redirect_token(&current, &first_cmd, &current_cmd))
+			{
+				if (first_cmd)
+					free_command_list(first_cmd);
 				return (NULL);
+			}
 		}
 		else
 			current = current->next;
