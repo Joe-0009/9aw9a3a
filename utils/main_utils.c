@@ -17,19 +17,24 @@ void	print_Cmd_list(t_command *cmd)
 
 void free_env_list(t_env **env_list)
 {
-    t_env *current;
-    t_env *next;
+	t_env *current;
+	t_env *next;
 
-    current = *env_list;
-    while (current)
-    {
-        next = current->next;
-        safe_free((void **)&current->key);
-        safe_free((void **)&current->value);
-        safe_free((void **)&current);
-        current = next;
-    }
-    *env_list = NULL;
+	if (!env_list || !*env_list)
+		return;
+		
+	current = *env_list;
+	while (current)
+	{
+		next = current->next;
+		if (current->key)
+			safe_free((void **)&current->key);
+		if (current->value)
+			safe_free((void **)&current->value);
+		safe_free((void **)&current);
+		current = next;
+	}
+	*env_list = NULL;
 }
 
 void	update_shlvl(t_env **env_list)

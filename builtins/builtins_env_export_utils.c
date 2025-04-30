@@ -32,13 +32,12 @@ void add_or_update_env(t_env **env_list, const char *key, const char *value)
 	t_env	*node;
 	t_env	*last;
 
-	if (!key)
+	if (!key || !env_list)
 		return ;
 	node = find_env_node(*env_list, key);
 	if (node)
 	{
-		if (node->value)
-			safe_free((void **)&node->value);
+		safe_free((void **)&node->value);
 		if (value != NULL)
 			node->value = ft_strdup(value);
 		else
@@ -49,29 +48,25 @@ void add_or_update_env(t_env **env_list, const char *key, const char *value)
 	if (!node)
 		return ;
 	node->key = ft_strdup(key);
-	if (!node->key)
-	{
-		free(node);
-		return ;
-	}
 	if (value != NULL)
 		node->value = ft_strdup(value);
 	else
 		node->value = NULL;
-	if (value != NULL && !node->value)
-	{
-		free(node->key);
-		free(node);
-		return ;
-	}
 	node->next = NULL;
-	if (*env_list == NULL)
+	if (!node->key || (value != NULL && !node->value))
 	{
-		*env_list = node;
+		safe_free((void **)&node->key);
+		safe_free((void **)&node->value);
+		safe_free((void **)&node);
 		return ;
 	}
-	last = *env_list;
-	while (last->next)
-		last = last->next;
-	last->next = node;
+	if (*env_list == NULL)
+		*env_list = node;
+	else
+	{
+		last = *env_list;
+		while (last->next)
+			last = last->next;
+		last->next = node;
+	}
 }

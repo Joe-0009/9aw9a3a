@@ -30,7 +30,6 @@ static void	shell_loop(t_env **env_list)
 	clear_history();
 }
 
-
 int	main(int argc, char **argv, char **envp)
 {
 	t_env *env_list;
