@@ -27,10 +27,47 @@ t_env	*find_env_node(t_env *env_list, const char *key)
 	return (NULL);
 }
 
+static t_env	*create_env_node(const char *key, const char *value)
+{
+	t_env	*node;
+
+	node = (t_env *)malloc(sizeof(t_env));
+	if (!node)
+		return (NULL);
+	node->key = ft_strdup(key);
+	if (value != NULL)
+		node->value = ft_strdup(value);
+	else
+		node->value = NULL;
+	node->next = NULL;
+	if (!node->key || (value != NULL && !node->value))
+	{
+		safe_free((void **)&node->key);
+		safe_free((void **)&node->value);
+		safe_free((void **)&node);
+		return (NULL);
+	}
+	return (node);
+}
+
+static void	append_env_node(t_env **env_list, t_env *node)
+{
+	t_env	*last;
+
+	if (*env_list == NULL)
+		*env_list = node;
+	else
+	{
+		last = *env_list;
+		while (last->next)
+			last = last->next;
+		last->next = node;
+	}
+}
+
 void add_or_update_env(t_env **env_list, const char *key, const char *value)
 {
 	t_env	*node;
-	t_env	*last;
 
 	if (!key || !env_list)
 		return ;
@@ -44,29 +81,8 @@ void add_or_update_env(t_env **env_list, const char *key, const char *value)
 			node->value = NULL;
 		return ;
 	}
-	node = (t_env *)malloc(sizeof(t_env));
+	node = create_env_node(key, value);
 	if (!node)
 		return ;
-	node->key = ft_strdup(key);
-	if (value != NULL)
-		node->value = ft_strdup(value);
-	else
-		node->value = NULL;
-	node->next = NULL;
-	if (!node->key || (value != NULL && !node->value))
-	{
-		safe_free((void **)&node->key);
-		safe_free((void **)&node->value);
-		safe_free((void **)&node);
-		return ;
-	}
-	if (*env_list == NULL)
-		*env_list = node;
-	else
-	{
-		last = *env_list;
-		while (last->next)
-			last = last->next;
-		last->next = node;
-	}
+	append_env_node(env_list, node);
 }
