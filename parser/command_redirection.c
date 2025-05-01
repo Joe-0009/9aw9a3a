@@ -13,6 +13,7 @@ static int	create_cmd_if_needed(t_command **first_cmd, t_command **current_cmd)
 			*first_cmd = new_cmd;
 		*current_cmd = new_cmd;
 	}
+	
 	return (1);
 }
 

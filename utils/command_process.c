@@ -12,6 +12,8 @@ int	process_command(char *input, t_env **env_list)
 		return (0);
 	assign_token_types(tokens);
 	cmds = create_cmds(&tokens);
+	print_Cmd_list(cmds);
+	printf("\n");
 	if (cmds)
 	{
 		ft_token_clear(&tokens, free);

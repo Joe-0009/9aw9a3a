@@ -5,14 +5,17 @@ void	print_Cmd_list(t_command *cmd)
 	int	i;
 
 	i = 0;
+	
 	while (cmd)
 	{
+		printf("\n%d\n", cmd->args_count);
 		i = 0;
 		while (i < cmd->args_count)
 			printf("%s ", cmd->args[i++]);
 		printf("\n");
 		cmd = cmd->next;
 	}
+
 }
 
 void free_env_list(t_env **env_list)

@@ -23,6 +23,7 @@ static int	handle_pipe_token(t_command *current_cmd)
 		ft_putstr_fd("minishell: syntax error near unexpected token `|\n", 2);
 		return (0);
 	}
+
 	return (1);
 }
 
@@ -31,6 +32,7 @@ t_command	*create_cmds(t_token **tokens)
 	t_command	*first_cmd;
 	t_command	*current_cmd;
 	t_token		*current;
+	t_command *new_cmd;
 
 	first_cmd = NULL;
 	current_cmd = NULL;
@@ -53,6 +55,21 @@ t_command	*create_cmds(t_token **tokens)
 				if (first_cmd)
 					free_command_list(first_cmd);
 				return (NULL);
+			}
+			// Check if next token is a redirection and create a new command for it
+			if (current->next && (current->next->type == TOKEN_REDIRECT_IN 
+				|| current->next->type == TOKEN_REDIRECT_OUT
+				|| current->next->type == TOKEN_APPEND 
+				|| current->next->type == TOKEN_HEREDOC))
+			{
+				new_cmd = command_init();
+				if (!new_cmd)
+				{
+					free_command_list(first_cmd);
+					return (NULL);
+				}
+				current_cmd->next = new_cmd;
+				current_cmd = new_cmd;
 			}
 			current = current->next;
 		}
