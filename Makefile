@@ -26,7 +26,7 @@ LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory
 
 # Source files by module
 MAIN_SRCS = main.c
-UTILS_SRCS = $(addprefix $(UTILS_DIR)/, string_utils.c memory_utils.c main_utils.c command_process.c)
+UTILS_SRCS = $(addprefix $(UTILS_DIR)/, string_utils.c memory_utils.c main_utils.c command_process.c fprintf_utils.c quote_utils.c)
 TOKENIZER_SRCS = $(addprefix $(TOKENIZER_DIR)/, tokenizer.c token_utils.c token_types.c token_list_utils.c tokenizer_process.c)
 PARSER_SRCS = $(addprefix $(PARSER_DIR)/, command_path.c command_init.c command_redirection.c command_parser.c command_redirect_setup.c command_redirection_utils.c)
 EXECUTOR_SRCS = $(addprefix $(EXECUTOR_DIR)/, heredoc.c executor_main.c executor_exec.c executor_child.c executor_utils.c executor_builtin.c executor_pipe.c)

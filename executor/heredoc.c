@@ -1,6 +1,7 @@
 #include "../minishell.h"
 
-static void	process_heredoc_line(char *line, int pipe_fd, int quoted, char **envp)
+static void	process_heredoc_line(char *line, int pipe_fd, int quoted,
+		char **envp)
 {
 	char	*expanded;
 
@@ -20,7 +21,7 @@ static void	process_heredoc_line(char *line, int pipe_fd, int quoted, char **env
 	ft_putchar_fd('\n', pipe_fd);
 }
 
-static void	read_heredoc_lines(int pipe_fd, char *processed_delimiter, 
+static void	read_heredoc_lines(int pipe_fd, char *processed_delimiter,
 		int quoted, char **envp)
 {
 	char	*line;
@@ -32,7 +33,8 @@ static void	read_heredoc_lines(int pipe_fd, char *processed_delimiter,
 		{
 			if (g_last_exit_status == 130)
 				break ;
-			ft_putstr_fd("minishell: warning: heredoc delimited by end-of-file\n", 2);
+			ft_putstr_fd("minishell: warning: heredoc delimited by end-of-file\n",
+				2);
 			break ;
 		}
 		if (ft_strcmp(line, processed_delimiter) == 0)
@@ -57,9 +59,7 @@ static void	handle_heredoc_child_process(int pipe_fd[2], char *delimiter,
 	processed_delimiter = strip_quotes(delimiter);
 	if (!processed_delimiter)
 		exit(1);
-	
 	read_heredoc_lines(pipe_fd[1], processed_delimiter, quoted, envp);
-	
 	safe_free((void **)&processed_delimiter);
 	safe_close(&pipe_fd[1]);
 	exit(0);
@@ -72,8 +72,7 @@ static int	handle_heredoc_parent(int pipe_fd[2], pid_t pid)
 	safe_close(&pipe_fd[1]);
 	waitpid(pid, &status, 0);
 	setup_signals();
-	if ((WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) || 
-		status == 33280)
+	if ((WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) || status == 33280)
 	{
 		safe_close(&pipe_fd[0]);
 		g_last_exit_status = 130;

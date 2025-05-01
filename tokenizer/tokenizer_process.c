@@ -31,8 +31,7 @@ t_token	*tokenize_input(char *input)
 {
 	t_token	*tokens;
 	t_state	state;
-	int		i;
-	int		start;
+	int		(i), (start);
 
 	tokens = NULL;
 	state = STATE_NORMAL;

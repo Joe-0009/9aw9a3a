@@ -8,6 +8,7 @@ int	*get_exit_status(void)
 static void	handle_sigint_prompt(int sig)
 {
 	(void)sig;
+
 	write(STDOUT_FILENO, "\n", 1);
 	rl_on_new_line();
 	rl_replace_line("", 0);
@@ -18,17 +19,13 @@ static void	handle_sigint_prompt(int sig)
 void	handle_sigint_heredoc(int sig)
 {
 	(void)sig;
+	
 	*get_exit_status() = 130;
 	write(1, "\n", 1);
-	
-	// Instead of just closing stdin, we need to actually
-	// exit the process with a signal that the parent can detect
-	signal(SIGINT, SIG_DFL);  // Reset to default handler
-	kill(getpid(), SIGINT);   // Send SIGINT to self - will be detected by parent
-	
-	// These lines will only execute if the kill doesn't work
+	signal(SIGINT, SIG_DFL);
+	kill(getpid(), SIGINT);
 	close(STDIN_FILENO);
-	exit(130);                // Ensure we exit with the right code
+	exit(130);
 }
 
 void	setup_signals(void)
