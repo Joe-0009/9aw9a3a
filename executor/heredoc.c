@@ -73,7 +73,7 @@ static int	handle_heredoc_parent(int pipe_fd[2], pid_t pid)
 	waitpid(pid, &status, 0);
 	setup_signals();
 	if ((WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) || 
-		status == 33280 || g_last_exit_status == 130)
+		status == 33280)
 	{
 		safe_close(&pipe_fd[0]);
 		g_last_exit_status = 130;

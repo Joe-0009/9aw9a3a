@@ -16,10 +16,7 @@ static int	setup_all_heredocs(t_command *cmd_list, char **envp)
 			{
 				result = handle_heredoc_redir(redir, envp);
 				if (result == 130)
-				{
-					g_last_exit_status = 130;
 					return (130);
-				}
 				if (result == -1)
 					return (-1);
 			}
@@ -30,12 +27,15 @@ static int	setup_all_heredocs(t_command *cmd_list, char **envp)
 	return (0);
 }
 
-static int	init_and_setup_heredocs(t_command *cmd_list, t_env **env_list,
+static int	setup_pipes_and_heredocs(t_command *cmd_list, t_env **env_list,
 		int pipe_fd[2], int *prev_pipe_read)
 {
 	int		setup_result;
 	char	**envp;
 
+	pipe_fd[0] = -1;
+	pipe_fd[1] = -1;
+	*prev_pipe_read = -1;
 	envp = env_list_to_envp(*env_list);
 	setup_result = setup_all_heredocs(cmd_list, envp);
 	safe_doube_star_free(envp);
@@ -46,29 +46,6 @@ static int	init_and_setup_heredocs(t_command *cmd_list, t_env **env_list,
 		return (130);
 	}
 	if (setup_result == -1)
-		return (1);
-	pipe_fd[0] = -1;
-	pipe_fd[1] = -1;
-	*prev_pipe_read = -1;
-	return (0);
-}
-
-static int	setup_pipes_and_heredocs(t_command *cmd_list, t_env **env_list,
-		int pipe_fd[2], int *prev_pipe_read)
-{
-	int	init_result;
-
-	pipe_fd[0] = -1;
-	pipe_fd[1] = -1;
-	*prev_pipe_read = -1;
-	init_result = init_and_setup_heredocs(cmd_list, env_list, pipe_fd,
-			prev_pipe_read);
-	if (init_result == 130)
-	{
-		setup_signals();
-		return (130);
-	}
-	else if (init_result != 0)
 	{
 		setup_signals();
 		return (1);
@@ -84,23 +61,23 @@ static void	execute_command_process(t_command *current, int *prev_pipe_read,
 
 	envp = env_list_to_envp(*env_list);
 	if (!envp)
-		return;
+		return ;
 	expand_command_args(current, envp);
 	if (!setup_command_pipe(current, prev_pipe_read, pipe_fd))
 	{
 		safe_doube_star_free(envp);
-		return;
+		return ;
 	}
 	pid = fork();
 	if (pid == -1)
 	{
 		handle_fork_error(current, *prev_pipe_read, pipe_fd);
 		safe_doube_star_free(envp);
-		return;
+		return ;
 	}
 	if (pid == 0)
 		child_process(current, *prev_pipe_read, pipe_fd, *env_list);
-	safe_doube_star_free(envp); // Free envp after fork in parent process
+	safe_doube_star_free(envp);
 	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
 }
 

@@ -19,7 +19,6 @@ int	handle_heredoc_redir(t_redirections *redir, char **envp)
 	{
 		if (heredoc_fd > 0)
 			safe_close(&heredoc_fd);
-		g_last_exit_status = 130;
 		return (130);
 	}
 	if (heredoc_fd == -1)
