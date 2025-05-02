@@ -27,12 +27,36 @@ static int	handle_pipe_token(t_command *current_cmd)
 	return (1);
 }
 
+static int	handle_pipe_with_redirection(t_token *current, t_command **current_cmd)
+{
+	t_command	*new_cmd;
+
+	if (current->next && (current->next->type == TOKEN_REDIRECT_IN 
+		|| current->next->type == TOKEN_REDIRECT_OUT
+		|| current->next->type == TOKEN_APPEND 
+		|| current->next->type == TOKEN_HEREDOC))
+	{
+		new_cmd = command_init();
+		if (!new_cmd)
+			return (0);
+		(*current_cmd)->next = new_cmd;
+		*current_cmd = new_cmd;
+	}
+	return (1);
+}
+
+static t_command	*cleanup_and_return_null(t_command *first_cmd)
+{
+	if (first_cmd)
+		free_command_list(first_cmd);
+	return (NULL);
+}
+
 t_command	*create_cmds(t_token **tokens)
 {
 	t_command	*first_cmd;
 	t_command	*current_cmd;
 	t_token		*current;
-	t_command *new_cmd;
 
 	first_cmd = NULL;
 	current_cmd = NULL;
@@ -42,47 +66,20 @@ t_command	*create_cmds(t_token **tokens)
 		if (current->type == TOKEN_WORD)
 		{
 			if (!handle_word_token(&current, &first_cmd, &current_cmd))
-			{
-				if (first_cmd)
-					free_command_list(first_cmd);
-				return (NULL);
-			}
+				return (cleanup_and_return_null(first_cmd));
 		}
 		else if (current->type == TOKEN_PIPE)
 		{
-			if (!handle_pipe_token(current_cmd))
-			{
-				if (first_cmd)
-					free_command_list(first_cmd);
-				return (NULL);
-			}
-			// Check if next token is a redirection and create a new command for it
-			if (current->next && (current->next->type == TOKEN_REDIRECT_IN 
-				|| current->next->type == TOKEN_REDIRECT_OUT
-				|| current->next->type == TOKEN_APPEND 
-				|| current->next->type == TOKEN_HEREDOC))
-			{
-				new_cmd = command_init();
-				if (!new_cmd)
-				{
-					free_command_list(first_cmd);
-					return (NULL);
-				}
-				current_cmd->next = new_cmd;
-				current_cmd = new_cmd;
-			}
+			if (!handle_pipe_token(current_cmd) || 
+				!handle_pipe_with_redirection(current, &current_cmd))
+				return (cleanup_and_return_null(first_cmd));
 			current = current->next;
 		}
-		else if (current->type == TOKEN_REDIRECT_IN
-			|| current->type == TOKEN_REDIRECT_OUT
+		else if (current->type == TOKEN_REDIRECT_IN || current->type == TOKEN_REDIRECT_OUT
 			|| current->type == TOKEN_APPEND || current->type == TOKEN_HEREDOC)
 		{
 			if (!handle_redirect_token(&current, &first_cmd, &current_cmd))
-			{
-				if (first_cmd)
-					free_command_list(first_cmd);
-				return (NULL);
-			}
+				return (cleanup_and_return_null(first_cmd));
 		}
 		else
 			current = current->next;
