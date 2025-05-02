@@ -1,10 +1,10 @@
 #include "../minishell.h"
 
-void	skip_whitespace(char *input, int *i, int *start)
+void	skip_whitespace(t_tokenizer *t)
 {
-	while (input[*i] && ft_isspace(input[*i]))
-		(*i)++;
-	*start = *i;
+	while (t->input[t->i] && ft_isspace(t->input[t->i]))
+		(t->i)++;
+	t->start = t->i;
 }
 
 t_token	*clean_tokens_return_null(t_token **tokens)
@@ -29,29 +29,29 @@ int	add_token(t_token **tokens, char *content)
 
 t_token	*tokenize_input(char *input)
 {
-	t_token	*tokens;
-	t_state	state;
-	int		(i), (start);
+	t_token		*tokens;
+	t_tokenizer	t;
 
 	tokens = NULL;
-	state = STATE_NORMAL;
-	i = 0;
-	start = 0;
-	while (input[i])
+	t.tokens = &tokens;
+	t.input = input;
+	t.i = 0;
+	t.start = 0;
+	t.state = STATE_NORMAL;
+	while (input[t.i])
 	{
-		if ((input[i] == '"' && state != STATE_IN_SINGLE_QUOTE)
-			|| (input[i] == '\'' && state != STATE_IN_DOUBLE_QUOTE))
+		if ((input[t.i] == '"' && t.state != STATE_IN_SINGLE_QUOTE)
+			|| (input[t.i] == '\'' && t.state != STATE_IN_DOUBLE_QUOTE))
 		{
-			handle_quotes(input, &i, &state);
+			handle_quotes(&t);
 			continue ;
 		}
-		if (state == STATE_NORMAL && !process_normal_char(&tokens, input, &i,
-				&start))
+		if (t.state == STATE_NORMAL && !process_normal_char(&t))
 			return (clean_tokens_return_null(&tokens));
-		else if (state != STATE_NORMAL)
-			i++;
+		else if (t.state != STATE_NORMAL)
+			t.i++;
 	}
-	if (!process_end_of_input(&tokens, input, i, start, state))
+	if (!process_end_of_input(&t))
 		return (clean_tokens_return_null(&tokens));
 	return (tokens);
 }

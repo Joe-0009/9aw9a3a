@@ -1,5 +1,6 @@
 #include "../minishell.h"
 
+
 static size_t	calculate_stripped_length(const char *value)
 {
 	int		in_quotes;
@@ -78,23 +79,22 @@ char	*strip_quotes(const char *value)
 	return (result);
 }
 
-static void	process_quote_check(char c, size_t *i, int *in_quotes, int *quoted,
-		char *quote_type)
+static void	process_quote_check(t_quote_ctx *ctx)
 {
-	if (!*in_quotes)
+	if (!*(ctx->in_quotes))
 	{
-		*in_quotes = 1;
-		*quote_type = c;
-		(*i)++;
+		*(ctx->in_quotes) = 1;
+		*(ctx->quote_type) = ctx->c;
+		(*(ctx->i))++;
 	}
-	else if (*in_quotes && c == *quote_type)
+	else if (*(ctx->in_quotes) && ctx->c == *(ctx->quote_type))
 	{
-		*quoted = 1;
-		*in_quotes = 0;
-		(*i)++;
+		*(ctx->quoted) = 1;
+		*(ctx->in_quotes) = 0;
+		(*(ctx->i))++;
 	}
 	else
-		(*i)++;
+		(*(ctx->i))++;
 }
 
 int	is_content_quoted(char *content)
@@ -103,6 +103,7 @@ int	is_content_quoted(char *content)
 	int		in_quotes;
 	char	quote_type;
 	int		quoted;
+	t_quote_ctx ctx;
 
 	i = 0;
 	in_quotes = 0;
@@ -110,8 +111,14 @@ int	is_content_quoted(char *content)
 	while (content[i])
 	{
 		if ((content[i] == '"' || content[i] == '\''))
-			process_quote_check(content[i], &i, &in_quotes, &quoted,
-				&quote_type);
+		{
+			ctx.c = content[i];
+			ctx.i = &i;
+			ctx.in_quotes = &in_quotes;
+			ctx.quoted = &quoted;
+			ctx.quote_type = &quote_type;
+			process_quote_check(&ctx);
+		}
 		else
 			i++;
 	}

@@ -31,23 +31,23 @@ void	token_utils_skip_whitespace(char *input, int *i, int *start)
 	*start = *i;
 }
 
-void	token_utils_handle_quotes(char *input, int *i, t_state *state)
+void	token_utils_handle_quotes(t_tokenizer *t)
 {
-	if (input[*i] == '"' && *state != STATE_IN_SINGLE_QUOTE)
+	if (t->input[t->i] == '"' && t->state != STATE_IN_SINGLE_QUOTE)
 	{
-		if (*state == STATE_NORMAL)
-			*state = STATE_IN_DOUBLE_QUOTE;
+		if (t->state == STATE_NORMAL)
+			t->state = STATE_IN_DOUBLE_QUOTE;
 		else
-			*state = STATE_NORMAL;
+			t->state = STATE_NORMAL;
 	}
-	else if (input[*i] == '\'' && *state != STATE_IN_DOUBLE_QUOTE)
+	else if (t->input[t->i] == '\'' && t->state != STATE_IN_DOUBLE_QUOTE)
 	{
-		if (*state == STATE_NORMAL)
-			*state = STATE_IN_SINGLE_QUOTE;
+		if (t->state == STATE_NORMAL)
+			t->state = STATE_IN_SINGLE_QUOTE;
 		else
-			*state = STATE_NORMAL;
+			t->state = STATE_NORMAL;
 	}
-	(*i)++;
+	(t->i)++;
 }
 
 t_token	*token_utils_clean_tokens_return_null(t_token **tokens)

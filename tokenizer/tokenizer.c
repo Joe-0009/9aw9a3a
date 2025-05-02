@@ -1,58 +1,57 @@
 #include "../minishell.h"
 
-int	process_operator(t_token **tokens, char *input, int *i, int *start)
+int	process_operator(t_tokenizer *t)
 {
 	char	*token_content;
 
-	if (*i > *start)
+	if (t->i > t->start)
 	{
-		token_content = extract_word_token(input, *start, *i);
-		if (!token_content || !add_token(tokens, token_content))
+		token_content = extract_word_token(t->input, t->start, t->i);
+		if (!token_content || !add_token(t->tokens, token_content))
 			return (0);
 	}
-	token_content = extract_operator_token(input, i);
-	if (!token_content || !add_token(tokens, token_content))
+	token_content = extract_operator_token(t->input, &t->i);
+	if (!token_content || !add_token(t->tokens, token_content))
 		return (0);
-	*start = *i;
+	t->start = t->i;
 	return (1);
 }
 
-int	process_whitespace(t_token **tokens, char *input, int *i, int *start)
+int	process_whitespace(t_tokenizer *t)
 {
 	char	*token_content;
 
-	if (*i > *start)
+	if (t->i > t->start)
 	{
-		token_content = extract_word_token(input, *start, *i);
-		if (!token_content || !add_token(tokens, token_content))
+		token_content = extract_word_token(t->input, t->start, t->i);
+		if (!token_content || !add_token(t->tokens, token_content))
 			return (0);
 	}
-	skip_whitespace(input, i, start);
+	skip_whitespace(t);
 	return (1);
 }
 
-int	process_normal_char(t_token **tokens, char *input, int *i, int *start)
+int	process_normal_char(t_tokenizer *t)
 {
-	if (is_operator(input[*i]))
-		return (process_operator(tokens, input, i, start));
-	else if (ft_isspace(input[*i]))
-		return (process_whitespace(tokens, input, i, start));
-	(*i)++;
+	if (is_operator(t->input[t->i]))
+		return (process_operator(t));
+	else if (ft_isspace(t->input[t->i]))
+		return (process_whitespace(t));
+	(t->i)++;
 	return (1);
 }
 
-int	process_end_of_input(t_token **tokens, char *input, int i, int start,
-		t_state state)
+int	process_end_of_input(t_tokenizer *t)
 {
 	char	*token_content;
 
-	if (i > start)
+	if (t->i > t->start)
 	{
-		token_content = extract_word_token(input, start, i);
-		if (!token_content || !add_token(tokens, token_content))
+		token_content = extract_word_token(t->input, t->start, t->i);
+		if (!token_content || !add_token(t->tokens, token_content))
 			return (0);
 	}
-	if (state != STATE_NORMAL)
+	if (t->state != STATE_NORMAL)
 	{
 		ft_putstr_fd("minishell: syntax error: unclosed quote\n", 2);
 		return (0);
@@ -60,15 +59,15 @@ int	process_end_of_input(t_token **tokens, char *input, int i, int start,
 	return (1);
 }
 
-void	handle_quotes(char *input, int *i, t_state *state)
+void	handle_quotes(t_tokenizer *t)
 {
 	char	quote_char;
 
-	quote_char = input[*i];
-	if (*state == STATE_NORMAL)
-		*state = (quote_char == '\'') ? STATE_IN_SINGLE_QUOTE : STATE_IN_DOUBLE_QUOTE;
-	else if ((*state == STATE_IN_SINGLE_QUOTE && quote_char == '\'')
-		|| (*state == STATE_IN_DOUBLE_QUOTE && quote_char == '"'))
-		*state = STATE_NORMAL;
-	(*i)++;
+	quote_char = t->input[t->i];
+	if (t->state == STATE_NORMAL)
+		t->state = (quote_char == '\'') ? STATE_IN_SINGLE_QUOTE : STATE_IN_DOUBLE_QUOTE;
+	else if ((t->state == STATE_IN_SINGLE_QUOTE && quote_char == '\'')
+		|| (t->state == STATE_IN_DOUBLE_QUOTE && quote_char == '"'))
+		t->state = STATE_NORMAL;
+	(t->i)++;
 }

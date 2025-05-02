@@ -104,22 +104,34 @@ char						*strip_quotes(const char *value);
 int                         is_content_quoted(char *content);
 
 /* ===================== TOKENIZER ===================== */
+typedef struct s_tokenizer {
+	t_token		**tokens;     /* List of tokens being built */
+	char		*input;       /* Input string being tokenized */
+	int		i;            /* Current position in input */
+	int		start;        /* Start position of current token */
+	t_state		state;        /* Current quote state */
+} t_tokenizer;
+
+typedef struct s_quote_ctx {
+	char	c;              /* Current character being processed */
+	size_t	*i;             /* Current position pointer */
+	int		*in_quotes;     /* Whether we're in quotes */
+	int		*quoted;        /* Whether string has quotes */
+	char	*quote_type;    /* Current quote type (' or ") */
+}	t_quote_ctx;
+
 t_token						*tokenize_input(char *input);
 void						assign_token_types(t_token *tokens);
 int							is_operator(char c);
 char						*extract_operator_token(char *str, int *pos);
 char						*extract_word_token(char *str, int start, int end);
-int							process_normal_char(t_token **tokens, char *input,
-								int *i, int *start);
-int							process_operator(t_token **tokens, char *input,
-								int *i, int *start);
-int							process_whitespace(t_token **tokens, char *input,
-								int *i, int *start);
-void						skip_whitespace(char *input, int *i, int *start);
-int							process_end_of_input(t_token **tokens, char *input,
-								int i, int start, t_state state);
+int							process_normal_char(t_tokenizer *t);
+int							process_operator(t_tokenizer *t);
+int							process_whitespace(t_tokenizer *t);
+void						skip_whitespace(t_tokenizer *t);
+int							process_end_of_input(t_tokenizer *t);
 t_token						*clean_tokens_return_null(t_token **tokens);
-void						handle_quotes(char *input, int *i, t_state *state);
+void						handle_quotes(t_tokenizer *t);
 int							add_token(t_token **tokens, char *content);
 
 /* ===================== TOKEN LIST ===================== */
