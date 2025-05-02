@@ -106,21 +106,21 @@ int							is_content_quoted(char *content);
 /* ===================== TOKENIZER ===================== */
 typedef struct s_tokenizer
 {
-	t_token **tokens; /* List of tokens being built */
-	char *input;      /* Input string being tokenized */
-	int i;            /* Current position in input */
-	int start;        /* Start position of current token */
-	t_state state;    /* Current quote state */
-}							t_tokenizer;
+	t_token	**tokens;	/* List of tokens being built */
+	char	*input;		/* Input string being tokenized */
+	int		i;		/* Current position in input */
+	int		start;		/* Start position of current token */
+	t_state	state;		/* Current quote state */
+}				t_tokenizer;
 
 typedef struct s_quote_ctx
 {
-	char c;           /* Current character being processed */
-	size_t *i;        /* Current position pointer */
-	int *in_quotes;   /* Whether we're in quotes */
-	int *quoted;      /* Whether string has quotes */
-	char *quote_type; /* Current quote type (' or ") */
-}							t_quote_ctx;
+	char	c;		/* Current character being processed */
+	size_t	*i;		/* Current position pointer */
+	int		*in_quotes;	/* Whether we're in quotes */
+	int		*quoted;	/* Whether string has quotes */
+	char	*quote_type;	/* Current quote type (' or ") */
+}				t_quote_ctx;
 
 t_token						*tokenize_input(char *input);
 void						assign_token_types(t_token *tokens);
@@ -165,13 +165,13 @@ void						add_redirection(t_command *cmd,
 /* ===================== BUILTINS ===================== */
 typedef struct s_env_setup
 {
-	char **env_array; /* Array of environment variables */
-	char **temp_env;  /* Temporary environment array */
-	int env_count;    /* Count of environment variables */
-	int extra_vars;   /* Count of extra variables */
-	int i;            /* Loop counter */
-	int j;            /* Loop counter */
-}							t_env_setup;
+	char	**env_array;	/* Array of environment variables */
+	char	**temp_env;	/* Temporary environment array */
+	int		env_count;	/* Count of environment variables */
+	int		extra_vars;	/* Count of extra variables */
+	int		i;		/* Loop counter */
+	int		j;		/* Loop counter */
+}				t_env_setup;
 
 int							is_builtin_command(char *cmd);
 int							execute_builtin(t_command *cmd, t_env **env_list);
@@ -216,15 +216,15 @@ void						expand_command_args(t_command *cmd, char **envp);
 /* ===================== ENV EXPANSION ARGS UTILS ===================== */
 typedef struct s_expand_vars
 {
-	t_command *cmd;      /* Command being processed */
-	char **envp;         /* Environment variables */
-	int i;               /* Current argument index */
-	int j;               /* Output argument index */
-	int added;           /* Number of args added by splitting */
-	int is_export;       /* Whether this is an export command */
-	int was_arg_quoted;  /* Whether argument had quotes */
-	int had_quoted_vars; /* Whether argument had quoted variables */
-}							t_expand_vars;
+	t_command	*cmd;			/* Command being processed */
+	char		**envp;			/* Environment variables */
+	int			i;				/* Current argument index */
+	int			j;				/* Output argument index */
+	int			added;			/* Number of args added by splitting */
+	int			is_export;		/* Whether this is an export command */
+	int			was_arg_quoted;	/* Whether argument had quotes */
+	int			had_quoted_vars;/* Whether argument had quoted variables */
+}				t_expand_vars;
 
 int							count_split_words(char **split_words);
 void						copy_and_replace_args(t_command *cmd,
