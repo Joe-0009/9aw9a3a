@@ -20,20 +20,20 @@ static int	handle_pipe_token(t_command *current_cmd)
 {
 	if (!current_cmd)
 	{
-		ft_putstr_fd("minishell: syntax error near unexpected token `|\n", 2);
+		ft_putstr_fd("minishell: syntax error near unexpected token `|", 2);
 		return (0);
 	}
-
 	return (1);
 }
 
-static int	handle_pipe_with_redirection(t_token *current, t_command **current_cmd)
+static int	handle_pipe_with_redirection(t_token *current,
+	t_command **current_cmd)
 {
 	t_command	*new_cmd;
 
-	if (current->next && (current->next->type == TOKEN_REDIRECT_IN 
+	if (current->next && (current->next->type == TOKEN_REDIRECT_IN
 		|| current->next->type == TOKEN_REDIRECT_OUT
-		|| current->next->type == TOKEN_APPEND 
+		|| current->next->type == TOKEN_APPEND
 		|| current->next->type == TOKEN_HEREDOC))
 	{
 		new_cmd = command_init();
@@ -95,8 +95,10 @@ t_command	*create_cmds(t_token **tokens)
 				return (cleanup_and_return_null(first_cmd));
 			current = current->next;
 		}
-		else if (current->type == TOKEN_REDIRECT_IN || current->type == TOKEN_REDIRECT_OUT
-			|| current->type == TOKEN_APPEND || current->type == TOKEN_HEREDOC)
+		else if (current->type == TOKEN_REDIRECT_IN || 
+			current->type == TOKEN_REDIRECT_OUT ||
+			current->type == TOKEN_APPEND || 
+			current->type == TOKEN_HEREDOC)
 		{
 			if (!handle_redirect_token(&current, &first_cmd, &current_cmd))
 				return (cleanup_and_return_null(first_cmd));

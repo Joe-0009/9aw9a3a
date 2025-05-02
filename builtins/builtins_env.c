@@ -33,8 +33,8 @@ static int	process_env_args(t_command *cmd, int *first_cmd_arg)
 	return (extra_vars);
 }
 
-static char	**setup_and_copy_env(t_env *env_list, t_command *cmd, 
-		int *first_cmd_arg)
+static char	**setup_and_copy_env(t_env *env_list, t_command *cmd,
+	int *first_cmd_arg)
 {
 	t_env_setup	env;
 

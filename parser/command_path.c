@@ -26,12 +26,12 @@ static char	*find_in_paths(char **paths, char *cmd)
 	{
 		full_path = ft_strjoin(paths[i], "/");
 		if (!full_path)
-			break ;
+			break;
 		temp = full_path;
 		full_path = ft_strjoin(full_path, cmd);
 		free(temp);
 		if (!full_path)
-			break ;
+			break;
 		if (access(full_path, X_OK) == 0)
 			return (full_path);
 		free(full_path);
@@ -43,7 +43,7 @@ static char	*find_in_paths(char **paths, char *cmd)
 
 static int	is_path_with_slash(char *cmd)
 {
-	return (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/' 
+	return (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
 		|| (cmd[1] == '.' && cmd[2] == '/'))));
 }
 

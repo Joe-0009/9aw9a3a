@@ -1,7 +1,7 @@
 #include "../minishell.h"
 
-static void	process_quote_chars(const char *value, size_t *i, int *in_quotes, 
-		char *quote_type, size_t *len)
+static void	process_quote_chars(const char *value, size_t *i, int *in_quotes,
+	char *quote_type, size_t *len)
 {
 	if (!*in_quotes)
 	{
@@ -34,8 +34,8 @@ static size_t	calculate_stripped_length(const char *value)
 	return (len);
 }
 
-static void	process_build_quote_chars(const char *value, size_t *i, int *in_quotes, 
-		char *quote_type, size_t *j, char *result)
+static void	process_build_quote_chars(const char *value, size_t *i,
+	int *in_quotes, char *quote_type, size_t *j, char *result)
 {
 	if (!*in_quotes)
 	{
@@ -61,7 +61,8 @@ static void	build_stripped_string(const char *value, char *result)
 	while (value[i])
 	{
 		if ((value[i] == '"' || value[i] == '\''))
-			process_build_quote_chars(value, &i, &in_quotes, &quote_type, &j, result);
+			process_build_quote_chars(value, &i, &in_quotes, &quote_type,
+				&j, result);
 		else
 			result[j++] = value[i];
 		i++;
