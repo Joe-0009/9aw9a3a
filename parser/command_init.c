@@ -14,62 +14,59 @@ t_command	*command_init(void)
 	return (cmd);
 }
 
-static int	count_word_args(t_token *token)
+static int	allocate_args_array(t_command *cmd, t_token **tokens)
 {
-	int	count;
+	int		arg_count;
+	t_token	*current;
 
-	count = 0;
-	while (token && token->type == TOKEN_WORD)
+	arg_count = 0;
+	current = *tokens;
+	while (current && current->type == TOKEN_WORD)
 	{
-		count++;
-		token = token->next;
+		arg_count++;
+		current = current->next;
 	}
-	return (count);
+	cmd->args = ft_calloc(arg_count + 1, sizeof(char *));
+	if (!cmd->args)
+		return (0);
+	cmd->args_count = arg_count;
+	return (1);
 }
 
-static void	fill_word_args(char **args, t_token **token, int count)
+static void	copy_args_to_command(t_command *cmd, t_token **tokens)
 {
-	int	i;
+	int		i;
+	t_token	*current;
 
 	i = 0;
-	while (*token && (*token)->type == TOKEN_WORD && i < count)
+	current = *tokens;
+	while (i < cmd->args_count && current && current->type == TOKEN_WORD)
 	{
-		args[i] = ft_strdup((*token)->content);
-		*token = (*token)->next;
+		cmd->args[i] = ft_strdup(current->content);
 		i++;
+		current = current->next;
 	}
-	args[i] = NULL;
+	cmd->args[i] = NULL;
+	*tokens = current;
+}
+
+static t_command	*handle_allocation_failure(t_command *cmd)
+{
+	free_command(cmd);
+	return (NULL);
 }
 
 t_command	*create_command_type_word(t_token **tokens)
 {
 	t_command	*cmds;
-	int			args_count;
-	int			i;
 
 	if (!*tokens || (*tokens)->type != TOKEN_WORD)
 		return (NULL);
 	cmds = command_init();
 	if (!cmds)
 		return (NULL);
-	args_count = count_word_args(*tokens);
-	cmds->args = malloc(sizeof(char *) * (args_count + 1));
-	if (!cmds->args)
-	{
-		free_command(cmds);
-		return (NULL);
-	}
-	fill_word_args(cmds->args, tokens, args_count);
-	cmds->args_count = args_count;
-	i = 0;
-	while (i < args_count)
-	{
-		if (cmds->args[i] == NULL)
-		{
-			free_command(cmds);
-			return (NULL);
-		}
-		i++;
-	}
+	if (!allocate_args_array(cmds, tokens))
+		return (handle_allocation_failure(cmds));
+	copy_args_to_command(cmds, tokens);
 	return (cmds);
 }

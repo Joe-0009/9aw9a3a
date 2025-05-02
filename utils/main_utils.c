@@ -1,11 +1,10 @@
 #include "../minishell.h"
 
-void	print_Cmd_list(t_command *cmd)
+void	print_cmd_list(t_command *cmd)
 {
 	int	i;
 
 	i = 0;
-	
 	while (cmd)
 	{
 		printf("\n%d\n", cmd->args_count);
@@ -15,17 +14,15 @@ void	print_Cmd_list(t_command *cmd)
 		printf("\n");
 		cmd = cmd->next;
 	}
-
 }
 
-void free_env_list(t_env **env_list)
+void	free_env_list(t_env **env_list)
 {
-	t_env *current;
-	t_env *next;
+	t_env	*current;
+	t_env	*next;
 
 	if (!env_list || !*env_list)
-		return;
-		
+		return ;
 	current = *env_list;
 	while (current)
 	{

@@ -9,7 +9,6 @@ void	expand_command_args(t_command *cmd, char **envp)
 	v.i = 0;
 	v.j = 0;
 	v.added = 0;
-	
 	if (cmd && cmd->args && cmd->args_count > 0)
 	{
 		v.is_export = (cmd->args[0] && ft_strcmp(cmd->args[0], "export") == 0);

@@ -37,21 +37,27 @@ int	is_var_in_squotes(const char *str)
 
 int	was_quoted(const char *str)
 {
+	int		in_quotes;
+	char	quote_type;
 	int		i;
-	t_state	state;
-	int		was_in_quotes;
 
 	i = 0;
-	state = STATE_NORMAL;
-	was_in_quotes = 0;
-	while (str[i])
+	in_quotes = 0;
+	while (str && str[i])
 	{
-		if ((str[i] == '"' || str[i] == '\'') && state == STATE_NORMAL)
-			was_in_quotes = 1;
-		update_quote_state(str[i], &state);
+		if (!in_quotes && (str[i] == '\'' || str[i] == '"'))
+		{
+			in_quotes = 1;
+			quote_type = str[i];
+		}
+		else if (in_quotes && str[i] == quote_type)
+		{
+			in_quotes = 0;
+			return (1);
+		}
 		i++;
 	}
-	return (was_in_quotes);
+	return (0);
 }
 
 int	has_var_in_dquotes(const char *str)

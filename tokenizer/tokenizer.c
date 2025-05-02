@@ -65,7 +65,12 @@ void	handle_quotes(t_tokenizer *t)
 
 	quote_char = t->input[t->i];
 	if (t->state == STATE_NORMAL)
-		t->state = (quote_char == '\'') ? STATE_IN_SINGLE_QUOTE : STATE_IN_DOUBLE_QUOTE;
+	{
+		if (quote_char == '\'')
+			t->state = STATE_IN_SINGLE_QUOTE;
+		else
+			t->state = STATE_IN_DOUBLE_QUOTE;
+	}
 	else if ((t->state == STATE_IN_SINGLE_QUOTE && quote_char == '\'')
 		|| (t->state == STATE_IN_DOUBLE_QUOTE && quote_char == '"'))
 		t->state = STATE_NORMAL;

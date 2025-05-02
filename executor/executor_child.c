@@ -49,7 +49,8 @@ int	wait_for_children(void)
 
 	status = 0;
 	last_status = 0;
-	while ((last_pid = waitpid(-1, &status, 0)) > 0)
+	last_pid = waitpid(-1, &status, 0);
+	while (last_pid > 0)
 	{
 		if (WIFSIGNALED(status))
 		{
@@ -63,6 +64,7 @@ int	wait_for_children(void)
 		{
 			last_status = WEXITSTATUS(status);
 		}
+		last_pid = waitpid(-1, &status, 0);
 	}
 	return (last_status);
 }

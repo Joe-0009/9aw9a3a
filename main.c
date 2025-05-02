@@ -32,7 +32,7 @@ static void	shell_loop(t_env **env_list)
 
 int	main(int argc, char **argv, char **envp)
 {
-	t_env *env_list;
+	t_env	*env_list;
 
 	(void)argc;
 	(void)argv;

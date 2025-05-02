@@ -13,7 +13,6 @@ static int	create_cmd_if_needed(t_command **first_cmd, t_command **current_cmd)
 			*first_cmd = new_cmd;
 		*current_cmd = new_cmd;
 	}
-	
 	return (1);
 }
 
@@ -24,7 +23,7 @@ static int	check_redirect_syntax(t_token **current)
 		if (!*current)
 			ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n", 2);
 		else
-			ft_fprintf_fd(2, "minishell: syntax error near unexpected token %s\n", 
+			ft_fprintf_fd(2, "minishell: syntax error near unexpected token %s\n",
 				(*current)->content);
 		return (0);
 	}
@@ -48,21 +47,38 @@ static char	**allocate_args_array(t_command *cmd, int new_count)
 	return (new_args);
 }
 
+static int	count_word_tokens(t_token *current)
+{
+	int			new_count;
+	t_token		*temp;
+
+	new_count = 0;
+	temp = current;
+	while (temp && temp->type == TOKEN_WORD)
+	{
+		new_count++;
+		temp = temp->next;
+	}
+	return (new_count);
+}
+
+static int	add_word_to_args(t_token **current, int i, char **new_args)
+{
+	new_args[i] = ft_strdup((*current)->content);
+	if (!new_args[i])
+		return (0);
+	*current = (*current)->next;
+	return (1);
+}
+
 static void	add_words_as_args(t_command *cmd, t_token **current)
 {
 	int			new_count;
 	char		**new_args;
 	int			i;
 	int			j;
-	t_token		*temp;
 
-	new_count = 0;
-	temp = *current;
-	while (temp && temp->type == TOKEN_WORD)
-	{
-		new_count++;
-		temp = temp->next;
-	}
+	new_count = count_word_tokens(*current);
 	if (new_count == 0)
 		return ;
 	new_args = allocate_args_array(cmd, new_count);
@@ -72,15 +88,13 @@ static void	add_words_as_args(t_command *cmd, t_token **current)
 	j = 0;
 	while (*current && (*current)->type == TOKEN_WORD && j < new_count)
 	{
-		new_args[i + j] = ft_strdup((*current)->content);
-		if (!new_args[i + j])
+		if (!add_word_to_args(current, i + j, new_args))
 		{
 			while (--j >= 0)
 				free(new_args[i + j]);
 			free(new_args);
 			return ;
 		}
-		*current = (*current)->next;
 		j++;
 	}
 	new_args[i + j] = NULL;

@@ -68,7 +68,6 @@ void	expand_args_loop(t_expand_vars *v)
 {
 	if (!v->cmd || !v->cmd->args || v->cmd->args_count <= 0)
 		return ;
-	
 	while (v->i < v->cmd->args_count)
 	{
 		if (!v->cmd->args[v->i])

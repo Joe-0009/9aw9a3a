@@ -3,7 +3,8 @@
 static int	append_to_result(char **result, const char *str, char c, int is_char)
 {
 	char	*temp;
-	size_t		(curr_len), (len);
+	size_t	curr_len;
+	size_t	len;
 
 	if (is_char)
 	{

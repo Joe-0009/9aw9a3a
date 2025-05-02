@@ -22,7 +22,6 @@ static void	print_single_export(char *key, char *value)
 {
 	ft_putstr_fd("declare -x ", 1);
 	ft_putstr_fd(key, 1);
-	
 	if (value)
 	{
 		ft_putstr_fd("=\"", 1);

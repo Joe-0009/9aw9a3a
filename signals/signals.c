@@ -8,7 +8,6 @@ int	*get_exit_status(void)
 static void	handle_sigint_prompt(int sig)
 {
 	(void)sig;
-
 	write(STDOUT_FILENO, "\n", 1);
 	rl_on_new_line();
 	rl_replace_line("", 0);
@@ -19,7 +18,6 @@ static void	handle_sigint_prompt(int sig)
 void	handle_sigint_heredoc(int sig)
 {
 	(void)sig;
-	
 	*get_exit_status() = 130;
 	write(1, "\n", 1);
 	signal(SIGINT, SIG_DFL);

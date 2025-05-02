@@ -2,10 +2,17 @@
 
 int	is_builtin_command(char *cmd)
 {
-	char	*builtins[] = {"cd", "echo", "pwd", "export", "unset", "env",
-			"exit", NULL};
+	char	*builtins[8];
 	int		i;
 
+	builtins[0] = "cd";
+	builtins[1] = "echo";
+	builtins[2] = "pwd";
+	builtins[3] = "export";
+	builtins[4] = "unset";
+	builtins[5] = "env";
+	builtins[6] = "exit";
+	builtins[7] = NULL;
 	i = -1;
 	while (builtins[++i])
 	{
@@ -46,7 +53,7 @@ int	is_parent_builtin(char *cmd)
 int	execute_single_parent_builtin(t_command *cmd_list, t_env **env_list)
 {
 	int		status;
-	
+
 	expand_command_args(cmd_list, env_list_to_envp(*env_list));
 	status = execute_builtin(cmd_list, env_list);
 	setup_signals();
