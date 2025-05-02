@@ -65,7 +65,7 @@ static void	append_env_node(t_env **env_list, t_env *node)
 	}
 }
 
-void add_or_update_env(t_env **env_list, const char *key, const char *value)
+void	add_or_update_env(t_env **env_list, const char *key, const char *value)
 {
 	t_env	*node;
 

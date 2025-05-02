@@ -45,72 +45,61 @@ void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
 	}
 }
 
-static void	process_arg_expansion(t_command *cmd, char **envp, int i,
-		int *is_quoted, int *had_quoted)
+static void	process_arg_expansion(t_expand_vars *v)
 {
 	char	*stripped;
 
-	*is_quoted = was_quoted(cmd->args[i]);
-	*had_quoted = has_var_in_dquotes(cmd->args[i]);
-	if (!is_var_in_squotes(cmd->args[i]))
-		expand_and_strip_arg(cmd, envp, i);
+	v->was_arg_quoted = was_quoted(v->cmd->args[v->i]);
+	v->had_quoted_vars = has_var_in_dquotes(v->cmd->args[v->i]);
+	if (!is_var_in_squotes(v->cmd->args[v->i]))
+		expand_and_strip_arg(v->cmd, v->envp, v->i);
 	else
 	{
-		stripped = strip_quotes(cmd->args[i]);
+		stripped = strip_quotes(v->cmd->args[v->i]);
 		if (stripped)
 		{
-			free(cmd->args[i]);
-			cmd->args[i] = stripped;
+			free(v->cmd->args[v->i]);
+			v->cmd->args[v->i] = stripped;
 		}
 	}
 }
 
-void	expand_args_loop(t_command *cmd, char **envp)
+void	expand_args_loop(t_expand_vars *v)
 {
-	int		i;
-	int		j;
-	int		added;
-	int		is_export;
-	int		had_quoted_vars;
-	int		was_arg_quoted;
-
-	i = 0;
-	j = 0;
-	added = 0;
-	if (!cmd || !cmd->args || cmd->args_count <= 0)
+	if (!v->cmd || !v->cmd->args || v->cmd->args_count <= 0)
 		return ;
-	is_export = (cmd->args[0] && ft_strcmp(cmd->args[0], "export") == 0);
-	while (i < cmd->args_count)
+	
+	while (v->i < v->cmd->args_count)
 	{
-		if (!cmd->args[i])
+		if (!v->cmd->args[v->i])
 		{
-			i++;
+			v->i++;
 			continue ;
 		}
-		process_arg_expansion(cmd, envp, i, &was_arg_quoted, &had_quoted_vars);
-		if (!was_arg_quoted && !had_quoted_vars)
-			added = split_and_insert_args(cmd, i, is_export);
+		process_arg_expansion(v);
+		if (!v->was_arg_quoted && !v->had_quoted_vars)
+			v->added = split_and_insert_args(v);
 		else
-			added = 0;
-		if (added > 0)
+			v->added = 0;
+		if (v->added > 0)
 			continue ;
-		compact_args(cmd, &i, &j);
-		i++;
+		compact_args(v->cmd, &v->i, &v->j);
+		v->i++;
 	}
-	cmd->args_count = j;
+	v->cmd->args_count = v->j;
 }
 
-void	expand_redirections_loop(t_command *cmd, char **envp)
+void	expand_redirections_loop(t_expand_vars *v)
 {
 	t_redirections	*redir;
 	char			*expanded;
 
-	redir = cmd->redirections;
+	redir = v->cmd->redirections;
 	while (redir)
 	{
 		if (redir->type != TOKEN_HEREDOC)
 		{
-			expanded = expand_variables(redir->file, envp);
+			expanded = expand_variables(redir->file, v->envp);
 			if (expanded)
 			{
 				free(redir->file);

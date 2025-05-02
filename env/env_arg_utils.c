@@ -54,17 +54,17 @@ int	add_split_args_to_command(t_command *cmd, int pos,
 	return (word_count - 1);
 }
 
-int	split_and_insert_args(t_command *cmd, int i, int is_export)
+int	split_and_insert_args(t_expand_vars *v)
 {
 	char	**split_words;
 	int		added;
 
-	if (i > 0 && !is_export)
+	if (v->i > 0 && !v->is_export)
 	{
-		split_words = ft_split(cmd->args[i], ' ');
+		split_words = ft_split(v->cmd->args[v->i], ' ');
 		if (split_words && split_words[0])
 		{
-			added = add_split_args_to_command(cmd, i, split_words);
+			added = add_split_args_to_command(v->cmd, v->i, split_words);
 			if (added > 0)
 				return (added);
 		}

@@ -105,7 +105,6 @@ int                         is_content_quoted(char *content);
 
 /* ===================== TOKENIZER ===================== */
 t_token						*tokenize_input(char *input);
-void						expand_command_args(t_command *cmd, char **envp);
 void						assign_token_types(t_token *tokens);
 int							is_operator(char c);
 char						*extract_operator_token(char *str, int *pos);
@@ -149,6 +148,15 @@ int							handle_redirect_token(t_token **current,
 void						add_redirection(t_command *cmd, t_token_type redirect_type, char *file);
 
 /* ===================== BUILTINS ===================== */
+typedef struct s_env_setup {
+	char	**env_array;       /* Array of environment variables */
+	char	**temp_env;        /* Temporary environment array */
+	int		env_count;         /* Count of environment variables */
+	int		extra_vars;        /* Count of extra variables */
+	int		i;                 /* Loop counter */
+	int		j;                 /* Loop counter */
+}	t_env_setup;
+
 int							is_builtin_command(char *cmd);
 int							execute_builtin(t_command *cmd, t_env **env_list);
 int							builtin_cd(t_command *cmd, t_env **env);
@@ -190,16 +198,27 @@ char						*expand_variables(char *str, char **envp);
 void						expand_command_args(t_command *cmd, char **envp);
 
 /* ===================== ENV EXPANSION ARGS UTILS ===================== */
+typedef struct s_expand_vars {
+	t_command   *cmd;          /* Command being processed */
+	char        **envp;        /* Environment variables */
+	int         i;             /* Current argument index */
+	int         j;             /* Output argument index */
+	int         added;         /* Number of args added by splitting */
+	int         is_export;     /* Whether this is an export command */
+	int         was_arg_quoted; /* Whether argument had quotes */
+	int         had_quoted_vars; /* Whether argument had quoted variables */
+}	t_expand_vars;
+
 int							count_split_words(char **split_words);
 void						copy_and_replace_args(t_command *cmd, char **new_args,
 								int pos, char **split_words);
 int							add_split_args_to_command(t_command *cmd, int pos,
 								char **split_words);
 void						expand_and_strip_arg(t_command *cmd, char **envp, int i);
-int							split_and_insert_args(t_command *cmd, int i, int is_export);
+int							split_and_insert_args(t_expand_vars *v);
 void						compact_args(t_command *cmd, int *i, int *j);
-void						expand_args_loop(t_command *cmd, char **envp);
-void						expand_redirections_loop(t_command *cmd, char **envp);
+void						expand_args_loop(t_expand_vars *v);
+void						expand_redirections_loop(t_expand_vars *v);
 int							has_var_in_dquotes(const char *str);
 int                         is_var_in_squotes(const char *str);
 int                         was_quoted(const char *str);

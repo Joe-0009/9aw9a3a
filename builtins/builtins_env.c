@@ -36,31 +36,26 @@ static int	process_env_args(t_command *cmd, int *first_cmd_arg)
 static char	**setup_and_copy_env(t_env *env_list, t_command *cmd, 
 		int *first_cmd_arg)
 {
-	char	**env_array;
-	char	**temp_env;
-	int		env_count;
-	int		extra_vars;
-	int		i;
-	int		j;
+	t_env_setup	env;
 
-	extra_vars = process_env_args(cmd, first_cmd_arg);
-	env_array = env_list_to_envp(env_list);
-	if (!env_array)
+	env.extra_vars = process_env_args(cmd, first_cmd_arg);
+	env.env_array = env_list_to_envp(env_list);
+	if (!env.env_array)
 		return (NULL);
-	env_count = 0;
-	while (env_array[env_count])
-		env_count++;
-	temp_env = ft_calloc(env_count + extra_vars + 1, sizeof(char *));
-	if (!temp_env)
-		return (safe_doube_star_free(env_array), NULL);
-	i = -1;
-	while (env_array[++i])
-		temp_env[i] = ft_strdup(env_array[i]);
-	j = 1;
-	while (j < *first_cmd_arg)
-		temp_env[i++] = ft_strdup(cmd->args[j++]);
-	safe_doube_star_free(env_array);
-	return (temp_env);
+	env.env_count = 0;
+	while (env.env_array[env.env_count])
+		env.env_count++;
+	env.temp_env = ft_calloc(env.env_count + env.extra_vars + 1, sizeof(char *));
+	if (!env.temp_env)
+		return (safe_doube_star_free(env.env_array), NULL);
+	env.i = -1;
+	while (env.env_array[++env.i])
+		env.temp_env[env.i] = ft_strdup(env.env_array[env.i]);
+	env.j = 1;
+	while (env.j < *first_cmd_arg)
+		env.temp_env[env.i++] = ft_strdup(cmd->args[env.j++]);
+	safe_doube_star_free(env.env_array);
+	return (env.temp_env);
 }
 
 static int	handle_cmd_exec(t_command *cmd, t_env *env_list, int first_cmd_arg)
