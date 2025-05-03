@@ -1,30 +1,16 @@
 #include "../minishell.h"
 
-int	count_split_words(char **split_words)
-{
-	int	count;
-
-	count = 0;
-	if (!split_words)
-		return (0);
-	while (split_words[count])
-		count++;
-	return (count);
-}
-
 void	copy_and_replace_args(t_command *cmd, char **new_args, int pos,
 		char **split_words)
 {
 	int	i;
 	int	j;
 	int	k;
+	int	l;
 
-	i = 0;
-	while (i < pos)
-	{
+	i = -1;
+	while (++i < pos)
 		new_args[i] = cmd->args[i];
-		i++;
-	}
 	j = -1;
 	while (split_words[++j])
 		new_args[i + j] = ft_strdup(split_words[j]);
@@ -37,7 +23,8 @@ void	copy_and_replace_args(t_command *cmd, char **new_args, int pos,
 	}
 	new_args[i + j] = NULL;
 	free(cmd->args[pos]);
-	for (int l = 0; split_words[l]; l++)
+	l = -1;
+	while (split_words[++l])
 		free(split_words[l]);
 	free(split_words);
 }
@@ -62,6 +49,19 @@ int	add_split_args_to_command(t_command *cmd, int pos, char **split_words)
 	return (word_count);
 }
 
+static void	free_split_words(char **split_words)
+{
+	int	i;
+
+	i = 0;
+	while (split_words[i])
+	{
+		free(split_words[i]);
+		i++;
+	}
+	free(split_words);
+}
+
 int	split_and_insert_args(t_expand_vars *v)
 {
 	char	**split_words;
@@ -79,11 +79,7 @@ int	split_and_insert_args(t_expand_vars *v)
 					return (added);
 			}
 			else
-			{
-				for (int i = 0; split_words[i]; i++)
-					free(split_words[i]);
-				free(split_words);
-			}
+				free_split_words(split_words);
 		}
 		else if (split_words)
 			free(split_words);

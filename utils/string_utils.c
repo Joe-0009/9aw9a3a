@@ -49,3 +49,15 @@ int	ft_isspace(char c)
 	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f'
 		|| c == '\r');
 }
+
+int	count_split_words(char **split_words)
+{
+	int	count;
+
+	count = 0;
+	if (!split_words)
+		return (0);
+	while (split_words[count])
+		count++;
+	return (count);
+}

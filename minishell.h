@@ -174,10 +174,12 @@ t_command					*cleanup_and_return_null(t_command *first_cmd);
 t_command					*finish_command_parsing(t_command *first_cmd);
 /* Command redirection utilities */
 int							count_word_tokens(t_token *current);
-char						**allocate_args_array(t_command *cmd, int new_count);
-int							add_word_to_args(t_token **current, int i, 
+char						**allocate_args_array(t_command *cmd,
+								int new_count);
+int							add_word_to_args(t_token **current, int i,
 								char **new_args);
-void						add_words_as_args(t_command *cmd, t_token **current);
+void						add_words_as_args(t_command *cmd,
+								t_token **current);
 
 /* ===================== BUILTINS ===================== */
 typedef struct s_env_setup
