@@ -17,6 +17,7 @@ void	copy_and_replace_args(t_command *cmd, char **new_args, int pos,
 {
 	int	i;
 	int	j;
+	int	k;
 
 	i = 0;
 	while (i < pos)
@@ -24,21 +25,21 @@ void	copy_and_replace_args(t_command *cmd, char **new_args, int pos,
 		new_args[i] = cmd->args[i];
 		i++;
 	}
-	j = 0;
-	while (split_words[j])
-	{
+	j = -1;
+	while (split_words[++j])
 		new_args[i + j] = ft_strdup(split_words[j]);
+	k = pos + 1;
+	while (k < cmd->args_count)
+	{
+		new_args[i + j] = cmd->args[k];
+		k++;
 		j++;
 	}
-	safe_free((void **)&cmd->args[pos]);
-	safe_free((void **)&cmd->args);
-	i = i + j;
-	while (cmd->args[pos + 1 + (i - pos - j)])
-	{
-		new_args[i] = cmd->args[pos + 1 + (i - pos - j)];
-		i++;
-	}
-	new_args[i] = NULL;
+	new_args[i + j] = NULL;
+	free(cmd->args[pos]);
+	for (int l = 0; split_words[l]; l++)
+		free(split_words[l]);
+	free(split_words);
 }
 
 int	add_split_args_to_command(t_command *cmd, int pos, char **split_words)
@@ -55,6 +56,7 @@ int	add_split_args_to_command(t_command *cmd, int pos, char **split_words)
 	if (!new_args)
 		return (0);
 	copy_and_replace_args(cmd, new_args, pos, split_words);
+	free(cmd->args);
 	cmd->args = new_args;
 	cmd->args_count = new_size;
 	return (word_count);
@@ -65,15 +67,26 @@ int	split_and_insert_args(t_expand_vars *v)
 	char	**split_words;
 	int		added;
 
-	if (v->i > 0 && !v->is_export)
+	if ((v->i > 0 && !v->is_export) || (v->i == 0 && v->cmd->args_count == 1))
 	{
 		split_words = ft_split(v->cmd->args[v->i], ' ');
 		if (split_words && split_words[0])
 		{
-			added = add_split_args_to_command(v->cmd, v->i, split_words);
-			if (added > 0)
-				return (added);
+			if (count_split_words(split_words) > 1 || v->i > 0)
+			{
+				added = add_split_args_to_command(v->cmd, v->i, split_words);
+				if (added > 0)
+					return (added);
+			}
+			else
+			{
+				for (int i = 0; split_words[i]; i++)
+					free(split_words[i]);
+				free(split_words);
+			}
 		}
+		else if (split_words)
+			free(split_words);
 	}
 	return (0);
 }
