@@ -56,7 +56,7 @@ int	wait_for_children(void)
 		{
 			last_status = 128 + WTERMSIG(status);
 			if (WTERMSIG(status) == SIGQUIT && g_last_exit_status != 131)
-				write(STDERR_FILENO, "Quit (core dumped)\n", 19);
+				write(STDERR_FILENO, "Quit : 3\n", 19);
 			if (WTERMSIG(status) == SIGINT)
 				write(STDOUT_FILENO, "\n", 1);
 		}
