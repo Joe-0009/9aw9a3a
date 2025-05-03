@@ -1,71 +1,64 @@
 #include "../minishell.h"
 
-static void	process_quote_chars(const char *value, size_t *i, int *in_quotes,
-	char *quote_type, size_t *len)
+static void	process_quote_chars(const char *value, t_strip_ctx *ctx)
 {
-	if (!*in_quotes)
+	if (!ctx->in_quotes)
 	{
-		*in_quotes = 1;
-		*quote_type = value[*i];
+		ctx->in_quotes = 1;
+		ctx->quote_type = value[ctx->i];
 	}
-	else if (value[*i] == *quote_type)
-		*in_quotes = 0;
+	else if (value[ctx->i] == ctx->quote_type)
+		ctx->in_quotes = 0;
 	else
-		(*len)++;
+		(ctx->len_or_j)++;
 }
 
 static size_t	calculate_stripped_length(const char *value)
 {
-	int		in_quotes;
-	char	quote_type;
-	size_t	i;
-	size_t	len;
+	t_strip_ctx	ctx;
 
-	len = 0;
-	i = -1;
-	in_quotes = 0;
-	while (value[++i])
+	ctx.len_or_j = 0;
+	ctx.i = 0;
+	ctx.in_quotes = 0;
+	while (value[ctx.i])
 	{
-		if ((value[i] == '"' || value[i] == '\''))
-			process_quote_chars(value, &i, &in_quotes, &quote_type, &len);
+		if ((value[ctx.i] == '"' || value[ctx.i] == '\''))
+			process_quote_chars(value, &ctx);
 		else
-			len++;
+			ctx.len_or_j++;
+		ctx.i++;
 	}
-	return (len);
+	return (ctx.len_or_j);
 }
 
-static void	process_build_quote_chars(const char *value, size_t *i,
-	int *in_quotes, char *quote_type, size_t *j, char *result)
+static void	process_build_quote_chars(const char *value, t_strip_ctx *ctx)
 {
-	if (!*in_quotes)
+	if (!ctx->in_quotes)
 	{
-		*in_quotes = 1;
-		*quote_type = value[*i];
+		ctx->in_quotes = 1;
+		ctx->quote_type = value[ctx->i];
 	}
-	else if (value[*i] == *quote_type)
-		*in_quotes = 0;
+	else if (value[ctx->i] == ctx->quote_type)
+		ctx->in_quotes = 0;
 	else
-		result[(*j)++] = value[*i];
+		ctx->result[(ctx->len_or_j)++] = value[ctx->i];
 }
 
 static void	build_stripped_string(const char *value, char *result)
 {
-	int		in_quotes;
-	char	quote_type;
-	size_t	i;
-	size_t	j;
+	t_strip_ctx	ctx;
 
-	i = 0;
-	j = 0;
-	in_quotes = 0;
-	while (value[i])
+	ctx.i = 0;
+	ctx.len_or_j = 0;
+	ctx.in_quotes = 0;
+	ctx.result = result;
+	while (value[ctx.i])
 	{
-		if ((value[i] == '"' || value[i] == '\''))
-			process_build_quote_chars(value, &i, &in_quotes, &quote_type,
-				&j, result);
+		if ((value[ctx.i] == '"' || value[ctx.i] == '\''))
+			process_build_quote_chars(value, &ctx);
 		else
-			result[j++] = value[i];
-		i++;
+			result[ctx.len_or_j++] = value[ctx.i];
+		ctx.i++;
 	}
 }
 
@@ -87,50 +80,4 @@ char	*strip_quotes(const char *value)
 		return (NULL);
 	build_stripped_string(value, result);
 	return (result);
-}
-
-static void	process_quote_check(t_quote_ctx *ctx)
-{
-	if (!*(ctx->in_quotes))
-	{
-		*(ctx->in_quotes) = 1;
-		*(ctx->quote_type) = ctx->c;
-		(*(ctx->i))++;
-	}
-	else if (*(ctx->in_quotes) && ctx->c == *(ctx->quote_type))
-	{
-		*(ctx->quoted) = 1;
-		*(ctx->in_quotes) = 0;
-		(*(ctx->i))++;
-	}
-	else
-		(*(ctx->i))++;
-}
-
-int	is_content_quoted(char *content)
-{
-	size_t		i;
-	int			in_quotes;
-	char		quote_type;
-	int			quoted;
-	t_quote_ctx	ctx;
-
-	i = 0;
-	in_quotes = 0;
-	quoted = 0;
-	while (content[i])
-	{
-		if ((content[i] == '"' || content[i] == '\''))
-		{
-			ctx.c = content[i];
-			ctx.i = &i;
-			ctx.in_quotes = &in_quotes;
-			ctx.quoted = &quoted;
-			ctx.quote_type = &quote_type;
-			process_quote_check(&ctx);
-		}
-		else
-			i++;
-	}
-	return (quoted);
 }

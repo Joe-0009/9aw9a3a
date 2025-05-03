@@ -122,6 +122,15 @@ typedef struct s_quote_ctx
 	char	*quote_type;	/* Current quote type (' or ") */
 }				t_quote_ctx;
 
+typedef struct s_strip_ctx
+{
+	int		in_quotes;	/* Whether we're in quotes */
+	char	quote_type;	/* Current quote type (' or ") */
+	size_t	i;		/* Current position */
+	size_t	len_or_j;	/* Length counter or result position */
+	char	*result;	/* Result string (for build function) */
+}				t_strip_ctx;
+
 t_token						*tokenize_input(char *input);
 void						assign_token_types(t_token *tokens);
 int							is_operator(char c);
