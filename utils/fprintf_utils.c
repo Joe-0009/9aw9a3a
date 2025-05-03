@@ -13,22 +13,19 @@ static int	append_to_result(char **result, const char *str, char c,
 		temp = *result;
 		*result = ft_calloc(curr_len + 2, sizeof(char));
 		if (!*result)
-			return (free(temp), -1);
+			return (safe_free((void **)&temp), -1);
 		ft_strlcpy(*result, temp, curr_len + 1);
 		(*result)[curr_len] = c;
-		free(temp);
+		safe_free((void **)&temp);
 		return (1);
 	}
-	else
-	{
-		if (!str)
-			str = "(null)";
-		len = ft_strlen(str);
-		temp = *result;
-		*result = ft_strjoin(*result, str);
-		free(temp);
-		return (len);
-	}
+	if (!str)
+		str = "(null)";
+	len = ft_strlen(str);
+	temp = *result;
+	*result = ft_strjoin(*result, str);
+	safe_free((void **)&temp);
+	return (len);
 }
 
 static int	process_format_specifier(char **result, char specifier,

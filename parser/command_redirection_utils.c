@@ -24,3 +24,70 @@ void	add_redirection(t_command *cmd, t_token_type redirect_type, char *file)
 		current->next = redirection;
 	}
 }
+
+int	count_word_tokens(t_token *current)
+{
+	int		new_count;
+	t_token	*temp;
+
+	new_count = 0;
+	temp = current;
+	while (temp && temp->type == TOKEN_WORD)
+	{
+		new_count++;
+		temp = temp->next;
+	}
+	return (new_count);
+}
+
+char	**allocate_args_array(t_command *cmd, int new_count)
+{
+	char	**new_args;
+	int		i;
+
+	new_args = malloc(sizeof(char *) * (cmd->args_count + new_count + 1));
+	if (!new_args)
+		return (NULL);
+	i = 0;
+	while (i < cmd->args_count)
+	{
+		new_args[i] = cmd->args[i];
+		i++;
+	}
+	return (new_args);
+}
+
+int	add_word_to_args(t_token **current, int i, char **new_args)
+{
+	new_args[i] = ft_strdup((*current)->content);
+	if (!new_args[i])
+		return (0);
+	*current = (*current)->next;
+	return (1);
+}
+
+void	add_words_as_args(t_command *cmd, t_token **current)
+{
+	int		new_count;
+	char	**new_args;
+	int		i;
+	int		j;
+
+	new_count = count_word_tokens(*current);
+	if (new_count == 0)
+		return ;
+	new_args = allocate_args_array(cmd, new_count);
+	if (!new_args)
+		return ;
+	i = cmd->args_count;
+	j = 0;
+	while (*current && (*current)->type == TOKEN_WORD && j < new_count)
+	{
+		add_word_to_args(current, i + j, new_args);
+		j++;
+	}
+	new_args[i + j] = NULL;
+	free(cmd->args);
+	cmd->args = new_args;
+	cmd->args_count += new_count;
+}

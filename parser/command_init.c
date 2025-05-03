@@ -14,7 +14,7 @@ t_command	*command_init(void)
 	return (cmd);
 }
 
-static int	allocate_args_array(t_command *cmd, t_token **tokens)
+static int	allocate_command_args(t_command *cmd, t_token **tokens)
 {
 	int		arg_count;
 	t_token	*current;
@@ -65,7 +65,7 @@ t_command	*create_command_type_word(t_token **tokens)
 	cmds = command_init();
 	if (!cmds)
 		return (NULL);
-	if (!allocate_args_array(cmds, tokens))
+	if (!allocate_command_args(cmds, tokens))
 		return (handle_allocation_failure(cmds));
 	copy_args_to_command(cmds, tokens);
 	return (cmds);
