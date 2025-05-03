@@ -50,12 +50,6 @@ static void	copy_args_to_command(t_command *cmd, t_token **tokens)
 	*tokens = current;
 }
 
-static t_command	*handle_allocation_failure(t_command *cmd)
-{
-	free_command(cmd);
-	return (NULL);
-}
-
 t_command	*create_command_type_word(t_token **tokens)
 {
 	t_command	*cmds;
@@ -66,7 +60,30 @@ t_command	*create_command_type_word(t_token **tokens)
 	if (!cmds)
 		return (NULL);
 	if (!allocate_command_args(cmds, tokens))
-		return (handle_allocation_failure(cmds));
+	{
+		free_command(cmds);
+		return (NULL);
+	}
 	copy_args_to_command(cmds, tokens);
 	return (cmds);
+}
+
+t_command	*finish_command_parsing(t_command *first_cmd)
+{
+	t_command	*current;
+
+	current = first_cmd;
+	while (current)
+	{
+		if (!current->args)
+		{
+			current->args = malloc(sizeof(char *));
+			if (!current->args)
+				return (free_command_list(first_cmd), NULL);
+			current->args[0] = NULL;
+			current->args_count = 0;
+		}
+		current = current->next;
+	}
+	return (first_cmd);
 }

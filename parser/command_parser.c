@@ -31,10 +31,8 @@ static int	handle_pipe_with_redirection(t_token *current,
 {
 	t_command	*new_cmd;
 
-	if (current->next && (current->next->type == TOKEN_REDIRECT_IN
-			|| current->next->type == TOKEN_REDIRECT_OUT
-			|| current->next->type == TOKEN_APPEND
-			|| current->next->type == TOKEN_HEREDOC))
+	if (current->next && (current->next->type >= TOKEN_REDIRECT_IN
+			&& current->next->type <= TOKEN_HEREDOC))
 	{
 		new_cmd = command_init();
 		if (!new_cmd)
@@ -60,10 +58,8 @@ static int	process_token(t_token **current, t_command **first_cmd,
 			return (0);
 		*current = (*current)->next;
 	}
-	else if ((*current)->type == TOKEN_REDIRECT_IN
-		|| (*current)->type == TOKEN_REDIRECT_OUT
-		|| (*current)->type == TOKEN_APPEND
-		|| (*current)->type == TOKEN_HEREDOC)
+	else if ((*current)->type >= TOKEN_REDIRECT_IN
+		&& (*current)->type <= TOKEN_HEREDOC)
 	{
 		if (!handle_redirect_token(current, first_cmd, current_cmd))
 			return (0);
@@ -85,7 +81,11 @@ t_command	*create_cmds(t_token **tokens)
 	while (current)
 	{
 		if (!process_token(&current, &first_cmd, &current_cmd))
-			return (cleanup_and_return_null(first_cmd));
+		{
+			if (first_cmd)
+				free_command_list(first_cmd);
+			return (NULL);
+		}
 	}
 	return (finish_command_parsing(first_cmd));
 }
