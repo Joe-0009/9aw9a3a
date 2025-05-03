@@ -53,8 +53,13 @@ int	is_parent_builtin(char *cmd)
 int	execute_single_parent_builtin(t_command *cmd_list, t_env **env_list)
 {
 	int		status;
+	char	**envp;
 
-	expand_command_args(cmd_list, env_list_to_envp(*env_list));
+	envp = env_list_to_envp(*env_list);
+	if (!envp)
+		return (1);
+	expand_command_args(cmd_list, envp);
+	safe_doube_star_free(envp);
 	status = execute_builtin(cmd_list, env_list);
 	setup_signals();
 	return (status);
