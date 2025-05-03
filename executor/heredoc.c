@@ -10,14 +10,14 @@ static void	process_heredoc_line(char *line, int pipe_fd, int quoted,
 		expanded = expand_variables(line, envp);
 		if (expanded)
 		{
-			ft_putstr_fd(expanded, pipe_fd);
-			free(expanded);
+			ft_fprintf_fd(pipe_fd, "%s", expanded);
+			safe_free((void **)&expanded);
 		}
 		else
-			ft_putstr_fd(line, pipe_fd);
+			ft_fprintf_fd(pipe_fd, "%s", line);
 	}
 	else
-		ft_putstr_fd(line, pipe_fd);
+		ft_fprintf_fd(pipe_fd, "%s", line);
 	ft_putchar_fd('\n', pipe_fd);
 }
 
@@ -33,8 +33,8 @@ static void	read_heredoc_lines(int pipe_fd, char *processed_delimiter,
 		{
 			if (g_last_exit_status == 130)
 				break ;
-			ft_putstr_fd("minishell: warning: heredoc delimited by end-of-file\n",
-				2);
+			ft_fprintf_fd(2, "minishell: warning: ");
+			ft_fprintf_fd(2, "heredoc delimited by end-of-file\n");
 			break ;
 		}
 		if (ft_strcmp(line, processed_delimiter) == 0)
@@ -87,13 +87,13 @@ int	setup_heredoc(char *delimiter, char **envp)
 	pid_t	pid;
 
 	if (pipe(pipe_fd) == -1)
-		return (ft_putstr_fd("minishell: heredoc pipe error\n", 2), -1);
+		return (ft_fprintf_fd(2, "minishell: heredoc pipe error\n"), -1);
 	pid = fork();
 	if (pid == -1)
 	{
 		safe_close(&pipe_fd[0]);
 		safe_close(&pipe_fd[1]);
-		return (ft_putstr_fd("minishell: heredoc fork error\n", 2), -1);
+		return (ft_fprintf_fd(2, "minishell: heredoc fork error\n"), -1);
 	}
 	if (pid == 0)
 		handle_heredoc_child_process(pipe_fd, delimiter, envp);

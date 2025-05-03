@@ -13,14 +13,14 @@ static int	process_variable(char **result, char *str, int *i, char **envp)
 	if (!var_name)
 		return (0);
 	var_value = get_env_value(var_name, envp);
-	free(var_name);
+	safe_free((void **)&var_name);
 	if (!var_value)
 		return (1);
 	temp = *result;
 	*result = ft_strjoin(*result, var_value);
 	if (temp)
-		free(temp);
-	free(var_value);
+		safe_free((void **)&temp);
+	safe_free((void **)&var_value);
 	return (*result != NULL);
 }
 
@@ -39,7 +39,7 @@ static int	handle_expand_char(char **result, char *str, int *i)
 {
 	if (!add_char_to_result(result, str[(*i)++]))
 	{
-		free(*result);
+		safe_free((void **)&(*result));
 		return (0);
 	}
 	return (1);

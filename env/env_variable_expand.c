@@ -44,6 +44,6 @@ int	add_char_to_result(char **result, char c)
 	temp = *result;
 	*result = ft_strjoin(*result, buf);
 	if (temp)
-		free(temp);
+		safe_free((void **)&temp);
 	return (*result != NULL);
 }

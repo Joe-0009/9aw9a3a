@@ -20,15 +20,12 @@ int	builtin_export(t_command *cmd, t_env **env_list)
 
 static void	print_single_export(char *key, char *value)
 {
-	ft_putstr_fd("declare -x ", 1);
-	ft_putstr_fd(key, 1);
+	ft_fprintf_fd(1, "declare -x %s", key);
 	if (value)
 	{
-		ft_putstr_fd("=\"", 1);
-		ft_putstr_fd(value, 1);
-		ft_putstr_fd("\"", 1);
+		ft_fprintf_fd(1, "=\"%s\"", value);
 	}
-	ft_putchar_fd('\n', 1);
+	ft_fprintf_fd(1, "\n");
 }
 
 void	print_export_list(t_env *env_list)

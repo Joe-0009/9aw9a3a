@@ -5,53 +5,59 @@ int	count_split_words(char **split_words)
 	int	count;
 
 	count = 0;
+	if (!split_words)
+		return (0);
 	while (split_words[count])
 		count++;
 	return (count);
 }
 
-void	copy_and_replace_args(t_command *cmd, char **new_args,
-		int pos, char **split_words)
+void	copy_and_replace_args(t_command *cmd, char **new_args, int pos,
+		char **split_words)
 {
 	int	i;
 	int	j;
 
-	i = -1;
-	while (++i < pos)
+	i = 0;
+	while (i < pos)
+	{
 		new_args[i] = cmd->args[i];
+		i++;
+	}
 	j = 0;
 	while (split_words[j])
-		new_args[i++] = ft_strdup(split_words[j++]);
-	j = pos + 1;
-	while (j < cmd->args_count)
-		new_args[i++] = cmd->args[j++];
-	free(cmd->args[pos]);
-	free(cmd->args);
-	cmd->args = new_args;
-	cmd->args_count = i;
+	{
+		new_args[i + j] = ft_strdup(split_words[j]);
+		j++;
+	}
+	safe_free((void **)&cmd->args[pos]);
+	safe_free((void **)&cmd->args);
+	i = i + j;
+	while (cmd->args[pos + 1 + (i - pos - j)])
+	{
+		new_args[i] = cmd->args[pos + 1 + (i - pos - j)];
+		i++;
+	}
+	new_args[i] = NULL;
 }
 
-int	add_split_args_to_command(t_command *cmd, int pos,
-		char **split_words)
+int	add_split_args_to_command(t_command *cmd, int pos, char **split_words)
 {
-	char	**new_args;
 	int		word_count;
+	char	**new_args;
+	int		new_size;
 
 	word_count = count_split_words(split_words);
-	if (word_count <= 1)
-	{
-		ft_free_strs(split_words);
+	if (word_count == 0)
 		return (0);
-	}
-	new_args = ft_calloc(cmd->args_count + word_count, sizeof(char *));
+	new_size = cmd->args_count + word_count - 1;
+	new_args = ft_calloc(new_size + 1, sizeof(char *));
 	if (!new_args)
-	{
-		ft_free_strs(split_words);
-		return (-1);
-	}
+		return (0);
 	copy_and_replace_args(cmd, new_args, pos, split_words);
-	ft_free_strs(split_words);
-	return (word_count - 1);
+	cmd->args = new_args;
+	cmd->args_count = new_size;
+	return (word_count);
 }
 
 int	split_and_insert_args(t_expand_vars *v)
@@ -74,18 +80,18 @@ int	split_and_insert_args(t_expand_vars *v)
 
 void	compact_args(t_command *cmd, int *i, int *j)
 {
-	if (cmd->args[*i] && cmd->args[*i][0] != '\0')
+	int	k;
+
+	k = *i + 1;
+	while (k < cmd->args_count)
 	{
-		if (*i != *j)
+		if (cmd->args[k])
 		{
-			cmd->args[*j] = cmd->args[*i];
-			cmd->args[*i] = NULL;
+			cmd->args[*j] = cmd->args[k];
+			*j = *j + 1;
 		}
-		(*j)++;
+		k++;
 	}
-	else if (cmd->args[*i])
-	{
-		free(cmd->args[*i]);
-		cmd->args[*i] = NULL;
-	}
+	cmd->args[*j] = NULL;
+	cmd->args_count = *j;
 }

@@ -21,10 +21,15 @@ static int	check_redirect_syntax(t_token **current)
 	if (!*current || (*current)->type != TOKEN_WORD)
 	{
 		if (!*current)
-			ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n", 2);
+		{
+			ft_fprintf_fd(2, "minishell: syntax error near ");
+			ft_fprintf_fd(2, "unexpected token `newline'\n");
+		}
 		else
-			ft_fprintf_fd(2, "minishell: syntax error near unexpected token %s\n",
-				(*current)->content);
+		{
+			ft_fprintf_fd(2, "minishell: syntax error near ");
+			ft_fprintf_fd(2, "unexpected token %s\n", (*current)->content);
+		}
 		return (0);
 	}
 	return (1);
@@ -49,8 +54,8 @@ static char	**allocate_args_array(t_command *cmd, int new_count)
 
 static int	count_word_tokens(t_token *current)
 {
-	int			new_count;
-	t_token		*temp;
+	int		new_count;
+	t_token	*temp;
 
 	new_count = 0;
 	temp = current;
@@ -73,10 +78,10 @@ static int	add_word_to_args(t_token **current, int i, char **new_args)
 
 static void	add_words_as_args(t_command *cmd, t_token **current)
 {
-	int			new_count;
-	char		**new_args;
-	int			i;
-	int			j;
+	int		new_count;
+	char	**new_args;
+	int		i;
+	int		j;
 
 	new_count = count_word_tokens(*current);
 	if (new_count == 0)

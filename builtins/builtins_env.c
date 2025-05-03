@@ -34,7 +34,7 @@ static int	process_env_args(t_command *cmd, int *first_cmd_arg)
 }
 
 static char	**setup_and_copy_env(t_env *env_list, t_command *cmd,
-	int *first_cmd_arg)
+		int *first_cmd_arg)
 {
 	t_env_setup	env;
 
@@ -45,7 +45,8 @@ static char	**setup_and_copy_env(t_env *env_list, t_command *cmd,
 	env.env_count = 0;
 	while (env.env_array[env.env_count])
 		env.env_count++;
-	env.temp_env = ft_calloc(env.env_count + env.extra_vars + 1, sizeof(char *));
+	env.temp_env = ft_calloc(env.env_count + env.extra_vars + 1,
+			sizeof(char *));
 	if (!env.temp_env)
 		return (safe_doube_star_free(env.env_array), NULL);
 	env.i = -1;
@@ -67,9 +68,8 @@ static int	handle_cmd_exec(t_command *cmd, t_env *env_list, int first_cmd_arg)
 		return (1);
 	if (access(cmd->args[first_cmd_arg], F_OK) == -1)
 	{
-		ft_putstr_fd("env: ", 2);
-		ft_putstr_fd(cmd->args[first_cmd_arg], 2);
-		ft_putstr_fd(": No such file or directory\n", 2);
+		ft_fprintf_fd(2, "env: %s", cmd->args[first_cmd_arg]);
+		ft_fprintf_fd(2, ": No such file or directory\n");
 		safe_doube_star_free(temp_env);
 		return (127);
 	}

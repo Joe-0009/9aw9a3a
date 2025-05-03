@@ -1,6 +1,7 @@
 #include "../minishell.h"
 
-static int	append_to_result(char **result, const char *str, char c, int is_char)
+static int	append_to_result(char **result, const char *str, char c,
+		int is_char)
 {
 	char	*temp;
 	size_t	curr_len;
@@ -46,8 +47,8 @@ static int	process_format_specifier(char **result, char specifier,
 		c = (char)va_arg(args, int);
 		return (append_to_result(result, NULL, c, 1));
 	}
-	if (append_to_result(result, NULL, '%', 1) == -1 || 
-		append_to_result(result, NULL, specifier, 1) == -1)
+	if (append_to_result(result, NULL, '%', 1) == -1 || append_to_result(result,
+			NULL, specifier, 1) == -1)
 		return (-1);
 	return (2);
 }

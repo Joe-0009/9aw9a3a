@@ -25,7 +25,7 @@ static void	shell_loop(t_env **env_list)
 				printf("\n");
 			should_exit = ret;
 		}
-		free(input);
+		safe_free((void **)&input);
 	}
 	clear_history();
 }

@@ -5,7 +5,7 @@ static int	handle_cd_errors(char *dir, char *old_pwd)
 	if (old_pwd)
 		free(old_pwd);
 	if (!dir)
-		return (ft_putstr_fd("minishell: cd: HOME not set\n", 2), 1);
+		return (ft_fprintf_fd(2, "minishell: cd: HOME not set\n"), 1);
 	else
 		return (ft_fprintf_fd(2, "minishell: cd: %s: %s\n", dir,
 				strerror(errno)), 1);
@@ -67,7 +67,7 @@ int	builtin_cd(t_command *cmd, t_env **env)
 	if (cmd->args_count > 2)
 	{
 		free(old_pwd);
-		return (ft_putstr_fd("minishell: cd: too many arguments\n", 2), 1);
+		return (ft_fprintf_fd(2, "minishell: cd: too many arguments\n"), 1);
 	}
 	dir = get_target_dir(cmd, env, old_pwd);
 	if (!dir)

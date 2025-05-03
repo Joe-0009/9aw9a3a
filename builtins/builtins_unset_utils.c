@@ -27,7 +27,7 @@ void	unset_one_arg(char *arg, t_env **env_list)
 		ft_fprintf_fd(2,
 			"minishell: unset: `%s': not a valid identifier\n",
 			arg);
-		return;
+		return ;
 	}
 	prev = NULL;
 	cur = *env_list;
@@ -36,7 +36,7 @@ void	unset_one_arg(char *arg, t_env **env_list)
 		if (ft_strcmp(cur->key, arg) == 0)
 		{
 			remove_env_node(env_list, prev, cur);
-			break;
+			break ;
 		}
 		prev = cur;
 		cur = cur->next;

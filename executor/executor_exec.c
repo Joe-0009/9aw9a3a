@@ -8,7 +8,7 @@ static int	check_directory_error(char *path, char **envp)
 	{
 		ft_fprintf_fd(2, "minishell: %s: Is a directory\n", path);
 		if (ft_strchr(path, '/'))
-			free(path);
+			safe_free((void **)&path);
 		safe_doube_star_free(envp);
 		exit(126);
 	}
@@ -36,17 +36,11 @@ static void	exec_command(char *path, t_command *current, char **envp)
 		if (execve(path, current->args, envp) == -1)
 		{
 			perror("minishell: execve");
-			free(path);
+			safe_free((void **)&path);
 			safe_doube_star_free(envp);
 			exit(126);
 		}
 	}
-}
-
-void	handle_builtin_command(t_command *current, t_env *env_list)
-{
-	execute_builtin(current, &env_list);
-	exit(g_last_exit_status);
 }
 
 void	handle_external_command(t_command *current, t_env *env_list)
@@ -62,10 +56,9 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	path = find_executable_path(current->args[0], envp);
 	exec_command(path, current, envp);
 	safe_doube_star_free(envp);
-	ft_fprintf_fd(2, "minishell: %s: command not found\n",
-		current->args[0]);
+	ft_fprintf_fd(2, "minishell: %s: command not found\n", current->args[0]);
 	if (path)
-		free(path);
+		safe_free((void **)&path);
 	exit(127);
 }
 

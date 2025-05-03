@@ -6,7 +6,8 @@ static int	process_exit_arg(char *arg)
 
 	if (!is_number(arg))
 	{
-		ft_fprintf_fd(2, "minishell: exit: %s: numeric argument required\n", arg);
+		ft_fprintf_fd(2, "minishell: exit: %s: numeric argument required\n",
+			arg);
 		return (2);
 	}
 	exit_status = ft_atoi(arg);

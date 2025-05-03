@@ -161,6 +161,8 @@ int							handle_redirect_token(t_token **current,
 								t_command **first_cmd, t_command **current_cmd);
 void						add_redirection(t_command *cmd,
 								t_token_type redirect_type, char *file);
+t_command					*cleanup_and_return_null(t_command *first_cmd);
+t_command					*finish_command_parsing(t_command *first_cmd);
 
 /* ===================== BUILTINS ===================== */
 typedef struct s_env_setup
@@ -262,8 +264,6 @@ int							is_parent_builtin(char *cmd);
 int							execute_single_parent_builtin(t_command *cmd_list,
 								t_env **env_list);
 int							print_env_vars(char **envp);
-void						handle_builtin_command(t_command *current,
-								t_env *env_list);
 void						handle_external_command(t_command *current,
 								t_env *env_list);
 

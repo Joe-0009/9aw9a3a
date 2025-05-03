@@ -15,9 +15,7 @@ static void	handle_append_mode(char **value, char *key, t_env **env_list)
 
 static void	handle_error(char *key, char **value)
 {
-	ft_putstr_fd("minishell: export: `", 2);
-	ft_putstr_fd(key, 2);
-	ft_putstr_fd("': not a valid identifier\n", 2);
+	ft_fprintf_fd(2, "minishell: export: `%s': not a valid identifier\n", key);
 	safe_free((void **)&key);
 	if (*value)
 		safe_free((void **)value);
