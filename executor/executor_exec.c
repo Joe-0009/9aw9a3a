@@ -22,7 +22,7 @@ static void	handle_directory_errors(char *path, char **envp)
 	check_directory_error(path, envp);
 	if (stat(path, &file_stat) == -1 && ft_strchr(path, '/'))
 	{
-		ft_fprintf_fd(2, "minishell: %s: Not a directory\n", path);
+		ft_fprintf_fd(2, "minishell: %s: No such file or directory\n", path);
 		safe_doube_star_free(envp);
 		exit(127);
 	}
