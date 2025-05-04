@@ -52,6 +52,24 @@ static int	setup_pipes_and_heredocs(t_command *cmd_list, t_env **env_list,
 	}
 	return (0);
 }
+static int	setup_command_pipe(t_command *current, int *prev_pipe_read,
+		int pipe_fd[2])
+{
+	if (current->next)
+	{
+		if (setup_pipe(pipe_fd) == -1)
+		{
+			safe_close(prev_pipe_read);
+			return (0);
+		}
+	}
+	else
+	{
+		pipe_fd[0] = -1;
+		pipe_fd[1] = -1;
+	}
+	return (1);
+}
 
 static void	execute_command_process(t_command *current, int *prev_pipe_read,
 		int pipe_fd[2], t_env **env_list)

@@ -273,8 +273,6 @@ int							wait_for_children(void);
 int							parent_process(int prev_pipe_read, int pipe_fd[2]);
 
 /* ===================== EXECUTOR EXEC ===================== */
-int							setup_command_pipe(t_command *current,
-								int *prev_pipe_read, int pipe_fd[2]);
 int							is_parent_builtin(char *cmd);
 int							execute_single_parent_builtin(t_command *cmd_list,
 								t_env **env_list);
