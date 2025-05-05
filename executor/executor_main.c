@@ -99,68 +99,88 @@ static int	setup_command_pipe(t_command *current, int *prev_pipe_read,
 // 	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
 // }
 
+static int check_parent_builtin(t_command *cmd_list, t_env **env_list)
+{
+    if (cmd_list && cmd_list->next == NULL && cmd_list->args
+        && cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
+        return (execute_single_parent_builtin(cmd_list, env_list));
+    return (0);
+}
+
+static t_command *find_last_command(t_command *cmd_list)
+{
+    t_command *last_command;
+
+    last_command = cmd_list;
+    while (last_command && last_command->next)
+        last_command = last_command->next;
+    return (last_command);
+}
+
+static int execute_single_pipe_command(t_command *current, int *prev_pipe_read,
+        int pipe_fd[2], t_env **env_list, t_command *last_command, pid_t *last_pid)
+{
+    pid_t	pid;
+    char	**envp;
+
+    envp = env_list_to_envp(*env_list);
+    if (!envp)
+        return (0);
+    expand_command_args(current, envp);
+    if (!setup_command_pipe(current, prev_pipe_read, pipe_fd))
+    {
+        safe_doube_star_free(envp);
+        return (0);
+    }
+    if ((pid = fork()) == -1)
+    {
+        handle_fork_error(current, *prev_pipe_read, pipe_fd);
+        safe_doube_star_free(envp);
+        return (0);
+    }
+    if (pid == 0)
+        child_process(current, *prev_pipe_read, pipe_fd, *env_list);
+    if (current == last_command)
+        *last_pid = pid;
+    safe_doube_star_free(envp);
+    *prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
+    return (1);
+}
+static int execute_pipeline(t_command *cmd_list, int *prev_pipe_read,
+    int pipe_fd[2], t_env **env_list, pid_t *last_pid)
+{
+t_command *current;
+t_command *last_command;
+
+last_command = find_last_command(cmd_list);
+current = cmd_list;
+while (current)
+{
+    if (!execute_single_pipe_command(current, prev_pipe_read, pipe_fd,
+            env_list, last_command, last_pid))
+        return (0);
+    current = current->next;
+}
+return (1);
+}
+
 int	execute_command_list(t_command *cmd_list, t_env **env_list)
 {
-	int			pipe_fd[2];
-	int			prev_pipe_read;
-	int			status;
-	t_command	*current;
-	int			init_result;
-	t_command	*last_command;
-	pid_t		last_pid;
+int			pipe_fd[2];
+int			prev_pipe_read;
+int			status;
+pid_t		last_pid;
+int			result;
 
-	setup_exec_signals();
-	if (cmd_list && cmd_list->next == NULL && cmd_list->args
-		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
-		return (execute_single_parent_builtin(cmd_list, env_list));
-	init_result = setup_pipes_and_heredocs(cmd_list, env_list, pipe_fd,
-			&prev_pipe_read);
-	if (init_result != 0)
-		return (init_result);
-    
-	// Find the last command in the pipeline
-	last_command = cmd_list;
-	while (last_command && last_command->next)
-		last_command = last_command->next;
-    
-	current = cmd_list;
-	last_pid = -1;
-	while (current)
-	{
-		pid_t pid;
-		char **envp = env_list_to_envp(*env_list);
-		if (!envp)
-			return (1);
-            
-		expand_command_args(current, envp);
-		if (!setup_command_pipe(current, &prev_pipe_read, pipe_fd))
-		{
-			safe_doube_star_free(envp);
-			break;
-		}
-            
-		pid = fork();
-		if (pid == -1)
-		{
-			handle_fork_error(current, prev_pipe_read, pipe_fd);
-			safe_doube_star_free(envp);
-			break;
-		}
-            
-		if (pid == 0)
-			child_process(current, prev_pipe_read, pipe_fd, *env_list);
-            
-		// Track the PID of the last command in the pipeline
-		if (current == last_command)
-			last_pid = pid;
-            
-		safe_doube_star_free(envp);
-		prev_pipe_read = parent_process(prev_pipe_read, pipe_fd);
-		current = current->next;
-	}
-    
-	// Wait for all children, but focus on the last command's status
-	status = wait_for_specific_pid(last_pid);
-	setup_signals();
-	return (status);
+setup_exec_signals();
+if ((result = check_parent_builtin(cmd_list, env_list)))
+    return (result);
+if ((result = setup_pipes_and_heredocs(cmd_list, env_list, pipe_fd,
+        &prev_pipe_read)))
+    return (result);
+last_pid = -1;
+execute_pipeline(cmd_list, &prev_pipe_read, pipe_fd, env_list, &last_pid);
+status = wait_for_specific_pid(last_pid);
+setup_signals();
+return (status);
 }
