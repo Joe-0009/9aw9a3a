@@ -200,7 +200,7 @@ int							builtin_export(t_command *cmd, t_env **env_list);
 int							builtin_unset(t_command *cmd, t_env **env_list);
 int							builtin_env(t_command *cmd, t_env *env_list);
 int							builtin_exit(t_command *cmd, t_env **env_list);
-void						export_one_arg(char *arg, t_env **env_list);
+int						export_one_arg(char *arg, t_env **env_list);
 void						unset_one_arg(char *arg, t_env **env_list);
 void						print_environment(t_env *env_list, t_command *cmd);
 
@@ -257,6 +257,7 @@ void						expand_redirections_loop(t_expand_vars *v);
 int							has_var_in_dquotes(const char *str);
 int							is_var_in_squotes(const char *str);
 int							was_quoted(const char *str);
+void						clean_empty_args(t_command *cmd);
 
 /* ===================== EXECUTOR UTILS ===================== */
 int							setup_pipe(int pipe_fd[2]);
@@ -270,6 +271,7 @@ void						child_process(t_command *current,
 								int prev_pipe_read, int pipe_fd[2],
 								t_env *env_list);
 int							wait_for_children(void);
+int							wait_for_specific_pid(pid_t last_pid);
 int							parent_process(int prev_pipe_read, int pipe_fd[2]);
 
 /* ===================== EXECUTOR EXEC ===================== */

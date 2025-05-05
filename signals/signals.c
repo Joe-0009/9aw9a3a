@@ -40,4 +40,6 @@ void	setup_signals(void)
 	sa.sa_flags = 0;
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 		perror("sigaction SIGQUIT interactive error");
+	if (sigaction(SIGPIPE, &sa, NULL) == -1)
+		perror("sigaction SIGPIPE ignore error");
 }

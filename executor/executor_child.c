@@ -30,8 +30,7 @@ void	handle_child_output(t_command *current, int pipe_fd[2])
 void	child_process(t_command *current, int prev_pipe_read, int pipe_fd[2],
 		t_env *env_list)
 {
-	set_sigint_default();
-	signal(SIGQUIT, SIG_DFL);
+	setup_exec_signals();
 	handle_child_input(prev_pipe_read);
 	handle_child_output(current, pipe_fd);
 	if (setup_redirections(current) == -1)
@@ -41,32 +40,77 @@ void	child_process(t_command *current, int prev_pipe_read, int pipe_fd[2],
 	exit(127);
 }
 
-int	wait_for_children(void)
+static int	handle_process_status(pid_t pid, int status, pid_t last_pid)
 {
-	pid_t	last_pid;
+	int	last_command_status;
+	int	exit_status;
+
+	last_command_status = 0;
+	exit_status = 0;
+	if (pid == last_pid)
+	{
+		if (WIFEXITED(status))
+			last_command_status = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			last_command_status = 128 + WTERMSIG(status);
+	}
+	if (WIFSIGNALED(status))
+	{
+		exit_status = 128 + WTERMSIG(status);
+		if (WTERMSIG(status) == SIGQUIT && g_last_exit_status != 131)
+			write(STDERR_FILENO, "Quit: 3\n", 9);
+		if (WTERMSIG(status) == SIGINT)
+			write(STDOUT_FILENO, "\n", 1);
+	}
+	else if (WIFEXITED(status))
+		exit_status = WEXITSTATUS(status);
+	return (pid == last_pid ? last_command_status : exit_status);
+}
+
+int	wait_for_specific_pid(pid_t last_pid)
+{
+	pid_t	pid;
 	int		status;
 	int		last_status;
+	int		last_command_status;
 
 	status = 0;
 	last_status = 0;
-	last_pid = waitpid(-1, &status, 0);
-	while (last_pid > 0)
+	last_command_status = 0;
+	while ((pid = waitpid(-1, &status, 0)) > 0)
 	{
-		if (WIFSIGNALED(status))
+		if (pid == last_pid)
+			last_command_status = handle_process_status(pid, status, last_pid);
+		else
+			last_status = handle_process_status(pid, status, -1);
+	}
+	if (last_pid != -1)
+		return (last_command_status);
+	return (last_status);
+}
+
+int	wait_for_children(void)
+{
+	pid_t	pid;
+	int		status;
+	int		last_command_status;
+
+	status = 0;
+	last_command_status = 0;
+	while ((pid = waitpid(-1, &status, 0)) > 0)
+	{
+		if (WIFEXITED(status))
+			last_command_status = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
 		{
-			last_status = 128 + WTERMSIG(status);
+			last_command_status = 128 + WTERMSIG(status);
 			if (WTERMSIG(status) == SIGQUIT && g_last_exit_status != 131)
 				write(STDERR_FILENO, "Quit: 3\n", 9);
 			if (WTERMSIG(status) == SIGINT)
 				write(STDOUT_FILENO, "\n", 1);
 		}
-		else if (WIFEXITED(status))
-		{
-			last_status = WEXITSTATUS(status);
-		}
-		last_pid = waitpid(-1, &status, 0);
 	}
-	return (last_status);
+	return (last_command_status);
 }
 
 int	parent_process(int prev_pipe_read, int pipe_fd[2])

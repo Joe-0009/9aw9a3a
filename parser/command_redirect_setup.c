@@ -7,7 +7,8 @@ int	setup_redirect_in(char *file_path)
 	fd = open(file_path, O_RDONLY);
 	if (fd == -1)
 	{
-		ft_fprintf_fd(2, "minishell: %s: %s\n", file_path, strerror(errno));
+		ft_fprintf_fd(2, "minishell: ");
+		perror(file_path);
 		return (-1);
 	}
 	if (dup2(fd, STDIN_FILENO) == -1)
@@ -34,7 +35,8 @@ int	setup_redirect_out(char *file_path, int append_mode)
 	fd = open(file_path, flags, 0644);
 	if (fd == -1)
 	{
-		ft_fprintf_fd(2, "minishell: %s: %s\n", file_path, strerror(errno));
+		ft_fprintf_fd(2, "minishell: ");
+		perror(file_path);
 		return (-1);
 	}
 	if (dup2(fd, STDOUT_FILENO) == -1)

@@ -14,6 +14,8 @@ void	setup_heredoc_signals(void)
 	sa.sa_flags = 0;
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 		perror("sigaction SIGQUIT heredoc error");
+	if (sigaction(SIGPIPE, &sa, NULL) == -1)
+		perror("sigaction SIGPIPE ignore error");
 }
 
 void	setup_exec_signals(void)
@@ -27,6 +29,10 @@ void	setup_exec_signals(void)
 		perror("sigaction SIGINT ignore error");
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 		perror("sigaction SIGQUIT ignore error");
+	// We still want to ignore SIGPIPE in the parent process, but we'll let
+	// child processes handle it normally through the default handler
+	if (sigaction(SIGPIPE, &sa, NULL) == -1)
+		perror("sigaction SIGPIPE ignore error");
 }
 
 void	set_sigint_default(void)
@@ -40,4 +46,7 @@ void	set_sigint_default(void)
 		perror("sigaction SIGINT default error");
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 		perror("sigaction SIGQUIT default error");
+	// Make sure we reset SIGPIPE to default as well
+	if (sigaction(SIGPIPE, &sa, NULL) == -1)
+		perror("sigaction SIGPIPE default error");
 }

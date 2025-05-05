@@ -7,8 +7,7 @@ static int	handle_cd_errors(char *dir, char *old_pwd)
 	if (!dir)
 		return (ft_fprintf_fd(2, "minishell: cd: HOME not set\n"), 1);
 	else
-		return (ft_fprintf_fd(2, "minishell: cd: %s: %s\n", dir,
-				strerror(errno)), 1);
+		return (ft_fprintf_fd(2, "minishell: cd: %s: No such file or directory\n", dir), 1);
 }
 
 static int	update_pwd_vars(t_env **env, char *old_pwd)

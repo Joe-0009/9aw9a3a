@@ -4,7 +4,8 @@ int	is_valid_identifier(char *str)
 {
 	int	i;
 
-	if (!str || (!ft_isalpha(str[0]) && str[0] != '_'))
+	if (!str || (!ft_isalpha(str[0]) && str[0] != '_') || ft_strchr(str, '+')
+		|| ft_strchr(str, '-'))
 		return (0);
 	i = 1;
 	while (str[i])

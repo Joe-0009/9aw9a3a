@@ -71,33 +71,33 @@ static int	setup_command_pipe(t_command *current, int *prev_pipe_read,
 	return (1);
 }
 
-static void	execute_command_process(t_command *current, int *prev_pipe_read,
-		int pipe_fd[2], t_env **env_list)
-{
-	pid_t	pid;
-	char	**envp;
+// static void	execute_command_process(t_command *current, int *prev_pipe_read,
+// 		int pipe_fd[2], t_env **env_list)
+// {
+// 	pid_t	pid;
+// 	char	**envp;
 
-	envp = env_list_to_envp(*env_list);
-	if (!envp)
-		return ;
-	expand_command_args(current, envp);
-	if (!setup_command_pipe(current, prev_pipe_read, pipe_fd))
-	{
-		safe_doube_star_free(envp);
-		return ;
-	}
-	pid = fork();
-	if (pid == -1)
-	{
-		handle_fork_error(current, *prev_pipe_read, pipe_fd);
-		safe_doube_star_free(envp);
-		return ;
-	}
-	if (pid == 0)
-		child_process(current, *prev_pipe_read, pipe_fd, *env_list);
-	safe_doube_star_free(envp);
-	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
-}
+// 	envp = env_list_to_envp(*env_list);
+// 	if (!envp)
+// 		return ;
+// 	expand_command_args(current, envp);
+// 	if (!setup_command_pipe(current, prev_pipe_read, pipe_fd))
+// 	{
+// 		safe_doube_star_free(envp);
+// 		return ;
+// 	}
+// 	pid = fork();
+// 	if (pid == -1)
+// 	{
+// 		handle_fork_error(current, *prev_pipe_read, pipe_fd);
+// 		safe_doube_star_free(envp);
+// 		return ;
+// 	}
+// 	if (pid == 0)
+// 		child_process(current, *prev_pipe_read, pipe_fd, *env_list);
+// 	safe_doube_star_free(envp);
+// 	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
+// }
 
 int	execute_command_list(t_command *cmd_list, t_env **env_list)
 {
@@ -106,6 +106,8 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	int			status;
 	t_command	*current;
 	int			init_result;
+	t_command	*last_command;
+	pid_t		last_pid;
 
 	setup_exec_signals();
 	if (cmd_list && cmd_list->next == NULL && cmd_list->args
@@ -115,13 +117,50 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 			&prev_pipe_read);
 	if (init_result != 0)
 		return (init_result);
+    
+	// Find the last command in the pipeline
+	last_command = cmd_list;
+	while (last_command && last_command->next)
+		last_command = last_command->next;
+    
 	current = cmd_list;
+	last_pid = -1;
 	while (current)
 	{
-		execute_command_process(current, &prev_pipe_read, pipe_fd, env_list);
+		pid_t pid;
+		char **envp = env_list_to_envp(*env_list);
+		if (!envp)
+			return (1);
+            
+		expand_command_args(current, envp);
+		if (!setup_command_pipe(current, &prev_pipe_read, pipe_fd))
+		{
+			safe_doube_star_free(envp);
+			break;
+		}
+            
+		pid = fork();
+		if (pid == -1)
+		{
+			handle_fork_error(current, prev_pipe_read, pipe_fd);
+			safe_doube_star_free(envp);
+			break;
+		}
+            
+		if (pid == 0)
+			child_process(current, prev_pipe_read, pipe_fd, *env_list);
+            
+		// Track the PID of the last command in the pipeline
+		if (current == last_command)
+			last_pid = pid;
+            
+		safe_doube_star_free(envp);
+		prev_pipe_read = parent_process(prev_pipe_read, pipe_fd);
 		current = current->next;
 	}
-	status = wait_for_children();
+    
+	// Wait for all children, but focus on the last command's status
+	status = wait_for_specific_pid(last_pid);
 	setup_signals();
 	return (status);
 }

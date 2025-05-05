@@ -19,11 +19,18 @@ char	*get_env_value(char *var_name, char **envp)
 {
 	int		i;
 	size_t	var_len;
+	char	*tmp;
+	char	*interogation_var;
 
 	i = 0;
 	var_len = ft_strlen(var_name);
-	if (ft_strcmp(var_name, "?") == 0)
-		return (ft_itoa(g_last_exit_status));
+	if (ft_strncmp(var_name, "?", 1) == 0)
+	{
+		tmp = ft_itoa(g_last_exit_status);
+		interogation_var = ft_strjoin(tmp, ft_strchr(var_name, '?') + 1);
+		safe_free((void **)&tmp);
+		return (interogation_var);
+	}
 	while (envp[i])
 	{
 		if (ft_strncmp(envp[i], var_name, var_len) == 0

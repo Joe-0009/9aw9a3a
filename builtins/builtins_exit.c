@@ -24,6 +24,8 @@ int	builtin_exit(t_command *cmd, t_env **env_list)
 		exit_status = process_exit_arg(cmd->args[1]);
 		if (exit_status == 2)
 			return (exit_status);
+		else if (exit_status < 0)
+			return (156);
 	}
 	else
 		exit_status = 0;

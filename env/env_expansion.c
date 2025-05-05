@@ -31,11 +31,8 @@ void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
 	if (!in_single_quotes)
 	{
 		expanded = expand_variables(cmd->args[i], envp);
-		if (expanded)
-		{
-			free(cmd->args[i]);
-			cmd->args[i] = expanded;
-		}
+		free(cmd->args[i]);
+		cmd->args[i] = expanded;
 	}
 	stripped = strip_quotes(cmd->args[i]);
 	if (stripped)
@@ -60,5 +57,8 @@ void	expand_command_args(t_command *cmd, char **envp)
 		expand_args_loop(&v);
 	}
 	if (cmd)
+	{
 		expand_redirections_loop(&v);
+		clean_empty_args(cmd);  // Clean up empty arguments after expansion
+	}
 }

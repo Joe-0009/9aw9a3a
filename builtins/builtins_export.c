@@ -3,7 +3,9 @@
 int	builtin_export(t_command *cmd, t_env **env_list)
 {
 	int	i;
+	int fail;
 
+	fail = 0;
 	if (!cmd->args[1])
 	{
 		print_export_list(*env_list);
@@ -12,10 +14,11 @@ int	builtin_export(t_command *cmd, t_env **env_list)
 	i = 1;
 	while (cmd->args[i])
 	{
-		export_one_arg(cmd->args[i], env_list);
+		if (!export_one_arg(cmd->args[i], env_list))
+			fail = 1;
 		i++;
 	}
-	return (0);
+	return (fail);
 }
 
 static void	print_single_export(char *key, char *value)

@@ -19,20 +19,6 @@ static void	process_arg_expansion(t_expand_vars *v)
 	}
 }
 
-static void	restore_command_name(t_expand_vars *v, char *orig_cmd)
-{
-	if (orig_cmd && v->cmd->args && v->cmd->args_count > 0)
-	{
-		if (!v->cmd->args[0] || strcmp(orig_cmd, v->cmd->args[0]) != 0)
-		{
-			free(v->cmd->args[0]);
-			v->cmd->args[0] = orig_cmd;
-		}
-		else
-			free(orig_cmd);
-	}
-}
-
 static void	process_argument(t_expand_vars *v)
 {
 	process_arg_expansion(v);
@@ -52,13 +38,8 @@ static void	process_argument(t_expand_vars *v)
 
 void	expand_args_loop(t_expand_vars *v)
 {
-	char	*orig_cmd;
-
-	orig_cmd = NULL;
 	if (!v->cmd || !v->cmd->args || v->cmd->args_count <= 0)
 		return ;
-	if (v->cmd->args[0])
-		orig_cmd = ft_strdup(v->cmd->args[0]);
 	v->i = 0;
 	while (v->i < v->cmd->args_count)
 	{
@@ -68,8 +49,8 @@ void	expand_args_loop(t_expand_vars *v)
 			continue ;
 		}
 		process_argument(v);
+		
 	}
-	restore_command_name(v, orig_cmd);
 }
 
 void	expand_redirections_loop(t_expand_vars *v)

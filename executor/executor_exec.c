@@ -26,6 +26,12 @@ static void	handle_directory_errors(char *path, char **envp)
 		safe_doube_star_free(envp);
 		exit(127);
 	}
+	if (stat(path, &file_stat) == 0 && access(path, X_OK) == -1)
+	{
+		ft_fprintf_fd(2, "minishell: %s: Permission denied\n", path);
+		safe_doube_star_free(envp);
+		exit(126);
+	}
 }
 
 static void	exec_command(char *path, t_command *current, char **envp)
@@ -64,10 +70,12 @@ void	handle_external_command(t_command *current, t_env *env_list)
 
 void	execute_single_command(t_command *current, t_env *env_list)
 {
-	if (current->args && current->args[0]
-		&& is_builtin_command(current->args[0]))
-		exit(execute_builtin(current, &env_list));
-	else if (current->args && current->args[0])
-		handle_external_command(current, env_list);
+	if (current->args && current->args[0] && current->args[0][0])
+	{
+		if (is_builtin_command(current->args[0]))
+			exit(execute_builtin(current, &env_list));
+		else
+			handle_external_command(current, env_list);
+	}
 	exit(0);
 }

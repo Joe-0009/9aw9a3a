@@ -7,7 +7,7 @@ static int	process_variable(char **result, char *str, int *i, char **envp)
 	char	*temp;
 
 	(*i)++;
-	if (!str[*i] || ft_isspace(str[*i]))
+	if (!str[*i] || ft_isspace(str[*i]) || str[*i] == '\"')
 		return (add_char_to_result(result, '$'));
 	var_name = extract_var_name(str, i);
 	if (!var_name)
@@ -66,4 +66,38 @@ char	*expand_variables(char *str, char **envp)
 			return (NULL);
 	}
 	return (result);
+}
+
+void    clean_empty_args(t_command *cmd)
+{
+    int i;
+    int j;
+
+    if (!cmd || !cmd->args)
+        return;
+    
+    i = 0;
+    j = 0;
+    
+    while (i < cmd->args_count)
+    {
+        if (cmd->args[i] != NULL && cmd->args[i][0] != '\0')
+        {
+            // Keep non-empty arguments
+            cmd->args[j] = cmd->args[i];
+            if (i != j)
+                cmd->args[i] = NULL;
+            j++;
+        }
+        else if (cmd->args[i] != NULL)
+        {
+            // Free empty string arguments
+            free(cmd->args[i]);
+            cmd->args[i] = NULL;
+        }
+        i++;
+    }
+    
+    // Update args_count to the new count after removing empty args
+    cmd->args_count = j;
 }

@@ -46,7 +46,7 @@ static void	extract_key_value(char *arg, char **key, char **value,
 	}
 }
 
-void	export_one_arg(char *arg, t_env **env_list)
+int	export_one_arg(char *arg, t_env **env_list)
 {
 	char	*key;
 	char	*value;
@@ -56,7 +56,7 @@ void	export_one_arg(char *arg, t_env **env_list)
 	if (!is_valid_identifier(key))
 	{
 		handle_error(key, &value);
-		return ;
+		return (0);
 	}
 	if (append_mode)
 		handle_append_mode(&value, key, env_list);
@@ -64,4 +64,5 @@ void	export_one_arg(char *arg, t_env **env_list)
 	safe_free((void **)&key);
 	if (value)
 		safe_free((void **)&value);
+	return (1);
 }
