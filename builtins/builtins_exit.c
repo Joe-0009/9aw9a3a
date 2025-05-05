@@ -18,7 +18,7 @@ int	builtin_exit(t_cmd_ctx *cmd_ctx)
 {
 	int	exit_status;
 
-	if (cmd_ctx->cmd_size > 1)
+	if (cmd_ctx->cmd_list == cmd_ctx->current && cmd_ctx->current->next == NULL)
 		ft_putstr_fd("exit\n", 1);
 	if (cmd_ctx->current->args_count > 1)
 	{
@@ -35,7 +35,7 @@ int	builtin_exit(t_cmd_ctx *cmd_ctx)
 		ft_putstr_fd("minishell: exit: too many arguments\n", 2);
 		return (1);
 	}
-	free_command_list(cmd_ctx->current);
+	free_command_list(cmd_ctx->cmd_list);
 	free_env_list(cmd_ctx->env_list);
 	clear_history();
 	exit(exit_status);

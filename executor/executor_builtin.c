@@ -58,13 +58,11 @@ int	execute_single_parent_builtin(t_cmd_ctx *cmd_ctx)
 	envp = env_list_to_envp(*(cmd_ctx->env_list));
 	if (!envp)
 		return (1);
-	expand_command_args(cmd_ctx->cmd_list, envp);
+	expand_command_args(cmd_ctx->current, envp);
 	safe_doube_star_free(envp);
 	status = execute_builtin(cmd_ctx);
-	if (!ft_strcmp(cmd_ctx->cmd_list->args[0], "exit") && status ==  2)
-	{
+	if (!ft_strcmp(cmd_ctx->current->args[0], "exit") && status == 2)
 		exit(status);
-	}
 	setup_signals();
 	return (status);
 }
