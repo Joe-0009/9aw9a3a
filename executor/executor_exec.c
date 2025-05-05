@@ -68,14 +68,14 @@ void	handle_external_command(t_command *current, t_env *env_list)
 	exit(127);
 }
 
-void	execute_single_command(t_command *current, t_env *env_list)
+void	execute_single_command(t_cmd_ctx *cmd_ctx)
 {
-	if (current->args && current->args[0] && current->args[0][0])
+	if (cmd_ctx->current->args && cmd_ctx->current->args[0] && cmd_ctx->current->args[0][0])
 	{
-		if (is_builtin_command(current->args[0]))
-			exit(execute_builtin(current, &env_list));
+		if (is_builtin_command(cmd_ctx->current->args[0]))
+			exit(execute_builtin(cmd_ctx));
 		else
-			handle_external_command(current, env_list);
+			handle_external_command(cmd_ctx);
 	}
 	exit(0);
 }

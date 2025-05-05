@@ -152,15 +152,25 @@ void						ft_token_clear(t_token **lst, void (*del)(void *));
 t_token						*ft_token_new(char *content);
 
 /* ===================== COMMAND CREATION & EXECUTION ===================== */
+typedef struct s_cmd_ctx
+{
+	int			cmd_size;
+	int			*cmd_list;
+	int			pipe_fd[2];
+	int			*prev_pipe_read;
+	int			status;
+	t_command	*current;
+	int			init_result;
+	t_env **env_list;
+} t_cmd_ctx;
+
 t_command					*create_cmds(t_token **tokens);
 int							execute_command_list(t_command *cmd_list,
 								t_env **env_list);
 char						*find_executable_path(char *cmd, char **envp);
 int							setup_redirections(t_command *cmd);
 int							setup_heredoc(char *delimiter, char **envp);
-char						*process_heredoc_delimiter(const char *delimiter);
-void						execute_single_command(t_command *current,
-								t_env *env_list);
+void						execute_single_command(t_cmd_ctx *cmd_ctx);
 t_command					*create_command_type_word(t_token **tokens);
 t_command					*command_init(void);
 int							setup_redirect_in(char *file_path);
@@ -192,14 +202,14 @@ typedef struct s_env_setup
 }				t_env_setup;
 
 int							is_builtin_command(char *cmd);
-int							execute_builtin(t_command *cmd, t_env **env_list);
+int							execute_builtin(t_cmd_ctx *cmd_ctx);
 int							builtin_cd(t_command *cmd, t_env **env);
 int							builtin_echo(t_command *cmd);
 int							builtin_pwd(t_env **env);
 int							builtin_export(t_command *cmd, t_env **env_list);
 int							builtin_unset(t_command *cmd, t_env **env_list);
 int							builtin_env(t_command *cmd, t_env *env_list);
-int							builtin_exit(t_command *cmd, t_env **env_list);
+int							builtin_exit(t_cmd_ctx *cmd_ctx);
 int						export_one_arg(char *arg, t_env **env_list);
 void						unset_one_arg(char *arg, t_env **env_list);
 void						print_environment(t_env *env_list, t_command *cmd);
@@ -263,13 +273,10 @@ void						clean_empty_args(t_command *cmd);
 int							setup_pipe(int pipe_fd[2]);
 int							handle_heredoc_redir(t_redirections *redir,
 								char **envp);
-void						handle_fork_error(t_command *current,
-								int prev_pipe_read, int pipe_fd[2]);
+void						handle_fork_error(t_cmd_ctx *cmd_ctx);
 
 /* ===================== EXECUTOR CHILD ===================== */
-void						child_process(t_command *current,
-								int prev_pipe_read, int pipe_fd[2],
-								t_env *env_list);
+void						child_process(t_cmd_ctx *cmd_ctx);
 int							wait_for_children(void);
 int							wait_for_specific_pid(pid_t last_pid);
 int							parent_process(int prev_pipe_read, int pipe_fd[2]);

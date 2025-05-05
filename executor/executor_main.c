@@ -27,17 +27,16 @@ static int	setup_all_heredocs(t_command *cmd_list, char **envp)
 	return (0);
 }
 
-static int	setup_pipes_and_heredocs(t_command *cmd_list, t_env **env_list,
-		int pipe_fd[2], int *prev_pipe_read)
+static int	setup_pipes_and_heredocs(t_cmd_ctx *cmd_ctx)
 {
 	int		setup_result;
 	char	**envp;
 
-	pipe_fd[0] = -1;
-	pipe_fd[1] = -1;
-	*prev_pipe_read = -1;
-	envp = env_list_to_envp(*env_list);
-	setup_result = setup_all_heredocs(cmd_list, envp);
+	cmd_ctx->pipe_fd[0] = -1;
+	cmd_ctx->pipe_fd[1] = -1;
+	cmd_ctx->prev_pipe_read = -1;
+	envp = env_list_to_envp(cmd_ctx->env_list);
+	setup_result = setup_all_heredocs(cmd_ctx->cmd_list, envp);
 	safe_doube_star_free(envp);
 	if (setup_result == 130)
 	{
@@ -52,136 +51,72 @@ static int	setup_pipes_and_heredocs(t_command *cmd_list, t_env **env_list,
 	}
 	return (0);
 }
-static int	setup_command_pipe(t_command *current, int *prev_pipe_read,
-		int pipe_fd[2])
+static int	setup_command_pipe(t_cmd_ctx *cmd_ctx)
 {
-	if (current->next)
+	if (cmd_ctx->current->next)
 	{
-		if (setup_pipe(pipe_fd) == -1)
+		if (setup_pipe(cmd_ctx->pipe_fd) == -1)
 		{
-			safe_close(prev_pipe_read);
+			safe_close(cmd_ctx->prev_pipe_read);
 			return (0);
 		}
 	}
 	else
 	{
-		pipe_fd[0] = -1;
-		pipe_fd[1] = -1;
+		cmd_ctx->pipe_fd[0] = -1;
+		cmd_ctx->pipe_fd[1] = -1;
 	}
 	return (1);
 }
 
-// static void	execute_command_process(t_command *current, int *prev_pipe_read,
-// 		int pipe_fd[2], t_env **env_list)
-// {
-// 	pid_t	pid;
-// 	char	**envp;
-
-// 	envp = env_list_to_envp(*env_list);
-// 	if (!envp)
-// 		return ;
-// 	expand_command_args(current, envp);
-// 	if (!setup_command_pipe(current, prev_pipe_read, pipe_fd))
-// 	{
-// 		safe_doube_star_free(envp);
-// 		return ;
-// 	}
-// 	pid = fork();
-// 	if (pid == -1)
-// 	{
-// 		handle_fork_error(current, *prev_pipe_read, pipe_fd);
-// 		safe_doube_star_free(envp);
-// 		return ;
-// 	}
-// 	if (pid == 0)
-// 		child_process(current, *prev_pipe_read, pipe_fd, *env_list);
-// 	safe_doube_star_free(envp);
-// 	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
-// }
-
-static int	check_parent_builtin(t_command *cmd_list, t_env **env_list)
-{
-	if (cmd_list && cmd_list->next == NULL && cmd_list->args
-		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
-		return (execute_single_parent_builtin(cmd_list, env_list));
-	return (0);
-}
-
-static t_command	*find_last_command(t_command *cmd_list)
-{
-	t_command	*last_command;
-
-	last_command = cmd_list;
-	while (last_command && last_command->next)
-		last_command = last_command->next;
-	return (last_command);
-}
-
-static int	execute_single_pipe_command(t_command *current, int *prev_pipe_read,
-		int pipe_fd[2], t_env **env_list, t_command *last_command,
-		pid_t *last_pid)
+static void	execute_command_process(t_cmd_ctx *cmd_ctx)
 {
 	pid_t	pid;
 	char	**envp;
 
-	envp = env_list_to_envp(*env_list);
+	envp = env_list_to_envp(cmd_ctx);
 	if (!envp)
-		return (0);
-	expand_command_args(current, envp);
-	if (!setup_command_pipe(current, prev_pipe_read, pipe_fd))
+		return ;
+	expand_command_args(cmd_ctx->current, envp);
+	if (!setup_command_pipe(cmd_ctx))
 	{
 		safe_doube_star_free(envp);
-		return (0);
+		return ;
 	}
-	if ((pid = fork()) == -1)
+	pid = fork();
+	if (pid == -1)
 	{
-		handle_fork_error(current, *prev_pipe_read, pipe_fd);
+		handle_fork_error(cmd_ctx);
 		safe_doube_star_free(envp);
-		return (0);
+		return ;
 	}
 	if (pid == 0)
-		child_process(current, *prev_pipe_read, pipe_fd, *env_list);
-	if (current == last_command)
-		*last_pid = pid;
+		child_process(cmd_ctx);
 	safe_doube_star_free(envp);
-	*prev_pipe_read = parent_process(*prev_pipe_read, pipe_fd);
-	return (1);
-}
-static int	execute_pipeline(t_command *cmd_list, int *prev_pipe_read,
-		int pipe_fd[2], t_env **env_list, pid_t *last_pid)
-{
-	t_command	*current;
-	t_command	*last_command;
-
-	last_command = find_last_command(cmd_list);
-	current = cmd_list;
-	while (current)
-	{
-		if (!execute_single_pipe_command(current, prev_pipe_read, pipe_fd,
-				env_list, last_command, last_pid))
-			return (0);
-		current = current->next;
-	}
-	return (1);
+	cmd_ctx->prev_pipe_read = parent_process(cmd_ctx);
 }
 
 int	execute_command_list(t_command *cmd_list, t_env **env_list)
 {
-	int pipe_fd[2];
-	int prev_pipe_read;
-	int status;
-	pid_t last_pid;
-	int result;
+	t_cmd_ctx	*cmd_ctx;
 
+	cmd_ctx->env_list = env_list;
+	cmd_ctx->cmd_list = cmd_list;
+	cmd_ctx->cmd_size = ft_lstsize(cmd_list);
 	setup_exec_signals();
-	if ((result = check_parent_builtin(cmd_list, env_list)))
-		return (result);
-	if ((result = setup_pipes_and_heredocs(cmd_list, env_list, pipe_fd,
-				&prev_pipe_read)))
-		return (result);
-	last_pid = -1;
-	execute_pipeline(cmd_list, &prev_pipe_read, pipe_fd, env_list, &last_pid);
-	status = wait_for_specific_pid(last_pid);
+	if (cmd_list && cmd_list->next == NULL && cmd_list->args
+		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
+		return (execute_single_parent_builtin(cmd_list, env_list));
+	cmd_ctx->init_result = setup_pipes_and_heredocs(cmd_ctx);
+	if (cmd_ctx->init_result != 0)
+		return (cmd_ctx->init_result);
+	cmd_ctx->current = cmd_list;
+	while (cmd_ctx->current)
+	{
+		execute_command_process(cmd_ctx);
+		cmd_ctx->current = cmd_ctx->current->next;
+	}
+	cmd_ctx->status = wait_for_children();
 	setup_signals();
-	return (status);
+	return (cmd_ctx->status);
 }

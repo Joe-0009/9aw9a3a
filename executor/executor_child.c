@@ -1,41 +1,40 @@
 #include "../minishell.h"
 
-void	handle_child_input(int prev_pipe_read)
+void	handle_child_input(t_cmd_ctx *cmd_ctx)
 {
-	if (prev_pipe_read != -1)
+	if (cmd_ctx->prev_pipe_read != -1)
 	{
-		if (dup2(prev_pipe_read, STDIN_FILENO) == -1)
+		if (dup2(cmd_ctx->prev_pipe_read, STDIN_FILENO) == -1)
 		{
 			perror("minishell: dup2 error on input");
 			exit(1);
 		}
-		safe_close(&prev_pipe_read);
+		safe_close(cmd_ctx->prev_pipe_read);
 	}
 }
 
-void	handle_child_output(t_command *current, int pipe_fd[2])
+void	handle_child_output(t_cmd_ctx *cmd_ctx)
 {
-	if (current->next)
+	if (cmd_ctx->current->next)
 	{
-		safe_close(&pipe_fd[0]);
-		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+		safe_close(cmd_ctx->pipe_fd[0]);
+		if (dup2(cmd_ctx->pipe_fd[1], STDOUT_FILENO) == -1)
 		{
 			perror("minishell: dup2 error on output");
 			exit(1);
 		}
-		safe_close(&pipe_fd[1]);
+		safe_close(cmd_ctx->pipe_fd[1]);
 	}
 }
 
-void	child_process(t_command *current, int prev_pipe_read, int pipe_fd[2],
-		t_env *env_list)
+void	child_process(t_cmd_ctx *cmd_ctx)
 {
 	setup_exec_signals();
-	handle_child_input(prev_pipe_read);
-	handle_child_output(current, pipe_fd);
-	if (setup_redirections(current) == -1)
+	handle_child_input(cmd_ctx);
+	handle_child_output(cmd_ctx);
+	if (setup_redirections(cmd_ctx->current) == -1)
 		exit(1);
-	execute_single_command(current, env_list);
+	execute_single_command(cmd_ctx);
 	ft_fprintf_fd(2, "minishell: command execution failed\n");
 	exit(127);
 }

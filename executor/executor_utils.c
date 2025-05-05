@@ -27,14 +27,13 @@ int	handle_heredoc_redir(t_redirections *redir, char **envp)
 	return (0);
 }
 
-void	handle_fork_error(t_command *current, int prev_pipe_read,
-		int pipe_fd[2])
+void	handle_fork_error(t_cmd_ctx *cmd_ctx)
 {
 	perror("minishell: fork error");
-	safe_close(&prev_pipe_read);
-	if (current->next)
+	safe_close(cmd_ctx->prev_pipe_read);
+	if (cmd_ctx->current->next)
 	{
-		safe_close(&pipe_fd[0]);
-		safe_close(&pipe_fd[1]);
+		safe_close(cmd_ctx->pipe_fd[0]);
+		safe_close(cmd_ctx->pipe_fd[1]);
 	}
 }
