@@ -13,6 +13,7 @@ void	add_redirection(t_command *cmd, t_token_type redirect_type, char *file)
 	redirection->was_in_dquotes = has_var_in_dquotes(file);
 	file = strip_quotes(file);
 	redirection->file = ft_strdup(file);
+	safe_free((void **)&file);
 	redirection->heredoc_fd = -1;
 	redirection->next = NULL;
 	if (!redirection->file)

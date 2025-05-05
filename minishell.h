@@ -230,10 +230,10 @@ char						**env_list_to_envp(t_env *env_list);
 int							is_valid_identifier(char *str);
 
 /* ===================== SIGNALS ===================== */
-void heredoc_sigint_handler(int sig);
-void sigint_handler(int sig);
-void ctrl_d_handle();
-void	child_sigint_handler(int sig);
+void						heredoc_sigint_handler(int sig);
+void						sigint_handler(int sig);
+void						ctrl_d_handle(void);
+void						child_sigint_handler(int sig);
 /* ===================== ENV EXPANSION UTILS ===================== */
 int							is_var_char(char c);
 char						*extract_var_name(const char *str, int *pos);

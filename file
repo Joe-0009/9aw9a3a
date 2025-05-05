@@ -1,11 +1,9 @@
 Makefile
-a
 build
 builtins
 env
 executor
-fdk fdk
-file1 file2
+file
 libft
 main.c
 minishell
@@ -17,5 +15,7 @@ parser
 qs sd
 readline.supp
 signals
+t
 tokenizer
 utils
+zeb zeb
