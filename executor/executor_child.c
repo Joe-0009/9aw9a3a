@@ -9,7 +9,7 @@ void	handle_child_input(t_cmd_ctx *cmd_ctx)
 			perror("minishell: dup2 error on input");
 			exit(1);
 		}
-		safe_close(cmd_ctx->prev_pipe_read);
+		safe_close(&cmd_ctx->prev_pipe_read);
 	}
 }
 
@@ -17,13 +17,13 @@ void	handle_child_output(t_cmd_ctx *cmd_ctx)
 {
 	if (cmd_ctx->current->next)
 	{
-		safe_close(cmd_ctx->pipe_fd[0]);
+		safe_close(&cmd_ctx->pipe_fd[0]);
 		if (dup2(cmd_ctx->pipe_fd[1], STDOUT_FILENO) == -1)
 		{
 			perror("minishell: dup2 error on output");
 			exit(1);
 		}
-		safe_close(cmd_ctx->pipe_fd[1]);
+		safe_close(&cmd_ctx->pipe_fd[1]);
 	}
 }
 

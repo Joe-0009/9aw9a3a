@@ -53,3 +53,18 @@ void	ft_token_clear(t_token **lst, void (*del)(void *))
 	}
 	*lst = NULL;
 }
+
+int	count_commands(t_command *cmd_list)
+{
+	int			count;
+	t_command	*current;
+
+	count = 0;
+	current = cmd_list;
+	while (current)
+	{
+		count++;
+		current = current->next;
+	}
+	return (count);
+}

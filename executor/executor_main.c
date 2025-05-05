@@ -35,7 +35,7 @@ static int	setup_pipes_and_heredocs(t_cmd_ctx *cmd_ctx)
 	cmd_ctx->pipe_fd[0] = -1;
 	cmd_ctx->pipe_fd[1] = -1;
 	cmd_ctx->prev_pipe_read = -1;
-	envp = env_list_to_envp(cmd_ctx->env_list);
+	envp = env_list_to_envp(*(cmd_ctx->env_list));
 	setup_result = setup_all_heredocs(cmd_ctx->cmd_list, envp);
 	safe_doube_star_free(envp);
 	if (setup_result == 130)
@@ -51,13 +51,14 @@ static int	setup_pipes_and_heredocs(t_cmd_ctx *cmd_ctx)
 	}
 	return (0);
 }
+
 static int	setup_command_pipe(t_cmd_ctx *cmd_ctx)
 {
 	if (cmd_ctx->current->next)
 	{
 		if (setup_pipe(cmd_ctx->pipe_fd) == -1)
 		{
-			safe_close(cmd_ctx->prev_pipe_read);
+			safe_close(&cmd_ctx->prev_pipe_read);
 			return (0);
 		}
 	}
@@ -74,7 +75,7 @@ static void	execute_command_process(t_cmd_ctx *cmd_ctx)
 	pid_t	pid;
 	char	**envp;
 
-	envp = env_list_to_envp(cmd_ctx);
+	envp = env_list_to_envp(*(cmd_ctx->env_list));
 	if (!envp)
 		return ;
 	expand_command_args(cmd_ctx->current, envp);
@@ -93,30 +94,33 @@ static void	execute_command_process(t_cmd_ctx *cmd_ctx)
 	if (pid == 0)
 		child_process(cmd_ctx);
 	safe_doube_star_free(envp);
-	cmd_ctx->prev_pipe_read = parent_process(cmd_ctx);
+	cmd_ctx->prev_pipe_read = parent_process(cmd_ctx->prev_pipe_read,
+			cmd_ctx->pipe_fd);
 }
 
 int	execute_command_list(t_command *cmd_list, t_env **env_list)
 {
-	t_cmd_ctx	*cmd_ctx;
+	t_cmd_ctx	cmd_ctx;
+	int			status;
 
-	cmd_ctx->env_list = env_list;
-	cmd_ctx->cmd_list = cmd_list;
-	cmd_ctx->cmd_size = ft_lstsize(cmd_list);
+	cmd_ctx.env_list = env_list;
+	cmd_ctx.cmd_list = cmd_list;
+	cmd_ctx.cmd_size = count_commands(cmd_list);
 	setup_exec_signals();
-	if (cmd_list && cmd_list->next == NULL && cmd_list->args
-		&& cmd_list->args[0] && is_parent_builtin(cmd_list->args[0]))
-		return (execute_single_parent_builtin(cmd_list, env_list));
-	cmd_ctx->init_result = setup_pipes_and_heredocs(cmd_ctx);
-	if (cmd_ctx->init_result != 0)
-		return (cmd_ctx->init_result);
-	cmd_ctx->current = cmd_list;
-	while (cmd_ctx->current)
+	if (cmd_ctx.cmd_list && cmd_ctx.cmd_list->next == NULL && cmd_ctx.cmd_list->args
+		&& cmd_ctx.cmd_list->args[0] && is_parent_builtin(cmd_ctx.cmd_list->args[0]))
+		return (execute_single_parent_builtin(&cmd_ctx));
+	cmd_ctx.init_result = setup_pipes_and_heredocs(&cmd_ctx);
+	if (cmd_ctx.init_result != 0)
+		return (cmd_ctx.init_result);
+	cmd_ctx.current = cmd_list;
+	while (cmd_ctx.current)
 	{
-		execute_command_process(cmd_ctx);
-		cmd_ctx->current = cmd_ctx->current->next;
+		execute_command_process(&cmd_ctx);
+		cmd_ctx.current = cmd_ctx.current->next;
 	}
-	cmd_ctx->status = wait_for_children();
+	status = wait_for_children();
+	cmd_ctx.status = status;
 	setup_signals();
-	return (cmd_ctx->status);
+	return (status);
 }

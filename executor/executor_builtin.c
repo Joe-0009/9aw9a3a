@@ -50,18 +50,18 @@ int	is_parent_builtin(char *cmd)
 		|| ft_strcmp(cmd, "unset") == 0 || ft_strcmp(cmd, "exit") == 0);
 }
 
-int	execute_single_parent_builtin(t_command *cmd_list, t_env **env_list)
+int	execute_single_parent_builtin(t_cmd_ctx *cmd_ctx)
 {
 	int		status;
 	char	**envp;
 
-	envp = env_list_to_envp(*env_list);
+	envp = env_list_to_envp(*(cmd_ctx->env_list));
 	if (!envp)
 		return (1);
-	expand_command_args(cmd_list, envp);
+	expand_command_args(cmd_ctx->cmd_list, envp);
 	safe_doube_star_free(envp);
-	status = execute_builtin(cmd_list, env_list);
-	if (!ft_strcmp(cmd_list->args[0], "exit") && status ==  2)
+	status = execute_builtin(cmd_ctx);
+	if (!ft_strcmp(cmd_ctx->cmd_list->args[0], "exit") && status ==  2)
 	{
 		exit(status);
 	}

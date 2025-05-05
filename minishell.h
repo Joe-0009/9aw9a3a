@@ -150,18 +150,19 @@ void						ft_token_add_back(t_token **lst, t_token *new);
 void						ft_token_delone(t_token *lst, void (*del)(void *));
 void						ft_token_clear(t_token **lst, void (*del)(void *));
 t_token						*ft_token_new(char *content);
+int							count_commands(t_command *cmd_list);
 
 /* ===================== COMMAND CREATION & EXECUTION ===================== */
 typedef struct s_cmd_ctx
 {
 	int			cmd_size;
-	int			*cmd_list;
+	t_command	*cmd_list;
 	int			pipe_fd[2];
-	int			*prev_pipe_read;
+	int			prev_pipe_read;
 	int			status;
 	t_command	*current;
 	int			init_result;
-	t_env **env_list;
+	t_env		**env_list;
 } t_cmd_ctx;
 
 t_command					*create_cmds(t_token **tokens);
@@ -283,10 +284,8 @@ int							parent_process(int prev_pipe_read, int pipe_fd[2]);
 
 /* ===================== EXECUTOR EXEC ===================== */
 int							is_parent_builtin(char *cmd);
-int							execute_single_parent_builtin(t_command *cmd_list,
-								t_env **env_list);
-void						handle_external_command(t_command *current,
-								t_env *env_list);
+int							execute_single_parent_builtin(t_cmd_ctx *cmd_ctx);
+void						handle_external_command(t_cmd_ctx *cmd_ctx);
 
 /* ===================== UTILITY FUNCTIONS ===================== */
 void						print_Cmd_list(t_command *cmd);

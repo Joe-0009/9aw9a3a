@@ -49,20 +49,20 @@ static void	exec_command(char *path, t_command *current, char **envp)
 	}
 }
 
-void	handle_external_command(t_command *current, t_env *env_list)
+void	handle_external_command(t_cmd_ctx *cmd_ctx)
 {
 	char	*path;
 	char	**envp;
 
-	envp = env_list_to_envp(env_list);
+	envp = env_list_to_envp(*(cmd_ctx->env_list));
 	if (!envp)
 		exit(1);
-	if (current->args[0] && ft_strchr(current->args[0], '/'))
-		handle_directory_errors(current->args[0], envp);
-	path = find_executable_path(current->args[0], envp);
-	exec_command(path, current, envp);
+	if (cmd_ctx->current->args[0] && ft_strchr(cmd_ctx->current->args[0], '/'))
+		handle_directory_errors(cmd_ctx->current->args[0], envp);
+	path = find_executable_path(cmd_ctx->current->args[0], envp);
+	exec_command(path, cmd_ctx->current, envp);
 	safe_doube_star_free(envp);
-	ft_fprintf_fd(2, "minishell: %s: command not found\n", current->args[0]);
+	ft_fprintf_fd(2, "minishell: %s: command not found\n", cmd_ctx->current->args[0]);
 	if (path)
 		safe_free((void **)&path);
 	exit(127);
