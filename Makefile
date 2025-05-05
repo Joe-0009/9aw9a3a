@@ -32,7 +32,7 @@ PARSER_SRCS = $(addprefix $(PARSER_DIR)/, command_path.c command_init.c command_
 EXECUTOR_SRCS = $(addprefix $(EXECUTOR_DIR)/, heredoc.c executor_main.c executor_exec.c executor_child.c executor_utils.c executor_builtin.c)
 BUILTINS_SRCS = $(addprefix $(BUILTINS_DIR)/, builtins_cd.c builtins_pwd.c builtins_echo.c builtins_exit.c builtins_env.c builtins_env_export_utils.c builtins_export.c builtins_unset_utils.c builtins_unset.c builtins_env_print.c builtins_export_utils.c builtins_env_convert_utils.c)
 ENV_SRCS = $(addprefix $(ENV_DIR)/, env_expansion.c env_variable_expand.c env_quote_handling.c env_arg_processing.c env_variable_process.c env_arg_utils.c)
-SIGNALS_SRCS = $(addprefix $(SIGNALS_DIR)/, signals.c signals_setup.c)
+SIGNALS_SRCS = $(addprefix $(SIGNALS_DIR)/, signals.c)
 
 # All source files
 SRCS = $(MAIN_SRCS) $(UTILS_SRCS) $(TOKENIZER_SRCS) $(PARSER_SRCS) $(EXECUTOR_SRCS) $(BUILTINS_SRCS) $(ENV_SRCS) $(SIGNALS_SRCS)

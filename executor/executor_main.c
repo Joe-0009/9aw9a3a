@@ -41,12 +41,10 @@ static int	setup_pipes_and_heredocs(t_cmd_ctx *cmd_ctx)
 	if (setup_result == 130)
 	{
 		g_last_exit_status = 130;
-		setup_signals();
 		return (130);
 	}
 	if (setup_result == -1)
 	{
-		setup_signals();
 		return (1);
 	}
 	return (0);
@@ -86,6 +84,7 @@ static pid_t	execute_command_process(t_cmd_ctx *cmd_ctx)
 		return (handle_fork_error(cmd_ctx), safe_doube_star_free(envp), -1);
 	if (pid == 0)
 		child_process(cmd_ctx);
+	signal(SIGINT, SIG_IGN);
 	safe_doube_star_free(envp);
 	cmd_ctx->prev_pipe_read = parent_process(cmd_ctx->prev_pipe_read,
 			cmd_ctx->pipe_fd);
@@ -104,7 +103,6 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	cmd_ctx.cmd_list = cmd_list;
 	cmd_ctx.current = cmd_list;
 	cmd_ctx.cmd_size = count_commands(cmd_list);
-	setup_exec_signals();
 	if (cmd_ctx.cmd_list && cmd_ctx.cmd_list->next == NULL
 		&& cmd_ctx.cmd_list->args && cmd_ctx.cmd_list->args[0]
 		&& is_parent_builtin(cmd_ctx.cmd_list->args[0]))
@@ -124,7 +122,7 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 		cmd_ctx.current = cmd_ctx.current->next;
 	}
 	status = wait_for_specific_pid(last_pid);
+	signal(SIGINT, sigint_handler);
 	cmd_ctx.status = status;
-	setup_signals();
 	return (status);
 }

@@ -61,7 +61,8 @@ int	main(int argc, char **argv, char **envp)
 
 	(void)argc;
 	(void)argv;
-	setup_signals();
+	signal(SIGINT, sigint_handler);
+	signal(SIGQUIT, SIG_IGN);
 	env_list = envp_to_env_list(envp);
 	if (!env_list)
 		initialize_empty_env(&env_list);

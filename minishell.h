@@ -176,9 +176,10 @@ int							setup_heredoc(char *delimiter, char **envp);
 void						execute_single_command(t_cmd_ctx *cmd_ctx);
 t_command					*create_command_type_word(t_token **tokens);
 t_command					*command_init(void);
-int							setup_redirect_in(char *file_path, int was_in_squotes, int was_in_dquotes);
-int							setup_redirect_out(char *file_path,
-								int append_mode, int was_in_squotes, int was_in_dquotes);
+int							setup_redirect_in(char *file_path, int was_in_squotes,
+								int was_in_dquotes);
+int							setup_redirect_out(char *file_path, int append_mode,
+								int was_in_squotes, int was_in_dquotes);
 int							handle_redirect_token(t_token **current,
 								t_command **first_cmd, t_command **current_cmd);
 void						add_redirection(t_command *cmd,
@@ -213,9 +214,11 @@ int							builtin_export(t_command *cmd, t_env **env_list);
 int							builtin_unset(t_command *cmd, t_env **env_list);
 int							builtin_env(t_command *cmd, t_env *env_list);
 int							builtin_exit(t_cmd_ctx *cmd_ctx);
-int						export_one_arg(char *arg, t_env **env_list);
+int							export_one_arg(char *arg, t_env **env_list);
 void						unset_one_arg(char *arg, t_env **env_list);
 void						print_environment(t_env *env_list, t_command *cmd);
+int							is_parent_builtin(char *cmd);
+int							execute_single_parent_builtin(t_cmd_ctx *cmd_ctx);
 
 /* ===================== ENV LINKED LIST HELPERS ===================== */
 t_env						*find_env_node(t_env *env_list, const char *key);
@@ -227,13 +230,10 @@ char						**env_list_to_envp(t_env *env_list);
 int							is_valid_identifier(char *str);
 
 /* ===================== SIGNALS ===================== */
-void						setup_signals(void);
-void						setup_heredoc_signals(void);
-void						setup_exec_signals(void);
-void						set_sigint_default(void);
-int							*get_exit_status(void);
-void						handle_sigint_heredoc(int sig);
-
+void heredoc_sigint_handler(int sig);
+void sigint_handler(int sig);
+void ctrl_d_handle();
+void	child_sigint_handler(int sig);
 /* ===================== ENV EXPANSION UTILS ===================== */
 int							is_var_char(char c);
 char						*extract_var_name(const char *str, int *pos);
@@ -277,17 +277,13 @@ int							setup_pipe(int pipe_fd[2]);
 int							handle_heredoc_redir(t_redirections *redir,
 								char **envp);
 void						handle_fork_error(t_cmd_ctx *cmd_ctx);
+void						handle_child_input(t_cmd_ctx *cmd_ctx);
+void						handle_child_output(t_cmd_ctx *cmd_ctx);
 
 /* ===================== EXECUTOR CHILD ===================== */
 void						child_process(t_cmd_ctx *cmd_ctx);
-int							wait_for_children(void);
 int							wait_for_specific_pid(pid_t last_pid);
 int							parent_process(int prev_pipe_read, int pipe_fd[2]);
-
-/* ===================== EXECUTOR EXEC ===================== */
-int							is_parent_builtin(char *cmd);
-int							execute_single_parent_builtin(t_cmd_ctx *cmd_ctx);
-void						handle_external_command(t_cmd_ctx *cmd_ctx);
 
 /* ===================== UTILITY FUNCTIONS ===================== */
 void						print_Cmd_list(t_command *cmd);

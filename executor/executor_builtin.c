@@ -63,6 +63,5 @@ int	execute_single_parent_builtin(t_cmd_ctx *cmd_ctx)
 	status = execute_builtin(cmd_ctx);
 	if (!ft_strcmp(cmd_ctx->current->args[0], "exit") && status == 2)
 		exit(status);
-	setup_signals();
 	return (status);
 }

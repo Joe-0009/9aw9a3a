@@ -59,6 +59,6 @@ void	expand_command_args(t_command *cmd, char **envp)
 	if (cmd)
 	{
 		expand_redirections_loop(&v);
-		clean_empty_args(cmd);  // Clean up empty arguments after expansion
+		clean_empty_args(cmd); 
 	}
 }

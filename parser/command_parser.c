@@ -33,9 +33,9 @@ static int	handle_pipe_with_redirection(t_token *current,
 	t_command	*new_cmd;
 
 	if (current->next && ((current)->type == TOKEN_REDIRECT_IN
-		|| (current)->type == TOKEN_HEREDOC
-		|| (current)->type == TOKEN_REDIRECT_OUT
-		|| (current)->type == TOKEN_APPEND))
+			|| (current)->type == TOKEN_HEREDOC
+			|| (current)->type == TOKEN_REDIRECT_OUT
+			|| (current)->type == TOKEN_APPEND))
 	{
 		new_cmd = command_init();
 		if (!new_cmd)
