@@ -80,39 +80,34 @@ static pid_t	execute_command_process(t_cmd_ctx *cmd_ctx)
 		return (-1);
 	expand_command_args(cmd_ctx->current, envp);
 	if (!setup_command_pipe(cmd_ctx))
-	{
-		safe_doube_star_free(envp);
-		return (-1);
-	}
+		return (safe_doube_star_free(envp), -1);
 	pid = fork();
 	if (pid == -1)
-	{
-		handle_fork_error(cmd_ctx);
-		safe_doube_star_free(envp);
-		return (-1);
-	}
+		return (handle_fork_error(cmd_ctx), safe_doube_star_free(envp), -1);
 	if (pid == 0)
 		child_process(cmd_ctx);
 	safe_doube_star_free(envp);
 	cmd_ctx->prev_pipe_read = parent_process(cmd_ctx->prev_pipe_read,
 			cmd_ctx->pipe_fd);
-	return (pid);  // Return the PID of the created process
+	return (pid);
 }
 
 int	execute_command_list(t_command *cmd_list, t_env **env_list)
 {
 	t_cmd_ctx	cmd_ctx;
 	int			status;
-	pid_t		last_pid = -1;
+	pid_t		last_pid;
 	t_command	*last_cmd;
 
+	last_pid = -1;
 	cmd_ctx.env_list = env_list;
 	cmd_ctx.cmd_list = cmd_list;
 	cmd_ctx.current = cmd_list;
 	cmd_ctx.cmd_size = count_commands(cmd_list);
 	setup_exec_signals();
-	if (cmd_ctx.cmd_list && cmd_ctx.cmd_list->next == NULL && cmd_ctx.cmd_list->args
-		&& cmd_ctx.cmd_list->args[0] && is_parent_builtin(cmd_ctx.cmd_list->args[0]))
+	if (cmd_ctx.cmd_list && cmd_ctx.cmd_list->next == NULL
+		&& cmd_ctx.cmd_list->args && cmd_ctx.cmd_list->args[0]
+		&& is_parent_builtin(cmd_ctx.cmd_list->args[0]))
 		return (execute_single_parent_builtin(&cmd_ctx));
 	cmd_ctx.init_result = setup_pipes_and_heredocs(&cmd_ctx);
 	if (cmd_ctx.init_result != 0)
@@ -123,7 +118,7 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	while (cmd_ctx.current)
 	{
 		if (cmd_ctx.current == last_cmd)
-			last_pid = execute_command_process(&cmd_ctx); 
+			last_pid = execute_command_process(&cmd_ctx);
 		else
 			execute_command_process(&cmd_ctx);
 		cmd_ctx.current = cmd_ctx.current->next;

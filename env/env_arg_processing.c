@@ -61,7 +61,7 @@ void	expand_redirections_loop(t_expand_vars *v)
 	redir = v->cmd->redirections;
 	while (redir)
 	{
-		if (redir->type != TOKEN_HEREDOC)
+		if (redir->type != TOKEN_HEREDOC && !redir->was_in_squotes)
 		{
 			expanded = expand_variables(redir->file, v->envp);
 			if (expanded)

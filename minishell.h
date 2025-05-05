@@ -62,6 +62,8 @@ typedef struct s_redirections
 	t_token_type			type;
 	char					*file;
 	int						heredoc_fd;
+	int						was_in_squotes;
+	int						was_in_dquotes;
 	struct s_redirections	*next;
 }							t_redirections;
 
@@ -174,9 +176,9 @@ int							setup_heredoc(char *delimiter, char **envp);
 void						execute_single_command(t_cmd_ctx *cmd_ctx);
 t_command					*create_command_type_word(t_token **tokens);
 t_command					*command_init(void);
-int							setup_redirect_in(char *file_path);
+int							setup_redirect_in(char *file_path, int was_in_squotes, int was_in_dquotes);
 int							setup_redirect_out(char *file_path,
-								int append_mode);
+								int append_mode, int was_in_squotes, int was_in_dquotes);
 int							handle_redirect_token(t_token **current,
 								t_command **first_cmd, t_command **current_cmd);
 void						add_redirection(t_command *cmd,

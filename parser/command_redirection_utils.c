@@ -9,6 +9,8 @@ void	add_redirection(t_command *cmd, t_token_type redirect_type, char *file)
 	if (!redirection)
 		return ;
 	redirection->type = redirect_type;
+	redirection->was_in_squotes = is_var_in_squotes(file);
+	redirection->was_in_dquotes = has_var_in_dquotes(file);
 	file = strip_quotes(file);
 	redirection->file = ft_strdup(file);
 	redirection->heredoc_fd = -1;

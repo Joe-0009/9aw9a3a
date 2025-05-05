@@ -1,32 +1,45 @@
 #include "../minishell.h"
 
-int	setup_redirect_in(char *file_path)
+static int	is_ambiguous_redirect(char *file_path, int was_in_squotes,
+		int was_in_dquotes)
+{
+	if (was_in_squotes || was_in_dquotes)
+		return (0);
+	while (file_path && *file_path)
+	{
+		if (ft_isspace((unsigned char)*file_path))
+			return (1);
+		file_path++;
+	}
+	return (0);
+}
+
+int	setup_redirect_in(char *file_path, int was_in_squotes, int was_in_dquotes)
 {
 	int	fd;
 
+	if (is_ambiguous_redirect(file_path, was_in_squotes, was_in_dquotes))
+		return (ft_fprintf_fd(2, "minishell: %s: ambiguous redirect\n",
+				file_path), -1);
 	fd = open(file_path, O_RDONLY);
 	if (fd == -1)
-	{
-		ft_fprintf_fd(2, "minishell: ");
-		perror(file_path);
-		return (-1);
-	}
+		return (ft_fprintf_fd(2, "minishell: "), perror(file_path), -1);
 	if (dup2(fd, STDIN_FILENO) == -1)
-	{
-		ft_fprintf_fd(2, "minishell: input redirection failed: %s\n",
-			strerror(errno));
-		close(fd);
-		return (-1);
-	}
+		return (ft_fprintf_fd(2, "minishell: input redirection failed: %s\n",
+				strerror(errno)), close(fd), -1);
 	close(fd);
 	return (0);
 }
 
-int	setup_redirect_out(char *file_path, int append_mode)
+int	setup_redirect_out(char *file_path, int append_mode, int was_in_squotes,
+		int was_in_dquotes)
 {
 	int	flags;
 	int	fd;
 
+	if (is_ambiguous_redirect(file_path, was_in_squotes, was_in_dquotes))
+		return (ft_fprintf_fd(2, "minishell: %s: ambiguous redirect\n",
+				file_path), -1);
 	flags = O_WRONLY | O_CREAT;
 	if (append_mode)
 		flags |= O_APPEND;
@@ -34,32 +47,11 @@ int	setup_redirect_out(char *file_path, int append_mode)
 		flags |= O_TRUNC;
 	fd = open(file_path, flags, 0644);
 	if (fd == -1)
-	{
-		ft_fprintf_fd(2, "minishell: ");
-		perror(file_path);
-		return (-1);
-	}
+		return (ft_fprintf_fd(2, "minishell: "), perror(file_path), -1);
 	if (dup2(fd, STDOUT_FILENO) == -1)
-	{
-		ft_fprintf_fd(2, "minishell: output redirection failed: %s\n",
-			strerror(errno));
-		close(fd);
-		return (-1);
-	}
-	close(fd);
-	return (0);
-}
-
-static int	handle_heredoc_redirection(t_redirections *redir)
-{
-	if (dup2(redir->heredoc_fd, STDIN_FILENO) == -1)
-	{
-		ft_fprintf_fd(2, "minishell: heredoc redirection failed: %s\n",
-			strerror(errno));
-		return (-1);
-	}
-	safe_close(&redir->heredoc_fd);
-	return (0);
+		return (ft_fprintf_fd(2, "minishell: output redirection failed: %s\n",
+				strerror(errno)), close(fd), -1);
+	return (close(fd), 0);
 }
 
 static int	handle_single_redirection(t_redirections *redir)
@@ -68,13 +60,20 @@ static int	handle_single_redirection(t_redirections *redir)
 
 	result = 0;
 	if (redir->type == TOKEN_REDIRECT_IN)
-		result = setup_redirect_in(redir->file);
+		result = setup_redirect_in(redir->file, redir->was_in_squotes,
+				redir->was_in_dquotes);
 	else if (redir->type == TOKEN_REDIRECT_OUT)
-		result = setup_redirect_out(redir->file, 0);
+		result = setup_redirect_out(redir->file, 0, redir->was_in_squotes,
+				redir->was_in_dquotes);
 	else if (redir->type == TOKEN_APPEND)
-		result = setup_redirect_out(redir->file, 1);
+		result = setup_redirect_out(redir->file, 1, redir->was_in_squotes,
+				redir->was_in_dquotes);
 	else if (redir->type == TOKEN_HEREDOC)
-		result = handle_heredoc_redirection(redir);
+	{
+		if (dup2(redir->heredoc_fd, STDIN_FILENO) == -1)
+			return (ft_fprintf_fd(2, "minishell: heredoc redirection failed: %s\n", strerror(errno)), -1);
+		safe_close(&redir->heredoc_fd);
+	}
 	else
 	{
 		ft_putstr_fd("minishell: unknown redirection type\n", 2);
