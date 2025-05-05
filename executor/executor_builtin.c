@@ -61,6 +61,10 @@ int	execute_single_parent_builtin(t_command *cmd_list, t_env **env_list)
 	expand_command_args(cmd_list, envp);
 	safe_doube_star_free(envp);
 	status = execute_builtin(cmd_list, env_list);
+	if (!ft_strcmp(cmd_list->args[0], "exit") && status ==  2)
+	{
+		exit(status);
+	}
 	setup_signals();
 	return (status);
 }

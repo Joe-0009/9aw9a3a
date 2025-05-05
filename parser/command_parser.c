@@ -20,7 +20,8 @@ static int	handle_pipe_token(t_command *current_cmd)
 {
 	if (!current_cmd)
 	{
-		ft_fprintf_fd(2, "minishell: syntax error near unexpected token `|");
+		ft_fprintf_fd(2, "minishell: syntax error near unexpected token `|'\n");
+		g_last_exit_status = 2;
 		return (0);
 	}
 	return (1);

@@ -282,7 +282,6 @@ void						handle_external_command(t_command *current,
 								t_env *env_list);
 
 /* ===================== UTILITY FUNCTIONS ===================== */
-int							process_command(char *input, t_env **env_list);
 void						print_Cmd_list(t_command *cmd);
 void						initialize_empty_env(t_env **env_list);
 void						update_shlvl(t_env **env_list);

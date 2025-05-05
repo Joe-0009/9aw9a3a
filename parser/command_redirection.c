@@ -30,6 +30,7 @@ static int	check_redirect_syntax(t_token **current)
 			ft_fprintf_fd(2, "minishell: syntax error near ");
 			ft_fprintf_fd(2, "unexpected token %s\n", (*current)->content);
 		}
+		g_last_exit_status = 2;
 		return (0);
 	}
 	return (1);
