@@ -3,7 +3,7 @@
 static int	handle_cd_errors(char *dir, char *old_pwd)
 {
 	if (old_pwd)
-		free(old_pwd);
+		safe_free((void **)&old_pwd);
 	if (!dir)
 		return (ft_fprintf_fd(2, "minishell: cd: HOME not set\n"), 1);
 	else
@@ -22,14 +22,14 @@ static int	update_pwd_vars(t_env **env, char *old_pwd)
 			"getcwd: cannot access parent directories: "
 			"No such file or directory\n");
 		if (old_pwd)
-			free(old_pwd);
+			safe_free((void **)&old_pwd);
 		return (1);
 	}
 	add_or_update_env(env, "PWD", new_pwd);
 	if (old_pwd)
 		add_or_update_env(env, "OLDPWD", old_pwd);
-	free(new_pwd);
-	free(old_pwd);
+	safe_free((void **)&new_pwd);
+	safe_free((void **)&old_pwd);
 	return (0);
 }
 
@@ -65,7 +65,7 @@ int	builtin_cd(t_command *cmd, t_env **env)
 	old_pwd = getcwd(NULL, 0);
 	if (cmd->args_count > 2)
 	{
-		free(old_pwd);
+		safe_free((void **)&old_pwd);
 		return (ft_fprintf_fd(2, "minishell: cd: too many arguments\n"), 1);
 	}
 	dir = get_target_dir(cmd, env, old_pwd);

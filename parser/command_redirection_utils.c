@@ -17,7 +17,7 @@ void	add_redirection(t_command *cmd, t_token_type redirect_type, char *file)
 	redirection->heredoc_fd = -1;
 	redirection->next = NULL;
 	if (!redirection->file)
-		return (free(redirection));
+		return (safe_free((void **)&redirection));
 	if (!cmd->redirections)
 		cmd->redirections = redirection;
 	else
@@ -91,7 +91,7 @@ void	add_words_as_args(t_command *cmd, t_token **current)
 		j++;
 	}
 	new_args[i + j] = NULL;
-	free(cmd->args);
+	safe_free((void **)&cmd->args);
 	cmd->args = new_args;
 	cmd->args_count += new_count;
 }

@@ -28,12 +28,12 @@ static char	*create_env_string(char *key, char *value)
 	{
 		temp = result;
 		result = ft_strjoin(result, "=");
-		free(temp);
+		safe_free((void **)&temp);
 		if (!result)
 			return (NULL);
 		temp = result;
 		result = ft_strjoin(result, value);
-		free(temp);
+		safe_free((void **)&temp);
 	}
 	return (result);
 }
@@ -83,8 +83,8 @@ t_env	*envp_to_env_list(char **envp)
 			key = ft_substr(envp[i], 0, equal_sign - envp[i]);
 			value = ft_strdup(equal_sign + 1);
 			add_or_update_env(&env_list, key, value);
-			free(key);
-			free(value);
+			safe_free((void **)&key);
+			safe_free((void **)&value);
 		}
 		i++;
 	}

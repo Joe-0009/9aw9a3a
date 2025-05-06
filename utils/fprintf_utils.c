@@ -85,7 +85,7 @@ static int	process_format_string(char **result, const char *format,
 		ret = process_format_char(result, format, &i, args);
 		if (ret == -1)
 		{
-			free(*result);
+			safe_free((void **)&*result);
 			va_end(args);
 			return (-1);
 		}
@@ -109,7 +109,7 @@ int	ft_fprintf_fd(int fd, const char *format, ...)
 	if (count == -1)
 		return (-1);
 	ft_putstr_fd(result, fd);
-	free(result);
+	safe_free((void **)&result);
 	va_end(args);
 	return (count);
 }

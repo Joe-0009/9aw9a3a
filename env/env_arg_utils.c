@@ -22,11 +22,11 @@ void	copy_and_replace_args(t_command *cmd, char **new_args, int pos,
 		j++;
 	}
 	new_args[i + j] = NULL;
-	free(cmd->args[pos]);
+	safe_free((void **)&cmd->args[pos]);
 	l = -1;
 	while (split_words[++l])
-		free(split_words[l]);
-	free(split_words);
+		safe_free((void **)&split_words[l]);
+	safe_free((void **)&split_words);
 }
 
 int	add_split_args_to_command(t_command *cmd, int pos, char **split_words)
@@ -43,7 +43,7 @@ int	add_split_args_to_command(t_command *cmd, int pos, char **split_words)
 	if (!new_args)
 		return (0);
 	copy_and_replace_args(cmd, new_args, pos, split_words);
-	free(cmd->args);
+	safe_free((void **)&cmd->args);
 	cmd->args = new_args;
 	cmd->args_count = new_size;
 	return (word_count);
@@ -56,10 +56,10 @@ static void	free_split_words(char **split_words)
 	i = 0;
 	while (split_words[i])
 	{
-		free(split_words[i]);
+		safe_free((void **)&split_words[i]);
 		i++;
 	}
-	free(split_words);
+	safe_free((void **)&split_words);
 }
 
 int	split_and_insert_args(t_expand_vars *v)
@@ -82,7 +82,7 @@ int	split_and_insert_args(t_expand_vars *v)
 				free_split_words(split_words);
 		}
 		else if (split_words)
-			free(split_words);
+			free_split_words(split_words);
 	}
 	return (0);
 }

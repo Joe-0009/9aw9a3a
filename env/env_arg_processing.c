@@ -13,7 +13,7 @@ static void	process_arg_expansion(t_expand_vars *v)
 		stripped = strip_quotes(v->cmd->args[v->i]);
 		if (stripped)
 		{
-			free(v->cmd->args[v->i]);
+			safe_free((void **)&v->cmd->args[v->i]);
 			v->cmd->args[v->i] = stripped;
 		}
 	}
@@ -66,7 +66,7 @@ void	expand_redirections_loop(t_expand_vars *v)
 			expanded = expand_variables(redir->file, v->envp);
 			if (expanded)
 			{
-				free(redir->file);
+				safe_free((void **)&redir->file);
 				redir->file = expanded;
 			}
 		}

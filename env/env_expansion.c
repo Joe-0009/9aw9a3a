@@ -31,13 +31,13 @@ void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
 	if (!in_single_quotes)
 	{
 		expanded = expand_variables(cmd->args[i], envp);
-		free(cmd->args[i]);
+		safe_free((void **)&cmd->args[i]);
 		cmd->args[i] = expanded;
 	}
 	stripped = strip_quotes(cmd->args[i]);
 	if (stripped)
 	{
-		free(cmd->args[i]);
+		safe_free((void **)&cmd->args[i]);
 		cmd->args[i] = stripped;
 	}
 }

@@ -2,10 +2,10 @@
 
 static void	free_env_node(t_env *node)
 {
-	free(node->key);
+	safe_free((void **)&node->key);
 	if (node->value)
-		free(node->value);
-	free(node);
+		safe_free((void **)&node->value);
+	safe_free((void **)&node);
 }
 
 static void	remove_env_node(t_env **env_list, t_env *prev, t_env *cur)

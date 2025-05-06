@@ -34,7 +34,7 @@ void	ft_token_delone(t_token *lst, void (*del)(void *))
 	if (!lst || !del)
 		return ;
 	del(lst->content);
-	free(lst);
+	safe_free((void **)&lst);
 }
 
 void	ft_token_clear(t_token **lst, void (*del)(void *))

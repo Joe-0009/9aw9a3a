@@ -73,7 +73,6 @@ char	*strip_quotes(const char *value)
 	if (len == ft_strlen(value))
 	{
 		result = ft_strdup(value);
-		safe_free((void**)&value);
 		return (result);
 	}
 	result = ft_calloc(len + 1, 1);

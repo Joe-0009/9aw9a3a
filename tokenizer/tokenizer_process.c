@@ -20,7 +20,7 @@ int	add_token(t_token **tokens, char *content)
 	new_token = ft_token_new(content);
 	if (!new_token)
 	{
-		free(content);
+		safe_free((void **)&content);
 		return (0);
 	}
 	ft_token_add_back(tokens, new_token);
