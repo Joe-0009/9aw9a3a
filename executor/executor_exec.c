@@ -6,7 +6,7 @@ static int	check_directory_error(char *path, char **envp)
 
 	if (stat(path, &file_stat) == 0 && S_ISDIR(file_stat.st_mode))
 	{
-		ft_fprintf_fd(2, "minishell: %s: Is a directory\n", path);
+		ft_fprintf_fd(2, "minishell: %s: Command not found\n", path);
 		if (ft_strchr(path, '/'))
 			safe_free((void **)&path);
 		safe_doube_star_free(envp);
@@ -19,13 +19,17 @@ static void	handle_directory_errors(char *path, char **envp)
 {
 	struct stat	file_stat;
 
-	check_directory_error(path, envp);
-	if (stat(path, &file_stat) == -1 && ft_strchr(path, '/'))
+	if (ft_strchr(path, '/'))
 	{
-		ft_fprintf_fd(2, "minishell: %s: No such file or directory\n", path);
-		safe_doube_star_free(envp);
-		exit(127);
+		if (stat(path, &file_stat) == 0 && S_ISDIR(file_stat.st_mode))
+		{
+			ft_fprintf_fd(2, "minishell: %s: is a directory\n",
+				path);
+			safe_doube_star_free(envp);
+			exit(127);
+		}
 	}
+	check_directory_error(path, envp);
 	if (stat(path, &file_stat) == 0 && access(path, X_OK) == -1)
 	{
 		ft_fprintf_fd(2, "minishell: %s: Permission denied\n", path);
@@ -38,7 +42,7 @@ static void	exec_command(char *path, t_command *current, char **envp)
 {
 	if (path)
 	{
-		check_directory_error(path, envp);
+		check_directory_error(current->args[0], envp);
 		if (execve(path, current->args, envp) == -1)
 		{
 			perror("minishell: execve");
@@ -62,7 +66,8 @@ void	handle_external_command(t_cmd_ctx *cmd_ctx)
 	path = find_executable_path(cmd_ctx->current->args[0], envp);
 	exec_command(path, cmd_ctx->current, envp);
 	safe_doube_star_free(envp);
-	ft_fprintf_fd(2, "minishell: %s: command not found\n", cmd_ctx->current->args[0]);
+	ft_fprintf_fd(2, "minishell: %s: command not found\n",
+		cmd_ctx->current->args[0]);
 	if (path)
 		safe_free((void **)&path);
 	exit(127);
@@ -70,7 +75,8 @@ void	handle_external_command(t_cmd_ctx *cmd_ctx)
 
 void	execute_single_command(t_cmd_ctx *cmd_ctx)
 {
-	if (cmd_ctx->current->args && cmd_ctx->current->args[0] && cmd_ctx->current->args[0][0])
+	if (cmd_ctx->current->args && cmd_ctx->current->args[0]
+		&& cmd_ctx->current->args[0][0])
 	{
 		if (is_builtin_command(cmd_ctx->current->args[0]))
 			exit(execute_builtin(cmd_ctx));
