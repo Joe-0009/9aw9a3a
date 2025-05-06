@@ -5,6 +5,8 @@ static int	is_ambiguous_redirect(char *file_path, int was_in_squotes,
 {
 	if (was_in_squotes || was_in_dquotes)
 		return (0);
+	if (*file_path == '\0')
+		return (1);
 	while (file_path && *file_path)
 	{
 		if (ft_isspace((unsigned char)*file_path))
