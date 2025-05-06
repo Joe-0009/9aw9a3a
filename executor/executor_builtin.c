@@ -5,6 +5,8 @@ int	is_builtin_command(char *cmd)
 	char	*builtins[8];
 	int		i;
 
+	if (!cmd)
+		return (0);
 	builtins[0] = "cd";
 	builtins[1] = "echo";
 	builtins[2] = "pwd";
@@ -14,7 +16,7 @@ int	is_builtin_command(char *cmd)
 	builtins[6] = "exit";
 	builtins[7] = NULL;
 	i = -1;
-	while (builtins[++i])
+	while (++i < 7)
 	{
 		if (ft_strcmp(builtins[i], cmd) == 0)
 			return (1);

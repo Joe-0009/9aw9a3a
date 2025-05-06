@@ -23,10 +23,9 @@ static void	handle_directory_errors(char *path, char **envp)
 	{
 		if (stat(path, &file_stat) == 0 && S_ISDIR(file_stat.st_mode))
 		{
-			ft_fprintf_fd(2, "minishell: %s: is a directory\n",
-				path);
+			ft_fprintf_fd(2, "minishell: %s: Is a directory\n", path);
 			safe_doube_star_free(envp);
-			exit(127);
+			exit(126);
 		}
 	}
 	check_directory_error(path, envp);
@@ -66,8 +65,17 @@ void	handle_external_command(t_cmd_ctx *cmd_ctx)
 	path = find_executable_path(cmd_ctx->current->args[0], envp);
 	exec_command(path, cmd_ctx->current, envp);
 	safe_doube_star_free(envp);
-	ft_fprintf_fd(2, "minishell: %s: command not found\n",
-		cmd_ctx->current->args[0]);
+	if (is_path_with_slash(cmd_ctx->current->args[0]))
+	{
+		ft_fprintf_fd(2, "minishell: %s", cmd_ctx->current->args[0]);
+		ft_fprintf_fd(2, ": No such file or directory\n");
+	}
+	else
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(cmd_ctx->current->args[0], 2);
+		ft_putstr_fd(": command not found\n", 2);
+	}
 	if (path)
 		safe_free((void **)&path);
 	exit(127);
@@ -83,5 +91,15 @@ void	execute_single_command(t_cmd_ctx *cmd_ctx)
 		else
 			handle_external_command(cmd_ctx);
 	}
-	exit(0);
+	else if (cmd_ctx->current->args && cmd_ctx->current->args[0])
+	{
+		ft_fprintf_fd(2, "minishell: Command '' not found\n");
+		exit(127);
+	}
+	else
+	{
+		if (cmd_ctx->cmd_list->redirections)
+			exit(0);
+		exit(0);
+	}
 }

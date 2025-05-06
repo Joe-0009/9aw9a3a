@@ -41,13 +41,13 @@ static char	*find_in_paths(char **paths, char *cmd)
 	return (NULL);
 }
 
-static int	is_path_with_slash(char *cmd)
+int	is_path_with_slash(char *cmd)
 {
 	return (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/' || (cmd[1] == '.'
 					&& cmd[2] == '/'))));
 }
 
-static char	*check_direct_path(char *cmd)
+ char	*check_direct_path(char *cmd)
 {
 	if (is_path_with_slash(cmd))
 	{
@@ -70,7 +70,7 @@ char	*find_executable_path(char *cmd, char **envp)
 		return (full_path);
 	path_env = get_path_env(envp);
 	if (!path_env)
-		return (NULL);
+		return (safe_free((void **)full_path), NULL);
 	paths = ft_split(path_env, ':');
 	if (!paths)
 		return (NULL);

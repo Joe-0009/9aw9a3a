@@ -290,4 +290,8 @@ void						print_Cmd_list(t_command *cmd);
 void						initialize_empty_env(t_env **env_list);
 void						update_shlvl(t_env **env_list);
 
+
+
+int	is_path_with_slash(char *cmd);
+char	*check_direct_path(char *cmd);
 #endif

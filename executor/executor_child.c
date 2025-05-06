@@ -6,11 +6,11 @@ void	child_process(t_cmd_ctx *cmd_ctx)
 	signal(SIGQUIT, SIG_DFL);
 	handle_child_input(cmd_ctx);
 	handle_child_output(cmd_ctx);
-	if (cmd_ctx->cmd_list && cmd_ctx->cmd_list->args && !cmd_ctx->cmd_list->args[0])
-	{
-		ft_fprintf_fd(2, "minishell: Command '' not found\n");
-		exit(127);
-	}
+	// if (cmd_ctx->cmd_list && cmd_ctx->cmd_list->args && !cmd_ctx->cmd_list->args[0])
+	// {
+	// 	ft_fprintf_fd(2, "minishell: Command '' not found\n");
+	// 	exit(127);
+	// }
 	if (setup_redirections(cmd_ctx->current) == -1)
 		exit(1);
 	execute_single_command(cmd_ctx);
