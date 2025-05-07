@@ -73,14 +73,12 @@ static int	handle_single_redirection(t_redirections *redir)
 	else if (redir->type == TOKEN_HEREDOC)
 	{
 		if (dup2(redir->heredoc_fd, STDIN_FILENO) == -1)
-			return (ft_fprintf_fd(2, "minishell: heredoc redirection failed: %s\n", strerror(errno)), -1);
+			return (ft_fprintf_fd(2, "minishell: heredoc redirection "),
+				ft_fprintf_fd(2, "failed: %s\n", strerror(errno)) - 1);
 		safe_close(&redir->heredoc_fd);
 	}
-	else
-	{
-		ft_putstr_fd("minishell: unknown redirection type\n", 2);
-		result = -1;
-	}
+	ft_putstr_fd("minishell: unknown redirection type\n", 2);
+	result = -1;
 	return (result);
 }
 

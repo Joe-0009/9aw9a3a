@@ -49,7 +49,6 @@ void	expand_args_loop(t_expand_vars *v)
 			continue ;
 		}
 		process_argument(v);
-		
 	}
 }
 

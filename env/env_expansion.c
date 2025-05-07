@@ -1,20 +1,18 @@
 #include "../minishell.h"
 
-
-
 void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
 {
 	char	*expanded;
 	char	*stripped;
 
 	if (!cmd->args[i])
-		return;
+		return ;
 	expanded = expand_variables(cmd->args[i], envp);
 	safe_free((void **)&cmd->args[i]);
 	if (!expanded)
 	{
 		cmd->args[i] = NULL;
-		return;
+		return ;
 	}
 	cmd->args[i] = expanded;
 	stripped = strip_quotes(cmd->args[i]);
@@ -42,6 +40,6 @@ void	expand_command_args(t_command *cmd, char **envp)
 	if (cmd)
 	{
 		expand_redirections_loop(&v);
-		clean_empty_args(cmd); 
+		clean_empty_args(cmd);
 	}
 }

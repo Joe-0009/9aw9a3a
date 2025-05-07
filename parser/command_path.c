@@ -47,7 +47,7 @@ int	is_path_with_slash(char *cmd)
 					&& cmd[2] == '/'))));
 }
 
- char	*check_direct_path(char *cmd)
+char	*check_direct_path(char *cmd)
 {
 	if (is_path_with_slash(cmd))
 	{

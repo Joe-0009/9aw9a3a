@@ -32,8 +32,8 @@ static void	read_heredoc_lines(int pipe_fd, char *processed_delimiter,
 		if (!line)
 		{
 			ft_fprintf_fd(2, "minishell: warning: ");
-			ft_fprintf_fd(2, "heredoc delimited by %s end-of-file\n", processed_delimiter);
-			// Use a different code (0) for EOF condition, only set the global status
+			ft_fprintf_fd(2, "heredoc delimited by %s end-of-file\n",
+				processed_delimiter);
 			g_last_exit_status = 0;
 			break ;
 		}
@@ -46,8 +46,6 @@ static void	read_heredoc_lines(int pipe_fd, char *processed_delimiter,
 		safe_free((void **)&line);
 	}
 }
-
-
 
 static void	handle_heredoc_child_process(int pipe_fd[2], char *delimiter,
 		char **envp)
@@ -74,7 +72,7 @@ static int	handle_heredoc_parent(int pipe_fd[2], pid_t pid)
 	signal(SIGINT, SIG_IGN);
 	safe_close(&pipe_fd[1]);
 	waitpid(pid, &status, 0);
-	if ((WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) || status == 33280)
+	if ((WIFSIGNALED(status) && WTERMSIG(status) == SIGINT))
 	{
 		safe_close(&pipe_fd[0]);
 		g_last_exit_status = 130;

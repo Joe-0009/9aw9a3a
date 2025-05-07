@@ -3,7 +3,7 @@
 int	builtin_export(t_command *cmd, t_env **env_list)
 {
 	int	i;
-	int fail;
+	int	fail;
 
 	fail = 0;
 	if (!cmd->args[1])

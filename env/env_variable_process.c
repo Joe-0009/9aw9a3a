@@ -1,6 +1,7 @@
 #include "../minishell.h"
 
-static int	process_variable(char **result, char *str, int *i, char **envp, int *is_empty_var)
+static int	process_variable(char **result, char *str, int *i, char **envp,
+		int *is_empty_var)
 {
 	char	*var_name;
 	char	*var_value;
@@ -27,7 +28,8 @@ static int	process_variable(char **result, char *str, int *i, char **envp, int *
 	return (*result != NULL);
 }
 
-static int	handle_expand_dollar(char **result, char *str, int *i, char **envp, int *is_empty_var)
+static int	handle_expand_dollar(char **result, char *str, int *i, char **envp,
+		int *is_empty_var)
 {
 	if (str[*i] == '$' && str[*i + 1])
 	{
@@ -64,38 +66,40 @@ char	*expand_variables(char *str, char **envp)
 		return (NULL);
 	while (str[i])
 	{
-		handle_ret = handle_expand_dollar(&result, str, &i, envp, &is_empty_var);
+		handle_ret = handle_expand_dollar(&result, str, &i, envp,
+				&is_empty_var);
 		if (handle_ret == 0)
 			return (NULL);
 		else if (handle_ret == 1)
-			continue;
+			continue ;
 		if (!handle_expand_char(&result, str, &i))
 			return (NULL);
 	}
-	if (is_empty_var && result && result[0] == '\0' && !has_quoted_vars && !is_var_in_squotes(str))
+	if (is_empty_var && result && result[0] == '\0' && !has_quoted_vars
+		&& !is_var_in_squotes(str))
 		return (safe_free((void **)&result), NULL);
 	return (result);
 }
 
-void    clean_empty_args(t_command *cmd)
+void	clean_empty_args(t_command *cmd)
 {
-    int i;
-    int j;
+	int	i;
+	int	j;
 
-    if (!cmd || !cmd->args)
-        return;
-    i = 0;
-    j = 0;
-    while (i < cmd->args_count)
-    {
-        if (cmd->args[i] != NULL)
-        {
-            cmd->args[j] = cmd->args[i];
-            if (i != j)
-                cmd->args[i] = NULL;
-            j++;
-        }
-        i++;
-    }
-    cmd->args_count = j;
+	if (!cmd || !cmd->args)
+		return ;
+	i = 0;
+	j = 0;
+	while (i < cmd->args_count)
+	{
+		if (cmd->args[i] != NULL)
+		{
+			cmd->args[j] = cmd->args[i];
+			if (i != j)
+				cmd->args[i] = NULL;
+			j++;
+		}
+		i++;
+	}
+	cmd->args_count = j;
 }

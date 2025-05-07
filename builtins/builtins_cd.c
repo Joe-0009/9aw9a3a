@@ -7,7 +7,8 @@ static int	handle_cd_errors(char *dir, char *old_pwd)
 	if (!dir)
 		return (ft_fprintf_fd(2, "minishell: cd: HOME not set\n"), 1);
 	else
-		return (ft_fprintf_fd(2, "minishell: cd: %s: No such file or directory\n", dir), 1);
+		return (ft_fprintf_fd(2, "minishell: cd: %s: "), ft_fprintf_fd(2,
+				"No such file or directory\n", dir), 1);
 }
 
 static int	update_pwd_vars(t_env **env, char *old_pwd)
@@ -18,9 +19,9 @@ static int	update_pwd_vars(t_env **env, char *old_pwd)
 	if (!new_pwd)
 	{
 		ft_fprintf_fd(2,
-			"minishell: cd: error retrieving current directory: "
-			"getcwd: cannot access parent directories: "
-			"No such file or directory\n");
+						"minishell: cd: error retrieving current directory: "
+						"getcwd: cannot access parent directories: "
+						"No such file or directory\n");
 		if (old_pwd)
 			safe_free((void **)&old_pwd);
 		return (1);

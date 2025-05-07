@@ -18,8 +18,9 @@ int	builtin_exit(t_cmd_ctx *cmd_ctx)
 {
 	int	exit_status;
 
-	if (cmd_ctx->cmd_list == cmd_ctx->current && cmd_ctx->current->next == NULL && cmd_ctx->current->args_count == 1)
-		return(ft_putstr_fd("exit\n", 1), exit(g_last_exit_status), 6789);
+	if (cmd_ctx->cmd_list == cmd_ctx->current && cmd_ctx->current->next == NULL
+		&& cmd_ctx->current->args_count == 1)
+		return (ft_putstr_fd("exit\n", 1), exit(g_last_exit_status), 6789);
 	if (cmd_ctx->current->args_count > 1)
 	{
 		exit_status = process_exit_arg(cmd_ctx->current->args[1]);
