@@ -82,7 +82,6 @@ static int	handle_single_redirection(t_redirections *redir)
 		ft_putstr_fd("minishell: unknown redirection type\n", 2);
 		result = -1;
 	}
-		
 	return (result);
 }
 

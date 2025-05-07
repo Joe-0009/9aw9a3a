@@ -56,7 +56,6 @@ char	*expand_variables(char *str, char **envp)
 	var_exp.result = ft_strdup("");
 	if (!var_exp.result)
 		return (NULL);
-
 	while (str[var_exp.i])
 	{
 		if (!handle_character(&var_exp, str, envp))
@@ -68,6 +67,5 @@ char	*expand_variables(char *str, char **envp)
 	if (var_exp.is_empty_var && var_exp.result && var_exp.result[0] == '\0'
 		&& !var_exp.has_quoted_vars && !is_var_in_squotes(str))
 		return (safe_free((void **)&var_exp.result), NULL);
-
 	return (var_exp.result);
 }
