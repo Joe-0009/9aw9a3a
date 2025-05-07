@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yrachidi <yrachidi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/07 17:29:58 by yrachidi          #+#    #+#             */
+/*   Updated: 2025/05/07 17:30:02 by yrachidi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 int			g_last_exit_status = 0;
 
-static	int	process_command(char *input, t_env **env_list)
+static int	process_command(char *input, t_env **env_list)
 {
 	t_token		*tokens;
 	t_command	*cmds;
