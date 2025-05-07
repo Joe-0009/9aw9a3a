@@ -1,5 +1,28 @@
 #include "../minishell.h"
 
+static void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
+{
+	char	*expanded;
+	char	*stripped;
+
+	if (!cmd->args[i])
+		return ;
+	expanded = expand_variables(cmd->args[i], envp);
+	safe_free((void **)&cmd->args[i]);
+	if (!expanded)
+	{
+		cmd->args[i] = NULL;
+		return ;
+	}
+	cmd->args[i] = expanded;
+	stripped = strip_quotes(cmd->args[i]);
+	if (stripped)
+	{
+		safe_free((void **)&cmd->args[i]);
+		cmd->args[i] = stripped;
+	}
+}
+
 static void	process_arg_expansion(t_expand_vars *v)
 {
 	char	*stripped;
@@ -19,23 +42,6 @@ static void	process_arg_expansion(t_expand_vars *v)
 	}
 }
 
-static void	process_argument(t_expand_vars *v)
-{
-	process_arg_expansion(v);
-	if (v->i > 0 || v->cmd->args_count == 1)
-	{
-		if (!v->was_arg_quoted && !v->had_quoted_vars)
-		{
-			v->added = split_and_insert_args(v);
-			if (v->added > 0)
-			{
-				v->i += v->added - 1;
-			}
-		}
-	}
-	v->i++;
-}
-
 void	expand_args_loop(t_expand_vars *v)
 {
 	if (!v->cmd || !v->cmd->args || v->cmd->args_count <= 0)
@@ -48,7 +54,17 @@ void	expand_args_loop(t_expand_vars *v)
 			v->i++;
 			continue ;
 		}
-		process_argument(v);
+		process_arg_expansion(v);
+		if (v->i > 0 || v->cmd->args_count == 1)
+		{
+			if (!v->was_arg_quoted && !v->had_quoted_vars)
+			{
+				v->added = split_and_insert_args(v);
+				if (v->added > 0)
+					v->i += v->added - 1;
+			}
+		}
+		v->i++;
 	}
 }
 

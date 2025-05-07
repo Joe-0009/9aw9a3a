@@ -54,3 +54,25 @@ int	add_char_to_result(char **result, char c)
 		safe_free((void **)&temp);
 	return (*result != NULL);
 }
+void	clean_empty_args(t_command *cmd)
+{
+	int	i;
+	int	j;
+
+	if (!cmd || !cmd->args)
+		return ;
+	i = 0;
+	j = 0;
+	while (i < cmd->args_count)
+	{
+		if (cmd->args[i] != NULL)
+		{
+			cmd->args[j] = cmd->args[i];
+			if (i != j)
+				cmd->args[i] = NULL;
+			j++;
+		}
+		i++;
+	}
+	cmd->args_count = j;
+}

@@ -1,27 +1,6 @@
 #include "../minishell.h"
 
-void	expand_and_strip_arg(t_command *cmd, char **envp, int i)
-{
-	char	*expanded;
-	char	*stripped;
 
-	if (!cmd->args[i])
-		return ;
-	expanded = expand_variables(cmd->args[i], envp);
-	safe_free((void **)&cmd->args[i]);
-	if (!expanded)
-	{
-		cmd->args[i] = NULL;
-		return ;
-	}
-	cmd->args[i] = expanded;
-	stripped = strip_quotes(cmd->args[i]);
-	if (stripped)
-	{
-		safe_free((void **)&cmd->args[i]);
-		cmd->args[i] = stripped;
-	}
-}
 
 void	expand_command_args(t_command *cmd, char **envp)
 {

@@ -70,19 +70,18 @@ int	split_and_insert_args(t_expand_vars *v)
 	if ((v->i > 0 && !v->is_export) || (v->i == 0 && v->cmd->args_count == 1))
 	{
 		split_words = ft_split(v->cmd->args[v->i], ' ');
-		if (split_words && split_words[0])
+		if (!split_words || !split_words[0])
 		{
-			if (count_split_words(split_words) > 1 || v->i > 0)
-			{
-				added = add_split_args_to_command(v->cmd, v->i, split_words);
-				if (added > 0)
-					return (added);
-			}
-			else
-				free_split_words(split_words);
-		}
-		else if (split_words)
 			free_split_words(split_words);
+			return (0);
+		}
+		if (count_split_words(split_words) > 1 || v->i > 0)
+		{
+			added = add_split_args_to_command(v->cmd, v->i, split_words);
+			if (added > 0)
+				return (added);
+		}
+		free_split_words(split_words);
 	}
 	return (0);
 }

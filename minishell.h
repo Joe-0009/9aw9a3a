@@ -157,7 +157,6 @@ int							count_commands(t_command *cmd_list);
 /* ===================== COMMAND CREATION & EXECUTION ===================== */
 typedef struct s_cmd_ctx
 {
-	int						cmd_size;
 	t_command				*cmd_list;
 	int						pipe_fd[2];
 	int						prev_pipe_read;
@@ -235,6 +234,7 @@ void						sigint_handler(int sig);
 void						ctrl_d_handle(void);
 void						child_sigint_handler(int sig);
 /* ===================== ENV EXPANSION UTILS ===================== */
+
 int							is_var_char(char c);
 char						*extract_var_name(const char *str, int *pos);
 char						*get_env_value(char *var_name, char **envp);
@@ -254,6 +254,7 @@ typedef struct s_expand_vars
 	int						is_export;
 	int						was_arg_quoted;
 	int						had_quoted_vars;
+	int						is_empty_var;
 }							t_expand_vars;
 
 int							count_split_words(char **split_words);
@@ -261,8 +262,6 @@ void						copy_and_replace_args(t_command *cmd,
 								char **new_args, int pos, char **split_words);
 int							add_split_args_to_command(t_command *cmd, int pos,
 								char **split_words);
-void						expand_and_strip_arg(t_command *cmd, char **envp,
-								int i);
 int							split_and_insert_args(t_expand_vars *v);
 void						compact_args(t_command *cmd, int *i, int *j);
 void						expand_args_loop(t_expand_vars *v);

@@ -95,7 +95,6 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	cmd_ctx.env_list = env_list;
 	cmd_ctx.cmd_list = cmd_list;
 	cmd_ctx.current = cmd_list;
-	cmd_ctx.cmd_size = count_commands(cmd_list);
 	if (cmd_ctx.cmd_list && cmd_ctx.cmd_list->next == NULL
 		&& cmd_ctx.cmd_list->args && cmd_ctx.cmd_list->args[0]
 		&& is_parent_builtin(cmd_ctx.cmd_list->args[0]))
