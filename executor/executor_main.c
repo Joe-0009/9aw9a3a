@@ -1,32 +1,5 @@
 #include "../minishell.h"
 
-static int	setup_all_heredocs(t_command *cmd_list, char **envp)
-{
-	t_command		*current;
-	t_redirections	*redir;
-	int				result;
-
-	current = cmd_list;
-	while (current)
-	{
-		redir = current->redirections;
-		while (redir)
-		{
-			if (redir->type == TOKEN_HEREDOC)
-			{
-				result = handle_heredoc_redir(redir, envp);
-				if (result == 130)
-					return (130);
-				if (result == -1)
-					return (-1);
-			}
-			redir = redir->next;
-		}
-		current = current->next;
-	}
-	return (0);
-}
-
 static int	setup_pipes_and_heredocs(t_cmd_ctx *cmd_ctx)
 {
 	int		setup_result;
@@ -91,12 +64,32 @@ static pid_t	execute_command_process(t_cmd_ctx *cmd_ctx)
 	return (pid);
 }
 
+static pid_t	execute_command_pipeline(t_cmd_ctx *cmd_ctx,
+		t_command *cmd_list)
+{
+	t_command	*last_cmd;
+	pid_t		last_pid;
+
+	last_pid = -1;
+	last_cmd = cmd_list;
+	while (last_cmd && last_cmd->next)
+		last_cmd = last_cmd->next;
+	while (cmd_ctx->current)
+	{
+		if (cmd_ctx->current == last_cmd)
+			last_pid = execute_command_process(cmd_ctx);
+		else
+			execute_command_process(cmd_ctx);
+		cmd_ctx->current = cmd_ctx->current->next;
+	}
+	return (last_pid);
+}
+
 int	execute_command_list(t_command *cmd_list, t_env **env_list)
 {
 	t_cmd_ctx	cmd_ctx;
 	int			status;
 	pid_t		last_pid;
-	t_command	*last_cmd;
 
 	last_pid = -1;
 	cmd_ctx.env_list = env_list;
@@ -110,19 +103,8 @@ int	execute_command_list(t_command *cmd_list, t_env **env_list)
 	cmd_ctx.init_result = setup_pipes_and_heredocs(&cmd_ctx);
 	if (cmd_ctx.init_result != 0)
 		return (cmd_ctx.init_result);
-	last_cmd = cmd_list;
-	while (last_cmd && last_cmd->next)
-		last_cmd = last_cmd->next;
-	while (cmd_ctx.current)
-	{
-		if (cmd_ctx.current == last_cmd)
-			last_pid = execute_command_process(&cmd_ctx);
-		else
-			execute_command_process(&cmd_ctx);
-		cmd_ctx.current = cmd_ctx.current->next;
-	}
+	last_pid = execute_command_pipeline(&cmd_ctx, cmd_list);
 	status = wait_for_specific_pid(last_pid);
 	signal(SIGINT, sigint_handler);
-	cmd_ctx.status = status;
-	return (status);
+	return ((cmd_ctx.status = status));
 }

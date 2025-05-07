@@ -284,7 +284,8 @@ void						handle_child_output(t_cmd_ctx *cmd_ctx);
 void						child_process(t_cmd_ctx *cmd_ctx);
 int							wait_for_specific_pid(pid_t last_pid);
 int							parent_process(int prev_pipe_read, int pipe_fd[2]);
-
+int							setup_all_heredocs(t_command *cmd_list,
+								char **envp);
 /* ===================== UTILITY FUNCTIONS ===================== */
 void						print_Cmd_list(t_command *cmd);
 void						initialize_empty_env(t_env **env_list);

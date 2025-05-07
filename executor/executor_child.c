@@ -79,3 +79,30 @@ int	parent_process(int prev_pipe_read, int pipe_fd[2])
 		return (pipe_fd[0]);
 	return (-1);
 }
+
+int	setup_all_heredocs(t_command *cmd_list, char **envp)
+{
+	t_command		*current;
+	t_redirections	*redir;
+	int				result;
+
+	current = cmd_list;
+	while (current)
+	{
+		redir = current->redirections;
+		while (redir)
+		{
+			if (redir->type == TOKEN_HEREDOC)
+			{
+				result = handle_heredoc_redir(redir, envp);
+				if (result == 130)
+					return (130);
+				if (result == -1)
+					return (-1);
+			}
+			redir = redir->next;
+		}
+		current = current->next;
+	}
+	return (0);
+}
