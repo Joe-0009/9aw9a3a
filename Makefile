@@ -20,7 +20,7 @@ LIBS = $(LIBFT)
 
 # Compiler and flags
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -MMD -MP -g
+CFLAGS = -Wall -Wextra -Werror
 INCLUDES = -I$(LIBFT_DIR) -I/opt/homebrew/opt/readline/include
 LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline -lhistory 
 
@@ -38,19 +38,17 @@ SIGNALS_SRCS = $(addprefix $(SIGNALS_DIR)/, signals.c)
 SRCS = $(MAIN_SRCS) $(UTILS_SRCS) $(TOKENIZER_SRCS) $(PARSER_SRCS) $(EXECUTOR_SRCS) $(BUILTINS_SRCS) $(ENV_SRCS) $(SIGNALS_SRCS)
 
 # Object files with build directory
-OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
+OBJS = $(SRCS:%.c=%.o)
 
 # Dependency files
 DEPS = $(OBJS:.o=.d)
 
-# Include dependencies
--include $(DEPS)
 
-all: $(LIBFT) $(NAME)
+all: $(LIBFT) $(NAME) 
+	@make clean
 
 # Create build directories
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)/$(UTILS_DIR)
 	mkdir -p $(BUILD_DIR)/$(TOKENIZER_DIR)
 	mkdir -p $(BUILD_DIR)/$(PARSER_DIR)
@@ -64,7 +62,7 @@ $(LIBFT):
 	@make -C $(LIBFT_DIR) all bonus
 
 # Link the final executable
-$(NAME): $(BUILD_DIR) $(OBJS) $(LIBFT)
+$(NAME): $(OBJS) $(LIBFT)
 	$(CC) $(OBJS) $(LIBS) $(LDFLAGS) -o $(NAME)
 	@echo "$(NAME) successfully built!"
 
@@ -74,9 +72,8 @@ $(BUILD_DIR)/%.o: %.c
 
 # Clean rules
 clean:
-	rm -rf $(BUILD_DIR)
-	@if [ -f $(LIBFT) ]; then make -C $(LIBFT_DIR) clean; fi
-	@echo "Object files cleaned."
+	@make -C $(LIBFT_DIR) clean
+	@rm -rf $(OBJS)
 
 fclean: clean
 	rm -f $(NAME)
@@ -85,7 +82,6 @@ fclean: clean
 
 re: fclean all
 
-asan: re
-	./$(NAME)
 
-.PHONY: all clean fclean re asan
+.SECONDARY: $(OBJS)
+.PHONY: all clean fclean re

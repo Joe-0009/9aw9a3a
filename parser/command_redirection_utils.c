@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   command_redirection_utils.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: isallali <isallali@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yrachidi <yrachidi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/07 17:50:03 by isallali          #+#    #+#             */
-/*   Updated: 2025/05/07 17:50:04 by isallali         ###   ########.fr       */
+/*   Updated: 2025/05/07 19:28:32 by yrachidi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

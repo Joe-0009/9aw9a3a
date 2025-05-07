@@ -19,22 +19,23 @@ BOBJS = $(BSRCS:.c=.o)
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	ar rcs $(NAME) $(OBJS)
+	@ar rcs $(NAME) $(OBJS)
 
 bonus: $(BOBJS)
-	ar rcs $(NAME) $(BOBJS)
+	@ar rcs $(NAME) $(BOBJS)
 
 %.o: %.c libft.h
-	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 
 
 clean:
-	rm -f $(OBJS) $(BOBJS)
+	@rm -f $(OBJS) $(BOBJS)
 
 fclean: clean
-	rm -f $(NAME)
+	@rm -f $(NAME)
 
 re: fclean all
 
+.SECONDARY: $(OBJS)
 .PHONY: all clean fclean re bonus

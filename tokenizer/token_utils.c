@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: isallali <isallali@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yrachidi <yrachidi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/07 17:49:31 by isallali          #+#    #+#             */
-/*   Updated: 2025/05/07 17:49:32 by isallali         ###   ########.fr       */
+/*   Updated: 2025/05/07 19:18:45 by yrachidi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,6 @@ char	*extract_word_token(char *str, int start, int end)
 	if (!token)
 		ft_putstr_fd("minishell: memory allocation error in tokenization\n", 2);
 	return (token);
-}
-
-void	token_utils_skip_whitespace(char *input, int *i, int *start)
-{
-	while (input[*i] && ft_isspace(input[*i]))
-		(*i)++;
-	*start = *i;
 }
 
 void	token_utils_handle_quotes(t_tokenizer *t)
