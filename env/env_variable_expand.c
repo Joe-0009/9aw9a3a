@@ -54,6 +54,7 @@ int	add_char_to_result(char **result, char c)
 		safe_free((void **)&temp);
 	return (*result != NULL);
 }
+
 void	clean_empty_args(t_command *cmd)
 {
 	int	i;

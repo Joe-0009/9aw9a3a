@@ -235,6 +235,15 @@ void						ctrl_d_handle(void);
 void						child_sigint_handler(int sig);
 /* ===================== ENV EXPANSION UTILS ===================== */
 
+typedef struct s_var_expand
+{
+	int						i;
+	char					*result;
+	int						handle_ret;
+	int						is_empty_var;
+	int						has_quoted_vars;
+}							t_var_expand;
+
 int							is_var_char(char c);
 char						*extract_var_name(const char *str, int *pos);
 char						*get_env_value(char *var_name, char **envp);
@@ -254,7 +263,6 @@ typedef struct s_expand_vars
 	int						is_export;
 	int						was_arg_quoted;
 	int						had_quoted_vars;
-	int						is_empty_var;
 }							t_expand_vars;
 
 int							count_split_words(char **split_words);
@@ -263,7 +271,6 @@ void						copy_and_replace_args(t_command *cmd,
 int							add_split_args_to_command(t_command *cmd, int pos,
 								char **split_words);
 int							split_and_insert_args(t_expand_vars *v);
-void						compact_args(t_command *cmd, int *i, int *j);
 void						expand_args_loop(t_expand_vars *v);
 void						expand_redirections_loop(t_expand_vars *v);
 int							has_var_in_dquotes(const char *str);

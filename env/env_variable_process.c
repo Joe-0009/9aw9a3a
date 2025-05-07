@@ -1,84 +1,73 @@
 #include "../minishell.h"
 
-static int	process_variable(char **result, char *str, int *i, char **envp,
-		int *is_empty_var)
+static int	process_variable(t_var_expand *var_exp, char *str, char **envp)
 {
 	char	*var_name;
 	char	*var_value;
 	char	*temp;
 
-	(*i)++;
-	if (!str[*i] || ft_isspace(str[*i]) || str[*i] == '\"')
-		return (add_char_to_result(result, '$'));
-	var_name = extract_var_name(str, i);
+	(var_exp->i)++;
+	if (!str[var_exp->i] || ft_isspace(str[var_exp->i])
+		|| str[var_exp->i] == '\"')
+		return (add_char_to_result(&var_exp->result, '$'));
+	var_name = extract_var_name(str, &var_exp->i);
 	if (!var_name)
 		return (0);
 	var_value = get_env_value(var_name, envp);
 	safe_free((void **)&var_name);
 	if (!var_value)
 	{
-		*is_empty_var = 1;
+		var_exp->is_empty_var = 1;
 		return (1);
 	}
-	temp = *result;
-	*result = ft_strjoin(*result, var_value);
-	if (temp)
-		safe_free((void **)&temp);
+	temp = var_exp->result;
+	var_exp->result = ft_strjoin(var_exp->result, var_value);
+	safe_free((void **)&temp);
 	safe_free((void **)&var_value);
-	return (*result != NULL);
+	return (var_exp->result != NULL);
 }
 
-static int	handle_expand_dollar(char **result, char *str, int *i, char **envp,
-		int *is_empty_var)
+static int	handle_character(t_var_expand *var_exp, char *str, char **envp)
 {
-	if (str[*i] == '$' && str[*i + 1])
+	if (str[var_exp->i] == '$' && str[var_exp->i + 1])
 	{
-		if (!process_variable(result, str, i, envp, is_empty_var))
+		if (!process_variable(var_exp, str, envp))
 			return (0);
-		return (1);
 	}
-	return (-1);
-}
-
-static int	handle_expand_char(char **result, char *str, int *i)
-{
-	if (!add_char_to_result(result, str[(*i)++]))
+	else
 	{
-		safe_free((void **)&(*result));
-		return (0);
+		if (!add_char_to_result(&var_exp->result, str[var_exp->i]))
+		{
+			safe_free((void **)&var_exp->result);
+			return (0);
+		}
+		var_exp->i++;
 	}
 	return (1);
 }
 
 char	*expand_variables(char *str, char **envp)
 {
-	int		i;
-	char	*result;
-	int		handle_ret;
-	int		is_empty_var;
-	int		has_quoted_vars;
+	t_var_expand	var_exp;
 
-	i = 0;
-	is_empty_var = 0;
-	has_quoted_vars = has_var_in_dquotes(str);
-	result = ft_strdup("");
-	if (!result)
+	var_exp.i = 0;
+	var_exp.is_empty_var = 0;
+	var_exp.has_quoted_vars = has_var_in_dquotes(str);
+	var_exp.result = ft_strdup("");
+	if (!var_exp.result)
 		return (NULL);
-	while (str[i])
+
+	while (str[var_exp.i])
 	{
-		handle_ret = handle_expand_dollar(&result, str, &i, envp,
-				&is_empty_var);
-		if (handle_ret == 0)
+		if (!handle_character(&var_exp, str, envp))
+		{
+			safe_free((void **)&var_exp.result);
 			return (NULL);
-		else if (handle_ret == 1)
-			continue ;
-		if (!handle_expand_char(&result, str, &i))
-			return (NULL);
+		}
 	}
-	if (is_empty_var && result && result[0] == '\0' && !has_quoted_vars
-		&& !is_var_in_squotes(str))
-		return (safe_free((void **)&result), NULL);
-	return (result);
+	if (var_exp.is_empty_var && var_exp.result && var_exp.result[0] == '\0'
+		&& !var_exp.has_quoted_vars && !is_var_in_squotes(str))
+		return (safe_free((void **)&var_exp.result), NULL);
+
+	return (var_exp.result);
 }
-
-

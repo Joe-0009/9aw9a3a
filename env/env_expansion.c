@@ -1,7 +1,5 @@
 #include "../minishell.h"
 
-
-
 void	expand_command_args(t_command *cmd, char **envp)
 {
 	t_expand_vars	v;

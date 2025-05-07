@@ -85,21 +85,3 @@ int	split_and_insert_args(t_expand_vars *v)
 	}
 	return (0);
 }
-
-void	compact_args(t_command *cmd, int *i, int *j)
-{
-	int	k;
-
-	k = *i + 1;
-	while (k < cmd->args_count)
-	{
-		if (cmd->args[k])
-		{
-			cmd->args[*j] = cmd->args[k];
-			*j = *j + 1;
-		}
-		k++;
-	}
-	cmd->args[*j] = NULL;
-	cmd->args_count = *j;
-}
