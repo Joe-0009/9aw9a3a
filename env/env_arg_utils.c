@@ -54,6 +54,8 @@ static void	free_split_words(char **split_words)
 	int	i;
 
 	i = 0;
+	if (!split_words || !*split_words)
+		return ;
 	while (split_words[i])
 	{
 		safe_free((void **)&split_words[i]);
