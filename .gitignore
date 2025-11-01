@@ -1,0 +1,18 @@
+# Build artifacts
+*.o
+*.a
+minishell
+
+# Build directory
+build/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+
+# Temporary files
+*.swp
+*.swo
+*~
